@@ -1,0 +1,126 @@
+﻿@using ElectronicsStore.Domain.Entity
+@using Microsoft.AspNetCore.Hosting
+@using Microsoft.AspNetCore.Mvc.ViewEngines
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+@inject IWebHostEnvironment Environment
+@inject ICompositeViewEngine Engine
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - ElectronicsStore</title>
+    <!-- Подключение общих стилей -->
+    <link rel="stylesheet" href="~/css/Shared.css" asp-append-version="true" />
+</head>
+<body>
+    <!-- ------------------------------------------------------------------ -->
+    <!-- ХЕДЕР (ШАПКА) - аналог рис. 13 и 14 (Адаптивный) -->
+    <!-- ------------------------------------------------------------------ -->
+    <header>
+        <div id="header-top">
+            <!-- ССЫЛКА НА ГЛАВНУЮ СТРАНИЦУ (Без href, используем Tag Helpers) -->
+            <a asp-controller="Home" asp-action="Index" class="logo">ElectronicsStore</a>
+
+            <!-- КНОПКИ ВХОД/РЕГИСТРАЦИЯ (Видны всегда) -->
+            <div class="button-header">
+                <button id="login-button" class="button" onclick="location.href='@Url.Action("Login", "Account")'">Войти</button>
+                <button id="register-button" class="button" onclick="location.href='@Url.Action("Register", "Account")'">Регистрация</button>
+            </div>
+
+            <!-- КНОПКА ГАМБУРГЕР-МЕНЮ (Видна только на мобильных) -->
+            <button id="mobile-menu-toggle" class="mobile-menu-button" aria-label="Открыть меню">
+                &#9776; <!-- Юникод иконка бургер-меню -->
+            </button>
+        </div>
+
+        <!-- КОНТЕЙНЕР ДЛЯ МЕНЮ -->
+        <div id="header-bottom" class="menu-container">
+            <nav class="menu">
+                <ul>
+                    <!-- ИСПРАВЛЕНО: Для якорных ссылок на главную используем asp-fragment ВМЕСТО href -->
+                    <li><a asp-controller="Home" asp-action="Index" asp-fragment="about">О нас</a></li>
+
+                    <!-- Прямая ссылка на страницу Каталога (ОК) -->
+                    <li><a asp-controller="Catalog" asp-action="Index">Каталог товаров</a></li>
+
+                    <!-- ИСПРАВЛЕНО: Якорная ссылка -->
+                    <li><a asp-controller="Home" asp-action="Index" asp-fragment="contacts">Контакты</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- ------------------------------------------------------------------ -->
+    <!-- ОСНОВНОЕ ТЕЛО САЙТА -->
+    <!-- ------------------------------------------------------------------ -->
+    <div class="container-body">
+        <main role="main">
+            @RenderBody()
+        </main>
+    </div>
+
+    <!-- ------------------------------------------------------------------ -->
+    <!-- ПОДВАЛ (ФУТЕР) - аналог рис. 76 -->
+    <!-- ------------------------------------------------------------------ -->
+    <footer>
+        <div>
+            <div class="footer-left">
+                <!-- ССЫЛКА НА ГЛАВНУЮ СТРАНИЦУ (Без href, используем Tag Helpers) -->
+                <a asp-controller="Home" asp-action="Index" class="logo">ElectronicsStore</a>
+                <p>
+                    Ваш надежный поставщик электроники и бытовой техники.
+                    Мы предлагаем только сертифицированную продукцию от ведущих мировых брендов.
+                </p>
+                <p class="footer-copy">© @DateTime.Now.Year ElectronicsStore. Все права защищены.</p>
+            </div>
+
+            <div class="footer-right">
+                <h4>Навигация</h4>
+                <nav class="menu">
+                    <ul>
+                        <!-- ИСПРАВЛЕНО: Якорная ссылка -->
+                        <li><a asp-controller="Home" asp-action="Index" asp-fragment="about">О нас</a></li>
+                        <!-- Прямая ссылка на страницу Каталога (ОК) -->
+                        <li><a asp-controller="Catalog" asp-action="Index">Каталог товаров</a></li>
+                        <!-- ИСПРАВЛЕНО: Якорная ссылка -->
+                        <li><a asp-controller="Home" asp-action="Index" asp-fragment="contacts">Контакты</a></li>
+                    </ul>
+                </nav>
+                <ul class="navbar-nav ml-auto">
+                    <!-- Используем ml-auto для выравнивания вправо -->
+                    @if (SignInManager.IsSignedIn(User)) // <-- ПРОВЕРКА: Если пользователь вошел...
+                    {
+                        <li class="nav-item">
+                            <!-- 1. Ссылка на профиль -->
+                            <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="Profile" title="Управление">Привет, @User.Identity?.Name!</a>
+                        </li>
+                        <li class="nav-item">
+                            <!-- 2. Кнопка выхода (отправляет POST-запрос на Account/Logout) -->
+                            <form class="form-inline" asp-controller="Account" asp-action="Logout">
+                                <button type="submit" class="nav-link btn btn-link text-dark">Выход</button>
+                            </form>
+                        </li>
+                    }
+                    else // <-- Иначе (пользователь не вошел)...
+                    {
+                        <li class="nav-item">
+                            <!-- 1. Ссылка на регистрацию -->
+                            <a class="nav-link text-dark" asp-controller="Account" asp-action="Register">Регистрация</a>
+                        </li>
+                        <li class="nav-item">
+                            <!-- 2. Ссылка на вход -->
+                            <a class="nav-link text-dark" asp-controller="Account" asp-action="Login">Вход</a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Подключение общих скриптов -->
+    <script src="~/js/shared_script.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

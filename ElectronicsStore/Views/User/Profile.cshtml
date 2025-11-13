@@ -1,0 +1,23 @@
+﻿@{
+    ViewData["Title"] = "Профиль";
+}
+
+<div class="container mt-5">
+    <h2>@ViewData["Title"]</h2>
+    <hr />
+
+    @if (User.Identity.IsAuthenticated)
+    {
+        <!-- Отображаем имя пользователя, которое должно быть его Email, так как мы его используем как UserName -->
+        <p>Добро пожаловать в личный кабинет, <strong>@User.Identity.Name</strong>!</p>
+        <p>Ваша учетная запись успешно настроена.</p>
+        <div class="alert alert-info">
+            Здесь будет информация о ваших заказах и личных данных.
+        </div>
+    }
+    else
+    {
+        <p class="text-danger">Ошибка: Вы не авторизованы.</p>
+    }
+
+</div>
