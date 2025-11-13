@@ -1,13 +1,13 @@
-﻿/* ФАЙЛ: ElectronicsStore/wwwroot/css/login_and_registration.css
-*/
+﻿/* Файл: wwwroot/css/login_and_registration.css */
 
+/* Стили из рис. 61 */
 .container-login-registration {
-    display: none;
+    display: none; /* Изначально скрыто */
     width: 100%;
     height: 100%;
     position: fixed;
-    top: 0;
-    left: 0;
+    top: 0; /* Добавлено, чтобы покрыть весь экран */
+    left: 0; /* Добавлено */
     justify-content: center;
     align-items: center;
     background: rgba(0,0,0,.5);
@@ -16,7 +16,6 @@
 
 .block-container {
     width: 800px;
-    max-width: 90%;
     height: 500px;
     padding: 40px 0;
     z-index: 901;
@@ -25,21 +24,19 @@
 
 .block {
     height: 100%;
-    background-color: #007bff; /* Цвет твоего магазина */
+    background-color: rgb(255, 165, 0);
     box-shadow: 0 5px 45px rgba(0,0,0,0.7);
     display: flex;
     align-items: center;
     transition: 0.5s;
-    border-radius: 8px; /* Скругление */
 }
 
     .block.active {
-        background-color: #0056b3; /* Другой оттенок */
+        background-color: #370b0b;
     }
 
 .block_item {
     width: 50%;
-    text-align: center;
 }
 
 .overlay {
@@ -47,6 +44,11 @@
     width: 100%;
     height: 100%;
     z-index: 900;
+}
+
+/* Стили из рис. 63 */
+.block_item {
+    text-align: center;
 }
 
 .block-item_title {
@@ -64,14 +66,9 @@
     color: #333;
     font-size: 16px;
     font-weight: 500;
-    border-radius: 4px; /* Скругление */
-    transition: background-color 0.2s;
 }
 
-    .block-item_btn:hover {
-        background-color: #f0f0f0;
-    }
-
+/* Стили из рис. 66 */
 .form-box {
     background-color: #fff;
     height: 100%;
@@ -85,7 +82,6 @@
     display: flex;
     align-items: center;
     overflow: hidden;
-    border-radius: 8px; /* Скругление */
 }
 
     .form-box.active {
@@ -96,13 +92,13 @@
     font-size: 1.5rem;
     font-weight: 500;
     color: #333;
-    margin-bottom: 20px;
+    margin-bottom: 20px; /* Добавлено для отступа */
 }
 
 .form-box label {
     position: relative;
-    display: block;
-    width: 100%;
+    display: block; /* Добавлено */
+    width: 100%; /* Добавлено */
 }
 
 .form-box input {
@@ -112,78 +108,56 @@
     border: 1px solid #ccc;
     margin: 15px 0;
     font-size: inherit;
-    border-radius: 4px; /* Скругление */
-    box-sizing: border-box; /* Важно для padding */
 }
 
+    /* Стили из рис. 67 */
     .form-box input:focus {
-        border-color: #007bff;
+        border-color: rgb(255, 165, 0);
     }
 
+        /* Убираем :not(:placeholder-shown) для работы с placeholder=" " */
         .form-box input:focus + span,
         .form-box input:valid + span {
-            top: -10px; /* Скорректировано */
+            top: -18px;
             left: 8px;
             font-size: 12px;
-            color: #007bff;
+            color: rgb(255, 165, 0);
             background-color: #fff;
-            padding: 0 4px;
+            padding: 0 4px; /* Добавлено */
         }
-
-    /* Для input:-webkit-autofill */
-    .form-box input:-webkit-autofill + span {
-        top: -10px;
-        left: 8px;
-        font-size: 12px;
-        color: #007bff;
-        background-color: #fff;
-        padding: 0 4px;
-    }
-
 
 .form-box span {
     cursor: text;
     position: absolute;
-    top: 25px; /* Скорректировано */
-    left: 14px;
+    top: 28px; /* Скорректировано */
+    left: 16px;
     color: rgb(131, 131, 131);
     transition: all 0.3s ease-in-out;
     padding: 0 4px;
-    pointer-events: none; /* Чтобы клик проходил на input */
 }
 
 .form-btn {
     border: none;
     cursor: pointer;
-    background-color: #007bff;
+    background-color: rgb(255, 165, 0);
     color: #fff;
     padding: 10px 50px;
     margin-top: 10px;
     font-size: inherit;
     width: fit-content;
-    border-radius: 4px; /* Скругление */
-    transition: background-color 0.2s;
 }
-
-    .form-btn:hover {
-        background-color: #0056b3;
-    }
 
 .form_btn_signup {
-    background-color: #0056b3;
+    background-color: #370b0b;
 }
 
-    .form_btn_signup:hover {
-        background-color: #004085;
-    }
-
+/* Стили из рис. 68 */
 .form {
     width: 100%;
-    padding: 40px;
+    padding: 50px;
     font-size: 16px;
     position: absolute;
     transition: 0.5s;
-    box-sizing: border-box; /* Важно для padding */
 }
 
 .form_signin {
@@ -206,6 +180,7 @@
     transition: 0.25s;
 }
 
+/* Стили для ошибок из ГЛАВЫ 8 (рис. 88) */
 #error-messages-signin,
 #error-messages-signup {
     margin-top: 10px;
@@ -214,20 +189,4 @@
 .error {
     color: red;
     font-size: 13px;
-    margin-top: 5px;
 }
-
-/* Стили для кнопки "Выход" в шапке */
-.form-inline-button {
-    display: inline;
-    margin: 0;
-    padding: 0;
-}
-
-    .form-inline-button .button {
-        background: none;
-        border: none;
-        padding: 0;
-        margin: 0;
-        /* Убедись, что .button имеет стили, как у <a class="button"> */
-    }

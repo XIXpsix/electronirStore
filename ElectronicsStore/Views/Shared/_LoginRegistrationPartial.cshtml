@@ -1,0 +1,66 @@
+﻿@* ФАЙЛ: ElectronicsStore/Views/Shared/_LoginRegistrationPartial.cshtml
+  (Этот файл будет вызван из _Layout.cshtml)
+*@
+
+<div class="container-login-registration">
+    <div class="block-container">
+
+        <div class="block">
+            <section class="block_item block-item">
+                <h2 class="block-item_title">У вас уже есть аккаунт?</h2>
+                <button class="block-item_btn signin-btn">Войти</button>
+            </section>
+            <section class="block_item block-item">
+                <h2 class="block-item_title">У вас нет аккаунта?</h2>
+                <button class="block-item_btn signup-btn">Зарегистрироваться</button>
+            </section>
+        </div>
+
+        <div class="form-box">
+            <!-- Форма Входа -->
+            <form class="form form_signin" onsubmit="return false;">
+                <h3 class="form_title">Вход</h3>
+                <label>
+                    <input type="text" id="signin_email" placeholder=" " required />
+                    <span>Почта</span>
+                </label>
+                <label>
+                    <input type="password" id="signin_password" placeholder=" " required />
+                    <span>Пароль</span>
+                </label>
+                <button type="submit" class="form-btn form_btn_signin">Войти</button>
+                <div id="error-messages-signin"></div>
+            </form>
+
+            <!-- Форма Регистрации (Адаптирована под твой RegisterViewModel) -->
+            <form class="form form_signup" onsubmit="return false;">
+                <h3 class="form_title">Регистрация</h3>
+
+                <label>
+                    <input type="text" id="signup_firstname" placeholder=" " required />
+                    <span>Имя</span>
+                </label>
+                <label>
+                    <input type="text" id="signup_lastname" placeholder=" " required />
+                    <span>Фамилия</span>
+                </label>
+                <label>
+                    <input type="email" id="signup_email" placeholder=" " required />
+                    <span>Почта</span>
+                </label>
+                <label>
+                    <input type="password" id="signup_password" placeholder=" " required />
+                    <span>Пароль</span>
+                </label>
+                <label>
+                    <input type="password" id="signup_confirmpassword" placeholder=" " required />
+                    <span>Подтвердите пароль</span>
+                </label>
+                <button type="submit" class="form-btn form_btn_signup">Зарегистрироваться</button>
+                <div id="error-messages-signup"></div>
+            </form>
+        </div>
+
+    </div>
+    <div class="overlay"></div>
+</div>
