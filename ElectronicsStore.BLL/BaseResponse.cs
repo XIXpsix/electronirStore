@@ -1,15 +1,11 @@
-﻿using ElectronicsStore.Domain.Enum;
-namespace ElectronicsStore.BLL
+﻿using ElectronicsStore.BLL; // Убедись, что IBaseResponse в этом namespace
+using ElectronicsStore.Domain.Enum;
 
+
+public class BaseResponse<T> : IBaseResponse<T>
 {
-        public class BaseResponse<T> : IBaseResponse<T>
-        {
-            // Инициализируем required string, чтобы избежать ошибки инициализатора
-            public required string Description { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public StatusCode StatusCode { get; set; }
 
-            // Инициализируем StatusCode
-            public StatusCode StatusCode { get; set; } = StatusCode.InternalServerError;
-
-            public T? Data { get; set; }
-        }
+    public T? Data { get; set; }
 }

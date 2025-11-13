@@ -4,28 +4,29 @@ namespace ElectronicsStore.Models
 {
     public class RegisterViewModel
     {
-        [Required(ErrorMessage = "Введите имя")]
-        [Display(Name = "Имя")]
-        public string FirstName { get; set; }
-
-        [Required(ErrorMessage = "Введите фамилию")]
-        [Display(Name = "Фамилия")]
-        public string LastName { get; set; }
-
-        [Required(ErrorMessage = "Введите Email")]
+        // РЕШЕНИЕ: Добавь это свойство
+        [Required(ErrorMessage = "Email обязателен")]
         [EmailAddress]
         [Display(Name = "Email")]
-        public string Email { get; set; }
+        public string Email { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Введите пароль")]
-        [StringLength(100, ErrorMessage = "Поле {0} должно содержать как минимум {2} символов.", MinimumLength = 4)]
+        // И эти, которые мы добавили в прошлый раз
+        [Required(ErrorMessage = "Имя обязательно")]
+        [Display(Name = "Имя")]
+        public string FirstName { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Фамилия обязательна")]
+        [Display(Name = "Фамилия")]
+        public string LastName { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Пароль обязателен")]
         [DataType(DataType.Password)]
         [Display(Name = "Пароль")]
-        public string Password { get; set; }
+        public string Password { get; set; } = string.Empty;
 
         [DataType(DataType.Password)]
-        [Display(Name = "Повторите пароль")]
-        [Compare(nameof(Password), ErrorMessage = "Пароли не совпадают")]
-        public string ConfirmPassword { get; set; }
+        [Display(Name = "Подтвердить пароль")]
+        [Compare("Password", ErrorMessage = "Пароли не совпадают.")]
+        public string ConfirmPassword { get; set; } = string.Empty;
     }
 }

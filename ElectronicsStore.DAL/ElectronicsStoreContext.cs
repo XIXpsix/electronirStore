@@ -1,29 +1,25 @@
 ﻿using ElectronicsStore.Domain;
+using ElectronicsStore.Domain.Entity; // <-- РЕШЕНИЕ: Добавлен using
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore; // <-- РЕШЕНИЕ: Изменено для Identity
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
 
 
 namespace ElectronicsStore.DAL
 {
-    // Класс ElectronicsStoreContext наследует DbContext и представляет сессию
-    // взаимодействия с базой данных.
-    public class ElectronicsStoreContext : DbContext
+    // РЕШЕНИЕ: Контекст должен наследовать IdentityDbContext, а не DbContext
+    public class ElectronicsStoreContext : IdentityDbContext<ApplicationUser> // <-- Указан ApplicationUser
     {
         public DbSet<Category> Categories { get; set; } = null!;
-        // Набор данных (таблица) для товаров
         public DbSet<Product> Products { get; set; } = null!;
-        // Набор данных (таблица) для отзывов
         public DbSet<Review> Reviews { get; set; } = null!;
 
-        // Конструктор, принимающий параметры конфигурации
         public ElectronicsStoreContext(DbContextOptions<ElectronicsStoreContext> options) : base(options)
         {
         }
 
-        // Метод для настройки связей и инициализации данных (Seed Data)
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
+            base.OnModelCreating(modelBuilder); // <-- Оставить base.OnModelCreating()
 
             // Инициализация категорий
             var categories = new List<Category>
@@ -44,7 +40,7 @@ namespace ElectronicsStore.DAL
                    Name = "iPhone 15 Pro",
                    Price = 99999.99m,
                    Description = "Флагманский смартфон с чипом A17 Bionic.",
-                   CategoryId = 1 // Смартфоны
+                   CategoryId = 1
                 },
                 new Product
                 {
@@ -52,7 +48,7 @@ namespace ElectronicsStore.DAL
                     Name = "MacBook Pro M3",
                     Price = 189999.00m,
                     Description = "Мощный ноутбук для профессионалов.",
-                    CategoryId = 2 // Ноутбуки
+                    CategoryId = 2
                 },
                 new Product
                 {
@@ -60,7 +56,7 @@ namespace ElectronicsStore.DAL
                     Name = "Зарядное устройство 65W",
                     Price = 2999.00m,
                     Description = "Компактное и быстрое зарядное устройство.",
-                    CategoryId = 3 // Аксессуары
+                    CategoryId = 3
                 }
             };
 

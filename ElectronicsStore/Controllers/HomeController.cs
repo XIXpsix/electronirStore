@@ -1,20 +1,19 @@
-using System.Diagnostics;
 using ElectronicsStore.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 
 namespace ElectronicsStore.Controllers
 {
-    public class HomeController : Controller
+    // РЕШЕНИЕ: Вот так выглядит правильный основной конструктор
+    public class HomeController(ILogger<HomeController> logger) : Controller
     {
-        private readonly ILogger<HomeController> _logger;
-
-        public HomeController(ILogger<HomeController> logger) // <-- Это и есть конструктор для DI
-        {
-            _logger = logger;
-        }
+        // Поле _logger теперь инициализируется из параметра logger
+        private readonly ILogger<HomeController> _logger = logger;
 
         public IActionResult Index()
         {
+            // Убедись, что у тебя нет второго public IActionResult Index()
             return View();
         }
 

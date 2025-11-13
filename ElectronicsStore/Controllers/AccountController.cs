@@ -1,21 +1,18 @@
-﻿using ElectronicsStore.Domain.Entity;
-using ElectronicsStore.Models;
+﻿using ElectronicsStore.Domain.Entity; // <-- Добавлено, чтобы найти ApplicationUser
+using ElectronicsStore.Models;      // <-- Добавлено, чтобы найти Login/RegisterViewModel
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System;
 
 namespace ElectronicsStore.Controllers
 {
-    public class AccountController : Controller
+    // Используем основной конструктор, НО СРАЗУ СОХРАНЯЕМ ПОЛЯ
+    public class AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager) : Controller
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager;
+        // РЕШЕНИЕ: Эти поля ОБЯЗАТЕЛЬНЫ, чтобы остальной код их видел
+        private readonly UserManager<ApplicationUser> _userManager = userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager = signInManager;
 
-        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
-        {
-            _userManager = userManager;
-            _signInManager = signInManager;
-        }
+        // --- РЕГИСТРАЦИЯ ---
 
         [HttpGet]
         public IActionResult Register()
@@ -24,15 +21,25 @@ namespace ElectronicsStore.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser { Email = model.Email, UserName = model.Email, EmailConfirmed = true };
+                var user = new ApplicationUser
+                {
+                    UserName = model.Email,
+                    Email = model.Email,
+                    FirstName = model.FirstName,
+                    LastName = model.LastName
+                };
+
+                // Теперь _userManager существует
                 var result = await _userManager.CreateAsync(user, model.Password);
 
                 if (result.Succeeded)
                 {
+                    // И _signInManager существует
                     await _signInManager.SignInAsync(user, isPersistent: false);
                     return RedirectToAction("Index", "Home");
                 }
@@ -45,8 +52,10 @@ namespace ElectronicsStore.Controllers
             return View(model);
         }
 
+        // --- ЛОГИН (ВХОД) ---
+
         [HttpGet]
-        public IActionResult Login(string returnUrl = null)
+        public IActionResult Login(string? returnUrl = null)
         {
             return View(new LoginViewModel { ReturnUrl = returnUrl });
         }
@@ -57,18 +66,25 @@ namespace ElectronicsStore.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser
-                {
-                    Email = model.Email,
-                    UserName = model.Email,
-                    EmailConfirmed = true, // <-- Убедись, что это есть
-                    FirstName = model.FirstName, // <-- Убедись, что это есть
-                    LastName = model.LastName // <-- Убедись, что это есть
-                };
+                var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
 
-                var result = await _userManager.CreateAsync(user, model.Password);
+                if (result.Succeeded)
+                {
+                    if (!string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
+                    {
+                        return Redirect(model.ReturnUrl);
+                    }
+                    return RedirectToAction("Index", "Home");
+                }
+
+                ModelState.AddModelError(string.Empty, "Неверная попытка входа.");
+                return View(model);
             }
+
+            return View(model);
         }
+
+        // --- ВЫХОД ---
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -78,4 +94,4 @@ namespace ElectronicsStore.Controllers
             return RedirectToAction("Index", "Home");
         }
     }
-   }
+}
