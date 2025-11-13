@@ -1,4 +1,4 @@
-/* Твои оригинальные стили */
+п»ї/* РўРІРѕРё РѕСЂРёРіРёРЅР°Р»СЊРЅС‹Рµ СЃС‚РёР»Рё */
 html {
     box-sizing: border-box;
     font-family: "Montserrat", sans-serif;
@@ -13,35 +13,33 @@ html {
 }
 
 body {
-    /* ИЗМЕНЕНО: Убираем 'height: 10000px' - это не нужно */
     width: 100%;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    background-color: #f4f4f4; /* Добавим фон, чтобы отличать */
-    min-height: 100vh; /* Чтобы футер прижался к низу */
+    background-color: #f4f4f4;
 }
 
 /* ------------------------------------------- */
-/* --- ДОБАВЛЕННЫЕ СТИЛИ ДЛЯ ШАПКИ (HEADER) --- */
+/* --- Р”РћР‘РђР’Р›Р•РќРќР«Р• РЎРўРР›Р Р”Р›РЇ РЁРђРџРљР (HEADER) --- */
 /* ------------------------------------------- */
 
 header {
     width: 100%;
-    position: sticky; /* Делаем шапку "липкой" */
+    position: sticky;
     top: 0;
     z-index: 100;
     background-color: #ffffff;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-/* Блок с логотипом и кнопками "Войти" */
+/* Р‘Р»РѕРє СЃ Р»РѕРіРѕС‚РёРїРѕРј Рё РєРЅРѕРїРєР°РјРё "Р’РѕР№С‚Рё" */
 #header-top {
     width: 100%;
     max-width: 1200px;
     margin: 0 auto;
     display: flex;
-    justify-content: space-between; /* <-- ЭТО ДВИГАЕТ КНОПКИ ВПРАВО */
+    justify-content: space-between;
     align-items: center;
     padding: 10px 20px;
 }
@@ -53,19 +51,19 @@ header {
     text-decoration: none;
 }
 
-/* Контейнер для кнопок "Войти" / "Регистрация" */
+/* РљРѕРЅС‚РµР№РЅРµСЂ РґР»СЏ РєРЅРѕРїРѕРє "Р’РѕР№С‚Рё" / "Р РµРіРёСЃС‚СЂР°С†РёСЏ" */
 .button-header {
     display: flex;
-    gap: 10px; /* Расстояние между кнопками */
+    gap: 10px;
 }
 
-/* Стили для самих кнопок */
+/* РЎС‚РёР»Рё РґР»СЏ СЃР°РјРёС… РєРЅРѕРїРѕРє */
 .button,
 .form-inline-button .button {
     display: inline-block;
     padding: 8px 16px;
-    background-color: #007bff; /* Синий цвет (можешь поменять) */
-    color: white !important; /* !important, чтобы перебить синий цвет ссылок */
+    background-color: #007bff;
+    color: white !important;
     text-decoration: none;
     border-radius: 4px;
     border: none;
@@ -81,14 +79,14 @@ header {
         background-color: #0056b3;
     }
 
-/* Стили для кнопки "Выход", которая является формой */
+/* РЎС‚РёР»Рё РґР»СЏ РєРЅРѕРїРєРё "Р’С‹С…РѕРґ", РєРѕС‚РѕСЂР°СЏ СЏРІР»СЏРµС‚СЃСЏ С„РѕСЂРјРѕР№ */
 .form-inline-button {
     display: inline;
     margin: 0;
     padding: 0;
 }
 
-    /* У кнопки "Выход" убираем лишние стили, чтобы она была похожа на .button */
+    /* РЈ РєРЅРѕРїРєРё "Р’С‹С…РѕРґ" СѓР±РёСЂР°РµРј Р»РёС€РЅРёРµ СЃС‚РёР»Рё, С‡С‚РѕР±С‹ РѕРЅР° Р±С‹Р»Р° РїРѕС…РѕР¶Р° РЅР° .button */
     .form-inline-button .button {
         background: none;
         padding: 8px 16px;
@@ -101,7 +99,7 @@ header {
         }
 
 
-/* Меню навигации (О нас, Каталог, Контакты) */
+/* РњРµРЅСЋ РЅР°РІРёРіР°С†РёРё (Рћ РЅР°СЃ, РљР°С‚Р°Р»РѕРі, РљРѕРЅС‚Р°РєС‚С‹) */
 #header-bottom {
     width: 100%;
     background-color: #f8f9fa;
@@ -118,7 +116,7 @@ header {
 
 .menu ul {
     display: flex;
-    justify-content: flex-start; /* Меню будет слева */
+    justify-content: flex-start;
     list-style: none;
 }
 
@@ -141,35 +139,29 @@ header {
         color: #007bff;
     }
 
-/* Кнопка "три палки" нам больше не нужна */
 .mobile-menu-button {
     display: none;
 }
 
-/* ------------------------------------------- */
-/* --- КОНЕЦ СТИЛЕЙ ДЛЯ ШАПКИ --- */
-/* ------------------------------------------- */
-
-
-/* Твои стили для контейнера */
+/* вњ… Р“Р›РђР’РќРћР• РР—РњР•РќР•РќРР•: РљРћРќРўР•Р™РќР•Р  Р‘Р•Р— FLEX, РџР РћРЎРўРћ Р¦Р•РќРўР РР РЈР•Рњ Р§Р•Р Р•Р— MARGIN */
 .container-body {
     width: 82%;
+    max-width: 1200px;
+    margin: 20px auto; /* Р¦РµРЅС‚СЂРёСЂСѓРµРј РіРѕСЂРёР·РѕРЅС‚Р°Р»СЊРЅРѕ */
     border: 2px solid #cacaca;
     border-radius: 3px;
     box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.4);
-    margin-top: 20px; /* Отступ от шапки */
-    margin-bottom: 20px; /* Отступ от футера */
-    background-color: #ffffff; /* Фон для контента */
-    min-height: 60vh; /* Минимальная высота, чтобы футер не прилипал */
+    background-color: #ffffff;
+    flex: 1; /* Р Р°СЃС‚СЏРіРёРІР°РµС‚ РєРѕРЅС‚РµРЅС‚, С‡С‚РѕР±С‹ С„СѓС‚РµСЂ РїСЂРёР¶Р°Р»СЃСЏ РІРЅРёР·Сѓ */
 }
 
-/* Твои стили для футера (я их не трогал, но добавил базовые) */
+/* РўРІРѕРё СЃС‚РёР»Рё РґР»СЏ С„СѓС‚РµСЂР° (СЏ РёС… РЅРµ С‚СЂРѕРіР°Р», РЅРѕ РґРѕР±Р°РІРёР» Р±Р°Р·РѕРІС‹Рµ) */
 footer {
     width: 100%;
     background-color: #333;
     color: #fff;
     padding: 20px 0;
-    margin-top: auto; /* Прижимает футер к низу, если body.min-height: 100vh */
+    margin-top: auto;
 }
 
     footer > div {

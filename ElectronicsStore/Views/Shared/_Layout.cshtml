@@ -3,8 +3,7 @@
 @using Microsoft.AspNetCore.Mvc.ViewEngines
 @using Microsoft.AspNetCore.Identity
 @inject SignInManager<ApplicationUser> SignInManager
-@inject IWebHostEnvironment Environment
-@inject ICompositeViewEngine Engine
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -18,13 +17,13 @@
 <body>
     <header>
         <div id="header-top">
-            <a asp-controller="Home" asp-action="Index" class="logo">ElectronicsStore</a>
+            <a asp-page="/Index" class="logo">ElectronicsStore</a>
 
             <div class="button-header">
                 @if (SignInManager.IsSignedIn(User))
                 {
-                    <a class="button" asp-controller="User" asp-action="Profile" title="Управление">@User.Identity?.Name</a>
-                    <form class="form-inline-button" asp-controller="Account" asp-action="Logout" method="post">
+                    <a class="button" asp-page="/User/Profile" title="Управление">@User.Identity?.Name</a>
+                    <form class="form-inline-button" asp-page="/Account/Logout" method="post">
                         <button type="submit" class="button">Выход</button>
                     </form>
                 }

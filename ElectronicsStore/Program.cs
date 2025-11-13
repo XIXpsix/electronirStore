@@ -1,19 +1,19 @@
-// 1. ВСЕ 'USING' ОБЯЗАТЕЛЬНО СНАРУЖИ, В САМОМ ВЕРХУ
+п»ї// 1. Р’РЎР• 'USING' РћР‘РЇР—РђРўР•Р›Р¬РќРћ РЎРќРђР РЈР–Р, Р’ РЎРђРњРћРњ Р’Р•Р РҐРЈ
 using ElectronicsStore.BLL;
 using ElectronicsStore.DAL;
-using ElectronicsStore.Domain.Entity; // <-- Нужен для Identity
-using Microsoft.AspNetCore.Identity; // <-- Нужен для Identity
+using ElectronicsStore.Domain.Entity; // <-- РќСѓР¶РµРЅ РґР»СЏ Identity
+using Microsoft.AspNetCore.Identity; // <-- РќСѓР¶РµРЅ РґР»СЏ Identity
 using Microsoft.EntityFrameworkCore;
 
-// 2. ОПРЕДЕЛЕНИЕ КЛАССА
+// 2. РћРџР Р•Р”Р•Р›Р•РќРР• РљР›РђРЎРЎРђ
 internal class Program
 {
-    // 3. МЕТОД MAIN, ГДЕ ЖИВЕТ ВЕСЬ КОД
+    // 3. РњР•РўРћР” MAIN, Р“Р”Р• Р–РР’Р•Рў Р’Р•РЎР¬ РљРћР”
     private static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        // --- 1. Настройка сервисов ---
+        // --- 1. РќР°СЃС‚СЂРѕР№РєР° СЃРµСЂРІРёСЃРѕРІ ---
         var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
         builder.Services.AddDbContext<ElectronicsStoreContext>(options =>
@@ -21,8 +21,8 @@ internal class Program
             options.UseNpgsql(connectionString);
         });
 
-        // Регистрируем сервисы Identity (UserManager, SignInManager и т.д.)
-        // Это чинит ошибку "No service registered"
+        // Р РµРіРёСЃС‚СЂРёСЂСѓРµРј СЃРµСЂРІРёСЃС‹ Identity (UserManager, SignInManager Рё С‚.Рґ.)
+        // Р­С‚Рѕ С‡РёРЅРёС‚ РѕС€РёР±РєСѓ "No service registered"
         builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
         {
             options.Password.RequireDigit = false;
@@ -34,14 +34,15 @@ internal class Program
             .AddEntityFrameworkStores<ElectronicsStoreContext>()
             .AddDefaultTokenProviders();
 
-        // Регистрируем твой сервис
+        // Р РµРіРёСЃС‚СЂРёСЂСѓРµРј С‚РІРѕР№ СЃРµСЂРІРёСЃ
         builder.Services.AddScoped<ProductService>();
 
         builder.Services.AddControllersWithViews();
+        builder.Services.AddRazorPages(); // вњ… Р­С‚Рѕ РµСЃС‚СЊ?
 
         var app = builder.Build();
 
-        // --- 2. Логика миграций ---
+        // --- 2. Р›РѕРіРёРєР° РјРёРіСЂР°С†РёР№ ---
         try
         {
             using var scope = app.Services.CreateScope();
@@ -55,7 +56,7 @@ internal class Program
             logger.LogError(ex, "An error occurred while migrating the database.");
         }
 
-        // --- 3. Конвейер (Pipeline) ---
+        // --- 3. РљРѕРЅРІРµР№РµСЂ (Pipeline) ---
         if (!app.Environment.IsDevelopment())
         {
             app.UseExceptionHandler("/Home/Error");
@@ -67,13 +68,14 @@ internal class Program
 
         app.UseRouting();
 
-        // 4. ПОРЯДОК ВАЖЕН: Аутентификация ДО Авторизации
-        app.UseAuthentication(); // <-- Убедись, что это есть
-        app.UseAuthorization(); // <-- У тебя уже было
+        // 4. РџРћР РЇР”РћРљ Р’РђР–Р•Рќ: РђСѓС‚РµРЅС‚РёС„РёРєР°С†РёСЏ Р”Рћ РђРІС‚РѕСЂРёР·Р°С†РёРё
+        app.UseAuthentication(); // <-- РЈР±РµРґРёСЃСЊ, С‡С‚Рѕ СЌС‚Рѕ РµСЃС‚СЊ
+        app.UseAuthorization(); // <-- РЈ С‚РµР±СЏ СѓР¶Рµ Р±С‹Р»Рѕ
 
         app.MapControllerRoute(
             name: "default",
             pattern: "{controller=Home}/{action=Index}/{id?}");
+        app.MapRazorPages();
 
         app.Run();
     }

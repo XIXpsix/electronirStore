@@ -1,5 +1,5 @@
 ﻿/* Файл: wwwroot/css/login_and_registration.css */
-
+@* Файл: Views/Shared/_LoginRegistrationPartial.cshtml *@
 /* Стили из рис. 61 */
 .container-login-registration {
     display: none; /* Изначально скрыто */

@@ -6,7 +6,6 @@ namespace ElectronicsStore.Controllers
     {
         public IActionResult Profile()
         {
-            ViewData["Title"] = "Профиль пользователя";
             return View();
         }
     }
