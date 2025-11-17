@@ -11,10 +11,17 @@ document.addEventListener("DOMContentLoaded", function () {
     const modalOverlay = document.getElementById("modal-overlay");
     const modalCloseButton = document.getElementById("modal-close");
 
-    // ✅ Находим ГЛАВНОЕ ОКНО (белый блок)
+    // Находим ГЛАВНОЕ ОКНО (белый блок)
     const modalContentBox = document.getElementById("modal-content-box");
 
-    // 3. Ссылки для переключения (внутри модального окна)
+    // Находим слайдер внутри модального окна (куда нужно добавлять/убирать класс)
+    const modalSlider = modalContentBox ? modalContentBox.querySelector(".modal-slider") : null;
+
+    // 3. Контейнеры форм (внутри модального окна)
+    const loginFormContainer = document.getElementById("login-form-container");
+    const registerFormContainer = document.getElementById("register-form-container");
+
+    // 4. Ссылки для переключения (внутри модального окна)
     const showRegisterLink = document.getElementById("show-register-link");
     const showLoginLink = document.getElementById("show-login-link");
 
@@ -35,26 +42,28 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // ✅ ИЗМЕНЕННАЯ Функция: Показать форму Входа
+    // Функция: Показать форму Входа
     function showLoginForm() {
-        if (modalContentBox) {
-            // Убираем класс, CSS вернет слайдер в исходное положение
+        if (modalSlider) {
+            modalSlider.classList.remove("show-register");
+        } else if (modalContentBox) {
             modalContentBox.classList.remove("show-register");
         }
-        showModal(); // Показываем окно, если оно было скрыто
+        showModal();
     }
 
-    // ✅ ИЗМЕНЕННАЯ Функция: Показать форму Регистрации
+    // Функция: Показать форму Регистрации
     function showRegisterForm() {
-        if (modalContentBox) {
-            // Добавляем класс, CSS сдвинет слайдер
+        if (modalSlider) {
+            modalSlider.classList.add("show-register");
+        } else if (modalContentBox) {
             modalContentBox.classList.add("show-register");
         }
-        showModal(); // Показываем окно, если оно было скрыто
+        showModal();
     }
 
 
-    // --- Назначаем "слушателей" событий (тут почти без изменений) ---
+    // --- Назначаем "слушателей" событий ---
 
     // 1. Клик на кнопку "Войти" в шапке
     if (loginButton) {
@@ -83,7 +92,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (showRegisterLink) {
         showRegisterLink.addEventListener("click", function (e) {
             e.preventDefault();
-            showRegisterForm(); // Просто вызываем нужную функцию
+            showRegisterForm();
         });
     }
 
@@ -91,7 +100,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (showLoginLink) {
         showLoginLink.addEventListener("click", function (e) {
             e.preventDefault();
-            showLoginForm(); // Просто вызываем нужную функцию
+            showLoginForm();
         });
     }
 
@@ -106,7 +115,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // 7. Закрытие окна по нажатию Esc
     document.addEventListener("keydown", function (e) {
-        if (e.key === "Escape" && modalOverlay.classList.contains("active")) {
+        if (e.key === "Escape" && modalOverlay && modalOverlay.classList.contains("active")) {
             hideModal();
         }
     });

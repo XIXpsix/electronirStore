@@ -73,7 +73,7 @@
 .modal-slider {
     display: flex;
     transition: transform 0.4s ease-in-out;
-    transform: translateX(-100%);
+    transform: translateX(0); /* исправлено: по умолчанию показываем левую (вход) панель */
 }
 
 .modal-form-container {
@@ -83,6 +83,7 @@
     box-sizing: border-box;
 }
 
+/* При добавлении класса .show-register сдвигаем слайдер влево, чтобы показать правую (регистрацию) панель */
 .modal-content.show-register .modal-slider {
     transform: translateX(-100%);
 }
