@@ -1,200 +1,114 @@
-﻿/* ФАЙЛ: ElectronicsStore/wwwroot/js/login_and_registration_script.js
-  Этот код реализует логику модального окна из Глав 6 и 8 твоей методички.
-*/
+﻿// Ждем, пока вся HTML-страница (DOM) загрузится
+document.addEventListener("DOMContentLoaded", function () {
 
-document.addEventListener('DOMContentLoaded', function () {
+    // --- Находим все нужные элементы на странице ---
 
-    // --- Элементы управления модальным окном ---
-    const modalContainer = document.querySelector(".container-login-registration");
-    const overlay = document.querySelector(".overlay");
+    // 1. Кнопки в шапке (header)
+    const loginButton = document.getElementById("click-to-hide-login");
+    const registerButton = document.getElementById("click-to-hide-register");
 
-    // Элементы ВНУТРИ модального окна
-    const signInBtnInternal = document.querySelector('.signin-btn'); // Переключатель "Войти"
-    const signUpBtnInternal = document.querySelector('.signup-btn'); // Переключатель "Регистрация"
-    const formBox = document.querySelector('.form-box');
-    const block = document.querySelector('.block');
+    // 2. Элементы модального окна
+    const modalOverlay = document.getElementById("modal-overlay");
+    const modalCloseButton = document.getElementById("modal-close");
 
-    // Кнопки В ШАПКЕ
-    const headerLoginButton = document.getElementById("click-to-hide-login");
-    const headerRegisterButton = document.getElementById("click-to-hide-register");
+    // ✅ Находим ГЛАВНОЕ ОКНО (белый блок)
+    const modalContentBox = document.getElementById("modal-content-box");
 
-    // --- Элементы форм ---
-    const formSignin = document.querySelector('.form_signin');
-    const formSignup = document.querySelector('.form_signup');
-
-    // Поля Входа
-    const signinEmail = document.querySelector("#signin_email");
-    const signinPassword = document.querySelector("#signin_password");
-    const errorContainerSignin = document.getElementById('error-messages-signin');
-
-    // Поля Регистрации
-    const signupFirstName = document.querySelector("#signup_firstname");
-    const signupLastName = document.querySelector("#signup_lastname");
-    const signupEmail = document.querySelector("#signup_email");
-    const signupPassword = document.querySelector("#signup_password");
-    const signupConfirmPassword = document.querySelector("#signup_confirmpassword");
-    const errorContainerSignup = document.getElementById('error-messages-signup');
+    // 3. Ссылки для переключения (внутри модального окна)
+    const showRegisterLink = document.getElementById("show-register-link");
+    const showLoginLink = document.getElementById("show-login-link");
 
 
-    // --- Функции ---
+    // --- Функции для управления окном ---
 
-    // Функция открытия/закрытия окна
-    function toggleModal(show = true) {
-        if (!modalContainer) return;
-        modalContainer.style.display = show ? "flex" : "none";
-    }
-
-    // Функция переключения на "Войти"
-    function showLoginTab() {
-        if (!formBox || !block) return;
-        formBox.classList.remove('active');
-        block.classList.remove('active');
-        // Очищаем ошибки
-        displayErrors([], errorContainerSignin);
-        displayErrors([], errorContainerSignup);
-    }
-
-    // Функция переключения на "Регистрация"
-    function showRegisterTab() {
-        if (!formBox || !block) return;
-        formBox.classList.add('active');
-        block.classList.add('active');
-        // Очищаем ошибки
-        displayErrors([], errorContainerSignin);
-        displayErrors([], errorContainerSignup);
-    }
-
-    // Функция отправки fetch-запроса (из Главы 8, рис. 84)
-    function sendRequest(method, url, body = null) {
-        const headers = {
-            'Content-Type': 'application/json',
-            // Ищем AntiForgeryToken (ВАЖНО для [ValidateAntiForgeryToken])
-            'RequestVerificationToken': document.getElementsByName('__RequestVerificationToken')[0]?.value
-        };
-
-        return fetch(url, {
-            method: method,
-            headers: headers,
-            body: body ? JSON.stringify(body) : null
-        }).then(response => {
-            if (!response.ok) {
-                // Если ответ не 200 (OK), пытаемся прочитать ошибки
-                return response.json().then(errorData => {
-                    // Ошибки валидации ASP.NET (из ModelState)
-                    if (errorData.errors) {
-                        let aspNetErrors = [];
-                        for (const key in errorData.errors) {
-                            aspNetErrors = aspNetErrors.concat(errorData.errors[key]);
-                        }
-                        throw aspNetErrors;
-                    }
-                    // Ошибки Identity (пароль не тот, email занят и т.д.)
-                    else if (Array.isArray(errorData)) {
-                        // ASP.NET 8+ иногда возвращает массив строк
-                        if (typeof errorData[0] === 'string') {
-                            throw errorData;
-                        }
-                        // ASP.NET 6+ возвращает { code, description }
-                        throw errorData.map(e => e.description);
-                    }
-                    // Другие ошибки
-                    throw [errorData.message || 'Произошла неизвестная ошибка'];
-                });
-            }
-            // Успех (200 OK)
-            // Если ответ пустой (например, при выходе), вернем {success: true}
-            return response.text().then(text => text ? JSON.parse(text) : { success: true });
-        });
-    }
-
-    // Функция отображения ошибок (из Главы 8, рис. 87)
-    function displayErrors(errors, errorContainer) {
-        if (!errorContainer) return;
-        errorContainer.innerHTML = ''; // Очистить
-        if (Array.isArray(errors)) {
-            errors.forEach(error => {
-                const errorMessage = document.createElement('div');
-                errorMessage.classList.add('error');
-                errorMessage.textContent = error;
-                errorContainer.appendChild(errorMessage);
-            });
+    // Функция: Показать окно
+    function showModal() {
+        if (modalOverlay) {
+            modalOverlay.classList.add("active");
         }
     }
 
-    // --- Обработчики событий ---
+    // Функция: Скрыть окно
+    function hideModal() {
+        if (modalOverlay) {
+            modalOverlay.classList.remove("active");
+        }
+    }
 
-    // Кнопка "Войти" в шапке
-    headerLoginButton?.addEventListener("click", () => {
-        toggleModal(true);
-        showLoginTab();
-    });
+    // ✅ ИЗМЕНЕННАЯ Функция: Показать форму Входа
+    function showLoginForm() {
+        if (modalContentBox) {
+            // Убираем класс, CSS вернет слайдер в исходное положение
+            modalContentBox.classList.remove("show-register");
+        }
+        showModal(); // Показываем окно, если оно было скрыто
+    }
 
-    // Кнопка "Регистрация" в шапке
-    headerRegisterButton?.addEventListener("click", () => {
-        toggleModal(true);
-        showRegisterTab();
-    });
-
-    // Оверлей (серая область)
-    overlay?.addEventListener("click", () => toggleModal(false));
-
-    // Внутренний переключатель "Войти"
-    signInBtnInternal?.addEventListener('click', showLoginTab);
-
-    // Внутренний переключатель "Регистрация"
-    signUpBtnInternal?.addEventListener('click', showRegisterTab);
-
-
-    // --- Логика ВХОДА (отправка формы) ---
-    formSignin?.addEventListener('submit', (e) => {
-        e.preventDefault(); // Запрещаем стандартную отправку
-
-        // АДАПТАЦИЯ: URL изменен на /Account/Login
-        const requestURL = '/Account/Login';
-
-        const body = {
-            email: signinEmail.value,
-            password: signinPassword.value,
-            rememberMe: false
-        };
-
-        sendRequest('POST', requestURL, body)
-            .then(data => {
-                console.log('Успешный вход:', data);
-                location.reload(); // Перезагружаем страницу при успехе
-            })
-            .catch(err => {
-                console.error('Ошибка входа:', err);
-                displayErrors(err, errorContainerSignin);
-            });
-    });
+    // ✅ ИЗМЕНЕННАЯ Функция: Показать форму Регистрации
+    function showRegisterForm() {
+        if (modalContentBox) {
+            // Добавляем класс, CSS сдвинет слайдер
+            modalContentBox.classList.add("show-register");
+        }
+        showModal(); // Показываем окно, если оно было скрыто
+    }
 
 
-    // --- Логика РЕГИСТРАЦИИ (отправка формы) ---
-    formSignup?.addEventListener('submit', (e) => {
-        e.preventDefault(); // Запрещаем стандартную отправку
+    // --- Назначаем "слушателей" событий (тут почти без изменений) ---
 
-        // АДАПТАЦИЯ: URL изменен на /Account/Register
-        const requestURL = '/Account/Register';
+    // 1. Клик на кнопку "Войти" в шапке
+    if (loginButton) {
+        loginButton.addEventListener("click", function (e) {
+            e.preventDefault();
+            showLoginForm();
+        });
+    }
 
-        // АДАПТАЦИЯ: 'body' включает FirstName и LastName
-        const body = {
-            firstName: signupFirstName.value,
-            lastName: signupLastName.value,
-            email: signupEmail.value,
-            password: signupPassword.value,
-            confirmPassword: signupConfirmPassword.value
-        };
+    // 2. Клик на кнопку "Регистрация" в шапке
+    if (registerButton) {
+        registerButton.addEventListener("click", function (e) {
+            e.preventDefault();
+            showRegisterForm();
+        });
+    }
 
-        sendRequest('POST', requestURL, body)
-            .then(data => {
-                console.log('Успешная регистрация:', data);
-                location.reload(); // Перезагружаем страницу при успехе
-            })
-            .catch(err => {
-                console.error('Ошибка регистрации:', err);
-                displayErrors(err, errorContainerSignup);
-            });
+    // 3. Клик на "крестик" (закрыть)
+    if (modalCloseButton) {
+        modalCloseButton.addEventListener("click", function () {
+            hideModal();
+        });
+    }
+
+    // 4. Клик на ссылку "Регистрация" (внутри окна)
+    if (showRegisterLink) {
+        showRegisterLink.addEventListener("click", function (e) {
+            e.preventDefault();
+            showRegisterForm(); // Просто вызываем нужную функцию
+        });
+    }
+
+    // 5. Клик на ссылку "Войти" (внутри окна)
+    if (showLoginLink) {
+        showLoginLink.addEventListener("click", function (e) {
+            e.preventDefault();
+            showLoginForm(); // Просто вызываем нужную функцию
+        });
+    }
+
+    // 6. Клик на фон (оверлей) - чтобы закрыть окно
+    if (modalOverlay) {
+        modalOverlay.addEventListener("click", function (e) {
+            if (e.target === modalOverlay) {
+                hideModal();
+            }
+        });
+    }
+
+    // 7. Закрытие окна по нажатию Esc
+    document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && modalOverlay.classList.contains("active")) {
+            hideModal();
+        }
     });
 
 });

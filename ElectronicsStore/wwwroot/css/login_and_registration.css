@@ -1,192 +1,168 @@
-﻿/* Файл: wwwroot/css/login_and_registration.css */
-@* Файл: Views/Shared/_LoginRegistrationPartial.cshtml *@
-/* Стили из рис. 61 */
-.container-login-registration {
-    display: none; /* Изначально скрыто */
-    width: 100%;
-    height: 100%;
+﻿/* --- Стили для модального окна (ТЕМНАЯ ТЕМА) --- */
+
+/* 1. Оверлей (фон) - можно оставить как есть, blur будет круто смотреться */
+.modal-overlay {
     position: fixed;
-    top: 0; /* Добавлено, чтобы покрыть весь экран */
-    left: 0; /* Добавлено */
-    justify-content: center;
-    align-items: center;
-    background: rgba(0,0,0,.5);
-    z-index: 1000;
-}
-
-.block-container {
-    width: 800px;
-    height: 500px;
-    padding: 40px 0;
-    z-index: 901;
-    position: relative;
-}
-
-.block {
-    height: 100%;
-    background-color: rgb(255, 165, 0);
-    box-shadow: 0 5px 45px rgba(0,0,0,0.7);
-    display: flex;
-    align-items: center;
-    transition: 0.5s;
-}
-
-    .block.active {
-        background-color: #370b0b;
-    }
-
-.block_item {
-    width: 50%;
-}
-
-.overlay {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    z-index: 900;
-}
-
-/* Стили из рис. 63 */
-.block_item {
-    text-align: center;
-}
-
-.block-item_title {
-    font-size: 1.2rem;
-    font-weight: 500;
-    color: #fff;
-    margin-bottom: 10px;
-}
-
-.block-item_btn {
-    border: none;
-    cursor: pointer;
-    padding: 10px 20px;
-    background-color: #fff;
-    color: #333;
-    font-size: 16px;
-    font-weight: 500;
-}
-
-/* Стили из рис. 66 */
-.form-box {
-    background-color: #fff;
-    height: 100%;
-    width: 50%;
-    box-shadow: 0 5px 45px rgba(0,0,0,0.25);
-    position: absolute;
     top: 0;
     left: 0;
-    z-index: 902;
-    transition: 0.5s ease-in-out;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
     display: flex;
     align-items: center;
-    overflow: hidden;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    /* Эффект "матового стекла" - оставляем */
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
 }
 
-    .form-box.active {
-        left: 50%;
+    .modal-overlay.active {
+        opacity: 1;
+        visibility: visible;
     }
 
-.form_title {
-    font-size: 1.5rem;
-    font-weight: 500;
-    color: #333;
-    margin-bottom: 20px; /* Добавлено для отступа */
-}
-
-.form-box label {
+/* 3. Само модальное окно */
+.modal-content {
     position: relative;
-    display: block; /* Добавлено */
-    width: 100%; /* Добавлено */
-}
-
-.form-box input {
-    outline: none;
     width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    margin: 15px 0;
-    font-size: inherit;
+    max-width: 450px; /* Можно оставить пошире */
+    overflow: hidden;
+    padding: 0;
+    border-radius: 12px;
+    /* ✅ ИЗМЕНЕНИЕ: Убираем фон-картинку, ставим фон контента */
+    background-image: none;
+    background-color: #2a2a2a; /* Тот же, что у .container-body */
+    /* ✅ ИЗМЕНЕНИЕ: Добавляем ОРАНЖЕВУЮ рамку */
+    border: 1px solid #ff6600;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
 }
 
-    /* Стили из рис. 67 */
-    .form-box input:focus {
-        border-color: rgb(255, 165, 0);
+.modal-overlay.active .modal-content {
+    transform: scale(1);
+}
+
+/* 5. Кнопка "Закрыть" (крестик) */
+.modal-close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 2.5rem;
+    font-weight: bold;
+    /* ✅ ИЗМЕНЕНИЕ: Цвет крестика */
+    color: #aaa;
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.2s;
+    z-index: 10;
+    text-shadow: none; /* Убираем тень */
+}
+
+    .modal-close:hover {
+        color: #ff6600; /* ✅ Ховер ОРАНЖЕВЫЙ */
     }
 
-        /* Убираем :not(:placeholder-shown) для работы с placeholder=" " */
-        .form-box input:focus + span,
-        .form-box input:valid + span {
-            top: -18px;
-            left: 8px;
-            font-size: 12px;
-            color: rgb(255, 165, 0);
-            background-color: #fff;
-            padding: 0 4px; /* Добавлено */
-        }
 
-.form-box span {
-    cursor: text;
-    position: absolute;
-    top: 28px; /* Скорректировано */
-    left: 16px;
-    color: rgb(131, 131, 131);
-    transition: all 0.3s ease-in-out;
-    padding: 0 4px;
+/* --- Слайдер форм --- */
+
+.modal-slider {
+    display: flex;
+    transition: transform 0.4s ease-in-out;
+    transform: translateX(0);
 }
 
-.form-btn {
+.modal-form-container {
+    width: 100%;
+    padding: 30px 40px;
+    flex-shrink: 0;
+    box-sizing: border-box;
+}
+
+.modal-content.show-register .modal-slider {
+    transform: translateX(-100%);
+}
+
+/* --- Стили для форм (ТЕМНАЯ ТЕМА) --- */
+
+.modal-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #ffffff; /* ✅ Белый */
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.modal-form-group {
+    margin-bottom: 20px;
+}
+
+    .modal-form-group label {
+        display: block;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: #cccccc; /* ✅ Светло-серый */
+        margin-bottom: 8px;
+    }
+
+.modal-input {
+    width: 100%;
+    padding: 12px;
+    font-size: 1rem;
+    font-family: "Montserrat", sans-serif;
+    /* ✅ ИЗМЕНЕНИЕ: Стили полей ввода */
+    border: 1px solid #666;
+    background-color: #444;
+    color: #e0e0e0;
+    border-radius: 5px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+    .modal-input:focus {
+        outline: none;
+        /* ✅ ИЗМЕНЕНИЕ: Фокус ОРАНЖЕВЫЙ */
+        border-color: #ff6600;
+        box-shadow: 0 0 0 3px rgba(255, 102, 0, 0.2);
+    }
+
+/* ✅ ИЗМЕНЕНИЕ: Кнопка ОРАНЖЕВАЯ */
+.modal-button {
+    width: 100%;
+    display: block;
+    padding: 12px 16px;
+    background-color: #ff6600;
+    color: #111 !important; /* Темный текст */
+    font-weight: 500;
+    text-decoration: none;
+    border-radius: 4px;
     border: none;
     cursor: pointer;
-    background-color: rgb(255, 165, 0);
-    color: #fff;
-    padding: 10px 50px;
-    margin-top: 10px;
-    font-size: inherit;
-    width: fit-content;
+    font-size: 1.1rem;
+    font-family: inherit;
+    transition: background-color 0.2s;
 }
 
-.form_btn_signup {
-    background-color: #370b0b;
+    .modal-button:hover {
+        background-color: #e65c00; /* Темнее оранжевый */
+    }
+
+.modal-switcher {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 0.9rem;
+    color: #aaa; /* ✅ Светлее */
 }
 
-/* Стили из рис. 68 */
-.form {
-    width: 100%;
-    padding: 50px;
-    font-size: 16px;
-    position: absolute;
-    transition: 0.5s;
-}
+    .modal-switcher a {
+        color: #ff6600; /* ✅ Ссылка ОРАНЖЕВАЯ */
+        text-decoration: none;
+        font-weight: 500;
+    }
 
-.form_signin {
-    left: 0;
-    transition: 0.25s;
-}
-
-.form_signup {
-    left: 100%;
-    transition: 0s;
-}
-
-.form-box.active .form_signin {
-    left: -100%;
-    transition: 0s;
-}
-
-.form-box.active .form_signup {
-    left: 0;
-    transition: 0.25s;
-}
-
-/* Стили для ошибок из ГЛАВЫ 8 (рис. 88) */
-#error-messages-signin,
-#error-messages-signup {
-    margin-top: 10px;
-}
-
-.error {
-    color: red;
-    font-size: 13px;
-}
+        .modal-switcher a:hover {
+            text-decoration: underline;
+        }

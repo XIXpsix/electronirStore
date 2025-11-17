@@ -1,90 +1,65 @@
-﻿@using ElectronicsStore.Domain.Entity
-@using Microsoft.AspNetCore.Identity
-@inject UserManager<ApplicationUser> UserManager
-@inject SignInManager<ApplicationUser> SignInManager
+﻿@*
+    Изменение: Обе формы теперь обернуты в <div class="modal-slider">,
+    чтобы они могли "скользить" горизонтально.
+*@
 
-<div class="container-login-registration" id="login-registration-container">
-    <div class="block-container">
-        <!-- Левая часть (переключатели) -->
-        <div class="block">
-            <div class="block_item">
-                <h3 class="block-item_title">Уже есть аккаунт?</h3>
-                <button class="block-item_btn signin-btn" id="btn-signin">Войти</button>
+<div class="modal-overlay" id="modal-overlay">
+
+    <div class="modal-content" id="modal-content-box">
+
+        <span class="modal-close" id="modal-close">&times;</span>
+
+        <div class="modal-slider">
+
+            <div class="modal-form-container" id="login-form-container">
+                <h2 class="modal-title">Вход</h2>
+                <form asp-controller="Account" asp-action="Login" method="post">
+
+                    <div class="modal-form-group">
+                        <label for="login-name">Имя пользователя (Логин)</label>
+                        <input id="login-name" name="Name" class="modal-input" type="text" placeholder="Введите ваш логин" required />
+                    </div>
+
+                    <div class="modal-form-group">
+                        <label for="login-password">Пароль</label>
+                        <input id="login-password" name="Password" class="modal-input" type="password" placeholder="Введите ваш пароль" required />
+                    </div>
+
+                    <button type="submit" class="modal-button">Войти</button>
+                </form>
+
+                <p class="modal-switcher">
+                    Нет аккаунта? <a href="#" id="show-register-link">Регистрация</a>
+                </p>
             </div>
-            <div class="block_item">
-                <h3 class="block-item_title">Нет аккаунта?</h3>
-                <button class="block-item_btn signup-btn" id="btn-signup">Регистрация</button>
+
+            <div class="modal-form-container" id="register-form-container">
+                <h2 class="modal-title">Регистрация</h2>
+                <form asp-controller="Account" asp-action="Register" method="post">
+
+                    <div class="modal-form-group">
+                        <label for="register-name">Имя пользователя (Логин)</label>
+                        <input id="register-name" name="Name" class="modal-input" type="text" placeholder="Придумайте логин" required />
+                    </div>
+
+                    <div class="modal-form-group">
+                        <label for="register-password">Пароль</label>
+                        <input id="register-password" name="Password" class="modal-input" type="password" placeholder="Придумайте пароль" required />
+                    </div>
+
+                    <div class="modal-form-group">
+                        <label for="register-password-confirm">Повторите пароль</label>
+                        <input id="register-password-confirm" name="PasswordConfirm" class="modal-input" type="password" placeholder="Повторите пароль" required />
+                    </div>
+
+                    <button type="submit" class="modal-button">Зарегистрироваться</button>
+                </form>
+
+                <p class="modal-switcher">
+                    Уже есть аккаунт? <a href="#" id="show-login-link">Войти</a>
+                </p>
             </div>
+
         </div>
-
-        <!-- Формы входа и регистрации -->
-        <div class="form-box" id="form-box">
-            <!-- Форма входа -->
-            <form class="form form_signin" id="signin-form" method="post" asp-page="/Account/Login">
-                <h2 class="form_title">Вход</h2>
-
-                <div id="error-messages-signin"></div>
-
-                <label>
-                    <input type="email" name="email" placeholder=" " required id="signin_email" />
-                    <span>Email</span>
-                </label>
-
-                <label>
-                    <input type="password" name="password" placeholder=" " required />
-                    <span>Пароль</span>
-                </label>
-
-                <button type="submit" class="form-btn">Войти</button>
-            </form>
-
-            <!-- Форма регистрации -->
-            <form class="form form_signup" id="signup-form" method="post" asp-page="/Account/Register">
-                <h2 class="form_title">Регистрация</h2>
-
-                <div id="error-messages-signup"></div>
-
-                <label>
-                    <input type="text" name="firstName" placeholder=" " required />
-                    <span>Имя</span>
-                </label>
-
-                <label>
-                    <input type="text" name="lastName" placeholder=" " required />
-                    <span>Фамилия</span>
-                </label>
-
-                <label>
-                    <input type="email" name="email" placeholder=" " required />
-                    <span>Email</span>
-                </label>
-
-                <label>
-                    <input type="password" name="password" placeholder=" " required />
-                    <span>Пароль</span>
-                </label>
-
-                <label>
-                    <input type="password" name="confirmPassword" placeholder=" " required />
-                    <span>Подтвердить пароль</span>
-                </label>
-
-                <button type="submit" class="form-btn form_btn_signup">Зарегистрироваться</button>
-            </form>
-
-            <!-- Оверлей для закрытия модального окна -->
-        </div>
-            <div class="overlay" id="overlay"></div>
     </div>
 </div>
-
-
-<script>
-    console.log({
-        modal: document.querySelector(".container-login-registration"),
-        signinBtn: document.querySelector('.signin-btn'),
-        signupBtn: document.querySelector('.signup-btn'),
-        signinEmail: document.querySelector("#signin_email"),
-        formSignin: document.querySelector('.form_signin')
-    });
-</script>

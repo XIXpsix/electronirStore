@@ -1,7 +1,10 @@
-﻿/* Твои оригинальные стили */
+﻿/* --- Глобальные стили (ТЕМНАЯ ТЕМА) --- */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap');
+
 html {
     box-sizing: border-box;
     font-family: "Montserrat", sans-serif;
+    scroll-behavior: smooth;
 }
 
 *,
@@ -12,28 +15,34 @@ html {
     box-sizing: inherit;
 }
 
+/* --- ОСНОВНОЙ МАКЕТ (ТЕМНАЯ ТЕМА) --- */
 body {
     width: 100%;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    background-color: #f4f4f4;
+    /* ✅ ИЗМЕНЕНИЕ: Темный фон */
+    background-color: #1a1a1a;
+    /* ✅ ИЗМЕНЕНИЕ: Светлый текст по умолчанию */
+    color: #e0e0e0;
 }
 
-/* ------------------------------------------- */
-/* --- ДОБАВЛЕННЫЕ СТИЛИ ДЛЯ ШАПКИ (HEADER) --- */
-/* ------------------------------------------- */
+/* --------------------------------- */
+/* --- СТИЛИ ШАПКИ (ТЕМНАЯ ТЕМА) --- */
+/* --------------------------------- */
 
 header {
     width: 100%;
     position: sticky;
     top: 0;
     z-index: 100;
-    background-color: #ffffff;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    /* ✅ ИЗМЕНЕНИЕ: Фон шапки */
+    background-color: #242424;
+    /* ✅ ИЗМЕНЕНИЕ: Убираем тень, ставим границу */
+    box-shadow: none;
+    border-bottom: 1px solid #444;
 }
 
-/* Блок с логотипом и кнопками "Войти" */
 #header-top {
     width: 100%;
     max-width: 1200px;
@@ -46,24 +55,25 @@ header {
 
 .logo {
     font-size: 1.5rem;
-    font-weight: bold;
-    color: #333;
+    font-weight: 700;
+    /* ✅ ИЗМЕНЕНИЕ: Логотип теперь белый */
+    color: #ffffff;
     text-decoration: none;
 }
 
-/* Контейнер для кнопок "Войти" / "Регистрация" */
 .button-header {
     display: flex;
     gap: 10px;
 }
 
-/* Стили для самих кнопок */
+/* ✅ ИЗМЕНЕНИЕ: Кнопки стали ОРАНЖЕВЫМИ */
 .button,
 .form-inline-button .button {
     display: inline-block;
     padding: 8px 16px;
-    background-color: #007bff;
-    color: white !important;
+    background-color: #ff6600; /* Оранжевый */
+    color: #111 !important; /* Темный текст на оранжевом */
+    font-weight: 500;
     text-decoration: none;
     border-radius: 4px;
     border: none;
@@ -76,35 +86,32 @@ header {
 
     .button:hover,
     .form-inline-button .button:hover {
-        background-color: #0056b3;
+        background-color: #e65c00; /* Более темный оранжевый */
     }
 
-/* Стили для кнопки "Выход", которая является формой */
 .form-inline-button {
     display: inline;
     margin: 0;
     padding: 0;
 }
 
-    /* У кнопки "Выход" убираем лишние стили, чтобы она была похожа на .button */
     .form-inline-button .button {
         background: none;
         padding: 8px 16px;
-        background-color: #007bff;
-        color: white !important;
+        background-color: #ff6600;
+        color: #111 !important;
     }
 
         .form-inline-button .button:hover {
-            background-color: #0056b3;
+            background-color: #e65c00;
         }
 
-
-/* Меню навигации (О нас, Каталог, Контакты) */
 #header-bottom {
     width: 100%;
-    background-color: #f8f9fa;
-    border-top: 1px solid #e7e7e7;
-    border-bottom: 1px solid #e7e7e7;
+    /* ✅ ИЗМЕНЕНИЕ: Фон меню */
+    background-color: #333333;
+    border-top: 1px solid #444;
+    border-bottom: 1px solid #444;
 }
 
 .menu-container {
@@ -129,53 +136,289 @@ header {
     padding: 14px 20px;
     font-size: 1rem;
     font-weight: 500;
-    color: #333;
+    /* ✅ ИЗМЕНЕНИЕ: Цвет ссылок меню */
+    color: #e0e0e0;
     text-decoration: none;
     transition: background-color 0.2s, color 0.2s;
 }
-
+    /* ✅ ИЗМЕНЕНИЕ: Ховер ссылок меню */
     .menu a:hover {
-        background-color: #e9ecef;
-        color: #007bff;
+        background-color: #444;
+        color: #ff6600; /* Оранжевый */
     }
 
 .mobile-menu-button {
     display: none;
 }
 
-/* ✅ ГЛАВНОЕ ИЗМЕНЕНИЕ: КОНТЕЙНЕР БЕЗ FLEX, ПРОСТО ЦЕНТРИРУЕМ ЧЕРЕЗ MARGIN */
+/* --------------------------------- */
+/* --- ГЛАВНЫЙ КОНТЕЙНЕР (ТЕМНЫЙ) --- */
+/* --------------------------------- */
+
 .container-body {
     width: 82%;
     max-width: 1200px;
-    margin: 20px auto; /* Центрируем горизонтально */
-    border: 2px solid #cacaca;
+    margin: 20px auto;
+    /* ✅ ИЗМЕНЕНИЕ: Фон контента */
+    background-color: #2a2a2a;
+    /* ✅ ИЗМЕНЕНИЕ: Граница и тень */
+    border: 2px solid #444;
     border-radius: 3px;
-    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.4);
-    background-color: #ffffff;
-    flex: 1; /* Растягивает контент, чтобы футер прижался внизу */
+    box-shadow: none; /* Убираем тень, она не нужна в темной теме */
+    flex: 1;
+    padding: 0;
 }
 
-/* Твои стили для футера (я их не трогал, но добавил базовые) */
+
+/* ------------------------------------------- */
+/* --- СТИЛИ КОНТЕНТА (ТЕМНАЯ ТЕМА) --- */
+/* ------------------------------------------- */
+
+.container-section {
+    padding: 40px 30px;
+    /* ✅ ИЗМЕНЕНИЕ: Разделитель секций */
+    border-bottom: 1px solid #444;
+}
+
+    .container-section:last-child {
+        border-bottom: none;
+    }
+
+.info-sections {
+    font-size: 2.5rem;
+    font-weight: 700;
+    /* ✅ ИЗМЕНЕНИЕ: Цвет заголовков */
+    color: #ffffff;
+    margin-bottom: 30px;
+    text-align: center;
+    position: relative;
+}
+    /* ✅ ИЗМЕНЕНИЕ: Подчеркивание ОРАНЖЕВОЕ */
+    .info-sections::after {
+        content: '';
+        display: block;
+        width: 60px;
+        height: 4px;
+        background-color: #ff6600;
+        margin: 15px auto 0;
+    }
+
+.text {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    /* ✅ ИЗМЕНЕНИЕ: Цвет текста */
+    color: #cccccc;
+    max-width: 800px;
+    margin: 0 auto 20px auto;
+    text-align: left;
+}
+
+/* --- Каталог (Карточки) (ТЕМНАЯ ТЕМА) --- */
+
+.card-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+}
+
+.card {
+    /* ✅ ИЗМЕНЕНИЕ: Фон карточек */
+    background-color: #333333;
+    border: 1px solid #444;
+    border-radius: 8px;
+    padding: 25px;
+    box-shadow: none; /* Убираем тень */
+    transition: transform 0.3s, border-color 0.3s;
+    display: flex;
+    flex-direction: column;
+}
+
+    .card:hover {
+        transform: translateY(-5px);
+        /* ✅ ИЗМЕНЕНИЕ: Подсветка рамки ОРАНЖЕВЫМ */
+        border-color: #ff6600;
+    }
+
+.card-icon {
+    font-size: 3rem;
+    margin-bottom: 15px;
+}
+
+.card-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    /* ✅ ИЗМЕНЕНИЕ: Цвет */
+    color: #ffffff;
+    margin-bottom: 10px;
+}
+
+.card-description {
+    font-size: 1rem;
+    line-height: 1.6;
+    /* ✅ ИЗМЕНЕНИЕ: Цвет */
+    color: #cccccc;
+    flex-grow: 1;
+    margin-bottom: 20px;
+}
+
+.card-link {
+    font-size: 1rem;
+    font-weight: 500;
+    /* ✅ ИЗМЕНЕНИЕ: Ссылка ОРАНЖЕВАЯ */
+    color: #ff6600;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+    .card-link:hover {
+        color: #e65c00;
+    }
+
+
+/* --- Контакты (Форма) (ТЕМНАЯ ТЕМА) --- */
+
+.contacts-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 40px;
+}
+
+.contact-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: #ffffff; /* ✅ */
+}
+
+.contact-subtitle {
+    font-size: 1rem;
+    color: #cccccc; /* ✅ */
+    margin-bottom: 25px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+    .form-group label {
+        display: block;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: #cccccc; /* ✅ */
+        margin-bottom: 8px;
+    }
+
+    /* ✅ ИЗМЕНЕНИЕ: Поля ввода */
+    .form-group input[type="text"],
+    .form-group textarea {
+        width: 100%;
+        padding: 12px;
+        font-size: 1rem;
+        font-family: inherit;
+        border: 1px solid #666; /* Темная рамка */
+        background-color: #444; /* Темный фон */
+        color: #e0e0e0; /* Светлый текст */
+        border-radius: 5px;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+        /* ✅ ИЗМЕНЕНИЕ: Фокус ОРАНЖЕВЫЙ */
+        .form-group input[type="text"]:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #ff6600;
+            box-shadow: 0 0 0 3px rgba(255, 102, 0, 0.2);
+        }
+
+/* ✅ ИЗМЕНЕНИЕ: Кнопка "Отправить" ОРАНЖЕВАЯ */
+.contact-submit-button {
+    width: 100%;
+    display: block;
+    padding: 12px 16px;
+    background-color: #ff6600;
+    color: #111 !important; /* Темный текст */
+    font-weight: 500;
+    text-decoration: none;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-family: inherit;
+    transition: background-color 0.2s;
+}
+
+    .contact-submit-button:hover {
+        background-color: #e65c00;
+    }
+
+.info-block {
+    margin-bottom: 25px;
+}
+
+    .info-block h4 {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #ffffff; /* ✅ */
+        margin-bottom: 8px;
+    }
+
+    .info-block p {
+        font-size: 1rem;
+        line-height: 1.6;
+        color: #cccccc; /* ✅ */
+    }
+
+.map-placeholder {
+    width: 100%;
+    height: 200px;
+    background-color: #333; /* ✅ */
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #888;
+    font-style: italic;
+    margin-top: 20px;
+}
+
+
+/* --------------------------------- */
+/* --- СТИЛИ ФУТЕРА (ТЕМНАЯ ТЕМА) --- */
+/* --------------------------------- */
+
 footer {
     width: 100%;
-    background-color: #333;
-    color: #fff;
-    padding: 20px 0;
-    margin-top: auto;
+    /* ✅ ИЗМЕНЕНИЕ: Самый темный (почти черный) фон */
+    background-color: #111111;
+    color: #e0e0e0;
+    padding: 30px 0;
 }
 
-    footer div {
+    footer > div {
         width: 100%;
         max-width: 1200px;
         margin: 0 auto;
         padding: 0 20px;
         display: flex;
         justify-content: space-between;
+        gap: 30px;
     }
 
 .footer-left {
     flex-basis: 60%;
 }
+
+    .footer-left .logo {
+        color: #fff;
+        font-size: 1.8rem;
+        display: block;
+        margin-bottom: 15px;
+    }
+
+    .footer-left p {
+        line-height: 1.7;
+        color: #ccc;
+    }
+
 
 .footer-right {
     flex-basis: 35%;
@@ -183,21 +426,111 @@ footer {
 
     .footer-right h4 {
         font-size: 1.2rem;
-        margin-bottom: 10px;
+        font-weight: 700;
+        margin-bottom: 15px;
+        color: #fff;
     }
 
 .footer-copy {
     margin-top: 20px;
     font-size: 0.9rem;
     color: #aaa;
+    border-top: 1px solid #444; /* ✅ */
+    padding-top: 20px;
+}
+
+.footer-right .menu ul {
+    flex-direction: column;
 }
 
 .footer-right .menu a {
     color: #fff;
     padding: 5px 0;
+    font-weight: 400;
 }
-
+    /* ✅ ИЗМЕНЕНИЕ: Ховер ОРАНЖЕВЫЙ */
     .footer-right .menu a:hover {
         background-color: transparent;
-        color: #007bff;
+        color: #ff6600;
     }
+
+.footer-right .card {
+    background-color: #2a2a2a; /* ✅ */
+    border: 1px solid #444; /* ✅ */
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+    .footer-right .card .card-title {
+        color: #fff;
+        font-size: 1.2rem;
+    }
+
+    .footer-right .card .card-description {
+        color: #ccc;
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+
+    .footer-right .card .card-link {
+        color: #ff6600; /* ✅ */
+    }
+
+
+/* --------------------------------- */
+/* --- АДАПТИВНОСТЬ (Без изменений) --- */
+/* --------------------------------- */
+
+@media (max-width: 992px) {
+    .container-body {
+        width: 90%;
+        margin: 15px auto;
+    }
+
+    .contacts-grid {
+        grid-template-columns: 1fr;
+    }
+
+    footer > div {
+        flex-direction: column;
+        gap: 30px;
+    }
+}
+
+@media (max-width: 768px) {
+    #header-top {
+        flex-direction: column;
+        gap: 15px;
+        padding: 15px;
+    }
+
+    .menu ul {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .menu a {
+        padding: 12px 15px;
+    }
+
+    .container-body {
+        width: 100%;
+        margin: 0;
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .container-section {
+        padding: 25px 15px;
+    }
+
+    .info-sections {
+        font-size: 2rem;
+    }
+
+    .text {
+        font-size: 1rem;
+    }
+}
