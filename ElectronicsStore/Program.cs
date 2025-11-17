@@ -1,8 +1,9 @@
 ﻿// 1. ВСЕ 'USING' ОБЯЗАТЕЛЬНО СНАРУЖИ, В САМОМ ВЕРХУ
 using ElectronicsStore.BLL;
 using ElectronicsStore.DAL;
-using ElectronicsStore.Domain.Entity; // <-- Нужен для Identity
-using Microsoft.AspNetCore.Identity; // <-- Нужен для Identity
+using ElectronicsStore.Domain.Entity;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 
 // 2. ОПРЕДЕЛЕНИЕ КЛАССА
@@ -64,7 +65,16 @@ internal class Program
         }
 
         app.UseHttpsRedirection();
-        app.UseStaticFiles();
+
+        // ✅ ПРАВИЛЬНЫЕ MIME ТИПЫ - БЕЗ ДУБЛИРОВАНИЯ
+        var provider = new FileExtensionContentTypeProvider();
+        provider.Mappings[".css"] = "text/css; charset=utf-8";
+        provider.Mappings[".js"] = "application/javascript; charset=utf-8";
+
+        app.UseStaticFiles(new StaticFileOptions
+        {
+            ContentTypeProvider = provider
+        });
 
         app.UseRouting();
 

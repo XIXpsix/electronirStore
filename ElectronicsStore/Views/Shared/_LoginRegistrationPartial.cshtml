@@ -1,66 +1,90 @@
-﻿@* ФАЙЛ: ElectronicsStore/Views/Shared/_LoginRegistrationPartial.cshtml
-  (Этот файл будет вызван из _Layout.cshtml)
-*@
+﻿@using ElectronicsStore.Domain.Entity
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
 
-<div class="container-login-registration">
+<div class="container-login-registration" id="login-registration-container">
     <div class="block-container">
-
+        <!-- Левая часть (переключатели) -->
         <div class="block">
-            <section class="block_item block-item">
-                <h2 class="block-item_title">У вас уже есть аккаунт?</h2>
-                <button class="block-item_btn signin-btn">Войти</button>
-            </section>
-            <section class="block_item block-item">
-                <h2 class="block-item_title">У вас нет аккаунта?</h2>
-                <button class="block-item_btn signup-btn">Зарегистрироваться</button>
-            </section>
+            <div class="block_item">
+                <h3 class="block-item_title">Уже есть аккаунт?</h3>
+                <button class="block-item_btn signin-btn" id="btn-signin">Войти</button>
+            </div>
+            <div class="block_item">
+                <h3 class="block-item_title">Нет аккаунта?</h3>
+                <button class="block-item_btn signup-btn" id="btn-signup">Регистрация</button>
+            </div>
         </div>
 
-        <div class="form-box">
-            <!-- Форма Входа -->
-            <form class="form form_signin" onsubmit="return false;">
-                <h3 class="form_title">Вход</h3>
+        <!-- Формы входа и регистрации -->
+        <div class="form-box" id="form-box">
+            <!-- Форма входа -->
+            <form class="form form_signin" id="signin-form" method="post" asp-page="/Account/Login">
+                <h2 class="form_title">Вход</h2>
+
+                <div id="error-messages-signin"></div>
+
                 <label>
-                    <input type="text" id="signin_email" placeholder=" " required />
-                    <span>Почта</span>
+                    <input type="email" name="email" placeholder=" " required id="signin_email" />
+                    <span>Email</span>
                 </label>
+
                 <label>
-                    <input type="password" id="signin_password" placeholder=" " required />
+                    <input type="password" name="password" placeholder=" " required />
                     <span>Пароль</span>
                 </label>
-                <button type="submit" class="form-btn form_btn_signin">Войти</button>
-                <div id="error-messages-signin"></div>
+
+                <button type="submit" class="form-btn">Войти</button>
             </form>
 
-            <!-- Форма Регистрации (Адаптирована под твой RegisterViewModel) -->
-            <form class="form form_signup" onsubmit="return false;">
-                <h3 class="form_title">Регистрация</h3>
+            <!-- Форма регистрации -->
+            <form class="form form_signup" id="signup-form" method="post" asp-page="/Account/Register">
+                <h2 class="form_title">Регистрация</h2>
+
+                <div id="error-messages-signup"></div>
 
                 <label>
-                    <input type="text" id="signup_firstname" placeholder=" " required />
+                    <input type="text" name="firstName" placeholder=" " required />
                     <span>Имя</span>
                 </label>
+
                 <label>
-                    <input type="text" id="signup_lastname" placeholder=" " required />
+                    <input type="text" name="lastName" placeholder=" " required />
                     <span>Фамилия</span>
                 </label>
+
                 <label>
-                    <input type="email" id="signup_email" placeholder=" " required />
-                    <span>Почта</span>
+                    <input type="email" name="email" placeholder=" " required />
+                    <span>Email</span>
                 </label>
+
                 <label>
-                    <input type="password" id="signup_password" placeholder=" " required />
+                    <input type="password" name="password" placeholder=" " required />
                     <span>Пароль</span>
                 </label>
-                <label>
-                    <input type="password" id="signup_confirmpassword" placeholder=" " required />
-                    <span>Подтвердите пароль</span>
-                </label>
-                <button type="submit" class="form-btn form_btn_signup">Зарегистрироваться</button>
-                <div id="error-messages-signup"></div>
-            </form>
-        </div>
 
+                <label>
+                    <input type="password" name="confirmPassword" placeholder=" " required />
+                    <span>Подтвердить пароль</span>
+                </label>
+
+                <button type="submit" class="form-btn form_btn_signup">Зарегистрироваться</button>
+            </form>
+
+            <!-- Оверлей для закрытия модального окна -->
+        </div>
+            <div class="overlay" id="overlay"></div>
     </div>
-    <div class="overlay"></div>
 </div>
+
+
+<script>
+    console.log({
+        modal: document.querySelector(".container-login-registration"),
+        signinBtn: document.querySelector('.signin-btn'),
+        signupBtn: document.querySelector('.signup-btn'),
+        signinEmail: document.querySelector("#signin_email"),
+        formSignin: document.querySelector('.form_signin')
+    });
+</script>

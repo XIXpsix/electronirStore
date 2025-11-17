@@ -1,165 +1,125 @@
 ﻿@{
     ViewData["Title"] = "Главная";
-    // *** НЕТ строки Layout = "_Layout"; ***
-}
-@{
-    Layout = "_Layout"; // Это указывает, что нужно использовать файл _Layout.cshtml
+    Layout = "_Layout";
 }
 
-<!-- Этот div - аналог "container" из методички (рис. 41) с рамкой -->
-<div class="container-content-box">
-
-    <!-- Секция "О нас" (Адаптация рис. 43) -->
-    <div id="about" class="container-section scroll-mt-24">
-        <h2 class="info-sections">О нас</h2>
-        <!-- Текст адаптирован под "Интернет-магазин" (вместо "Текст 1" из Приложения А) -->
-        <p class="text">
-            Добро пожаловать в "Мир Электроники" — ваш надежный партнер в мире высоких технологий и современной техники! Мы предлагаем широкий ассортимент гаджетов, бытовой техники и компьютерных комплектующих по самым выгодным ценам. Наша команда экспертов всегда готова помочь вам подобрать идеальное устройство, отвечающее вашим потребностям и бюджету.
-        </p>
-        <p class="text">
-            Мы заботимся о каждом клиенте, предоставляя высококачественный сервис, начиная с профессиональной консультации и заканчивая быстрой доставкой и гарантийной поддержкой. Нам доверяют, потому что мы предлагаем только сертифицированную продукцию от ведущих мировых брендов.
-        </p>
-        <p class="text">
-            Мы также гордимся нашими гарантийными обязательствами. Вся техника, приобретенная у нас, имеет официальную гарантию. В случае возникновения вопросов или проблем, наша служба поддержки всегда на связи, чтобы обеспечить вам спокойствие и уверенность в вашей покупке.
-        </p>
-    </div>
-
-    <!-- ------------------------------------------------------------------ -->
-    <!-- НОВАЯ СЕКЦИЯ: Категории товаров (аналог Услуги, рис. 46) -->
-    <!-- ------------------------------------------------------------------ -->
-
-    <div id="catalog" class="container-section scroll-mt-24">
-        <h2 class="info-sections">Категории товаров</h2>
-
-        <div class="card-container">
-            <!-- Карточка 1: Смартфоны и Гаджеты -->
-            <div class="card">
-                <div class="card-icon">&#128241;</div> <!-- Иконка Смартфон -->
-                <h3 class="card-title">Смартфоны и Гаджеты</h3>
-                <p class="card-description">
-                    Широкий выбор последних моделей смартфонов, умных часов, наушников и аксессуаров. Оставайтесь на связи и в тренде.
-                </p>
-                <a href="#" class="card-link">Смотреть каталог &rarr;</a>
-            </div>
-
-            <!-- Карточка 2: Компьютеры и Ноутбуки -->
-            <div class="card">
-                <div class="card-icon">&#128187;</div> <!-- Иконка Ноутбук -->
-                <h3 class="card-title">Компьютеры и Ноутбуки</h3>
-                <p class="card-description">
-                    Мощные рабочие станции, игровые ПК и тонкие ноутбуки для учебы и работы. Соберем идеальную конфигурацию.
-                </p>
-                <a href="#" class="card-link">Смотреть каталог &rarr;</a>
-            </div>
-
-            <!-- Карточка 3: Бытовая Техника -->
-            <div class="card">
-                <div class="card-icon">&#128270;</div> <!-- Иконка Бытовая техника (Увеличительное стекло) -->
-                <h3 class="card-title">Бытовая Техника</h3>
-                <p class="card-description">
-                    Современные решения для дома: от холодильников и стиральных машин до пылесосов и умных устройств для кухни.
-                </p>
-                <a href="#" class="card-link">Смотреть каталог &rarr;</a>
-            </div>
-
-            <!-- Карточка 4: ТВ и Аудио -->
-            <div class="card">
-                <div class="card-icon">&#128250;</div> <!-- Иконка ТВ/Кино -->
-                <h3 class="card-title">Телевизоры и Аудио</h3>
-                <p class="card-description">
-                    Погрузитесь в мир качественного изображения и чистого звука. Широкоформатные 4K/8K ТВ и профессиональные аудиосистемы.
-                </p>
-                <a href="#" class="card-link">Смотреть каталог &rarr;</a>
-            </div>
-
-            <!-- Карточка 5: Игровые Приставки -->
-            <div class="card">
-                <div class="card-icon">&#127918;</div> <!-- Иконка Игровая приставка -->
-                <h3 class="card-title">Игровые Приставки</h3>
-                <p class="card-description">
-                    Последние консоли и аксессуары для геймеров. Начни свое приключение в виртуальном мире прямо сейчас.
-                </p>
-                <a href="#" class="card-link">Смотреть каталог &rarr;</a>
-            </div>
-
-            <!-- Карточка 6: Аксессуары и Запчасти -->
-            <div class="card">
-                <div class="card-icon">&#128295;</div> <!-- Иконка Шестеренка -->
-                <h3 class="card-title">Аксессуары и Запчасти</h3>
-                <p class="card-description">
-                    Все необходимое для ремонта, тюнинга и комфортного использования вашей техники. Кабели, чехлы, комплектующие.
-                </p>
-                <a href="#" class="card-link">Смотреть каталог &rarr;</a>
-            </div>
-        </div>
-    </div>
-
-
-    <!-- ------------------------------------------------------------------ -->
-    <!-- НОВАЯ СЕКЦИЯ: Контакты (аналог рис. 52-54) -->
-    <!-- ------------------------------------------------------------------ -->
-
-    <div id="contacts" class="container-section scroll-mt-24">
-        <h2 class="info-sections">Контакты</h2>
-
-        <div class="contacts-grid">
-            <!-- 1. Форма обратной связи -->
-            <div class="contact-form-container">
-                <h3 class="contact-title">Форма обратной связи</h3>
-                <p class="contact-subtitle">
-                    Задайте свой вопрос, и мы свяжемся с вами в течение 30 минут.
-                </p>
-                <form class="contact-form">
-                    <div class="form-group">
-                        <label for="name">Ваше имя:</label>
-                        <input type="text" id="name" name="name" required placeholder="Иван Иванов" />
-                    </div>
-                    <div class="form-group">
-                        <label for="email">Email или телефон:</label>
-                        <input type="text" id="email" name="email" required placeholder="example@mail.ru или +7 (XXX) XXX-XX-XX" />
-                    </div>
-                    <div class="form-group">
-                        <label for="message">Сообщение:</label>
-                        <textarea id="message" name="message" rows="4" required placeholder="Опишите ваш вопрос или предложение..."></textarea>
-                    </div>
-                    <button type="submit" class="contact-submit-button">Отправить сообщение</button>
-                </form>
-            </div>
-
-            <!-- 2. Информация и адреса -->
-            <div class="contact-info-container">
-                <h3 class="contact-title">Наши адреса и информация</h3>
-
-                <div class="info-block">
-                    <h4>Центральный офис (Пункт выдачи 1)</h4>
-                    <p>
-                        ул. Гагарина, д. 10, г. Тирасполь, ПМР
-                    </p>
-                    <p>Пн-Пт: 9:00 - 18:00, Сб-Вс: Выходной</p>
-                </div>
-
-                <div class="info-block">
-                    <h4>Филиал (Пункт выдачи 2)</h4>
-                    <p>
-                        ул. Шевченко, д. 52, г. Бендеры, ПМР
-                    </p>
-                    <p>Ежедневно: 10:00 - 19:00</p>
-                </div>
-
-                <div class="info-block">
-                    <h4>Общая информация</h4>
-                    <p>Телефон: +373 (533) 99-99-99</p>
-                    <p>Email: support@electronicsstore.pmr</p>
-                </div>
-
-                <!-- Место для Карты (аналог рис. 55) -->
-                <div class="map-placeholder">
-                    [Место для интерактивной карты]
-                </div>
-
-            </div>
-        </div>
-
-    </div>
-
+<div id="about" class="container-section scroll-mt-24">
+    <h2 class="info-sections">О нас</h2>
+    <p class="text">
+        Добро пожаловать в "Мир Электроники" — ваш надежный партнер в мире высоких технологий и современной техники! Мы предлагаем широкий ассортимент гаджетов, бытовой техники и компьютерных комплектующих по самым выгодным ценам. Наша команда экспертов всегда готова помочь вам подобрать идеальное устройство, отвечающее вашим потребностям и бюджету.
+    </p>
+    <p class="text">Мы заботимся о каждом клиенте, предоставляя высококачественный сервис, начиная с профессиональной консультации и заканчивая быстрой доставкой и гарантийной поддержкой.</p>
+    <p class="text">Мы также гордимся нашими гарантийными обязательствами. Вся техника, приобретенная у нас, имеет официальную гарантию.</p>
 </div>
+<div id="catalog" class="container-section scroll-mt-24">
+    <h2 class="info-sections">Категории товаров</h2>
+
+    <div class="card-container">
+        <div class="card">
+            <div class="card-icon">&#128241;</div> <h3 class="card-title">Смартфоны и Гаджеты</h3>
+            <p class="card-description">
+                Широкий выбор последних моделей смартфонов, умных часов, наушников и аксессуаров. Оставайтесь на связи и в тренде.
+            </p>
+            <a href="#" class="card-link">Смотреть каталог &rarr;</a>
+        </div>
+
+        <div class="card">
+            <div class="card-icon">&#128187;</div> <h3 class="card-title">Компьютеры и Ноутбуки</h3>
+            <p class="card-description">
+                Мощные рабочие станции, игровые ПК и тонкие ноутбуки для учебы и работы. Соберем идеальную конфигурацию.
+            </p>
+            <a href="#" class="card-link">Смотреть каталог &rarr;</a>
+        </div>
+
+        <div class="card">
+            <div class="card-icon">&#128270;</div> <h3 class="card-title">Бытовая Техника</h3>
+            <p class="card-description">
+                Современные решения для дома: от холодильников и стиральных машин до пылесосов и умных устройств для кухни.
+            </p>
+            <a href="#" class="card-link">Смотреть каталог &rarr;</a>
+        </div>
+
+        <div class="card">
+            <div class="card-icon">&#128250;</div> <h3 class="card-title">Телевизоры и Аудио</h3>
+            <p class="card-description">
+                Погрузитесь в мир качественного изображения и чистого звука. Широкоформатные 4K/8K ТВ и профессиональные аудиосистемы.
+            </p>
+            <a href="#" class="card-link">Смотреть каталог &rarr;</a>
+        </div>
+
+        <div class="card">
+            <div class="card-icon">&#127918;</div> <h3 class="card-title">Игровые Приставки</h3>
+            <p class="card-description">
+                Последние консоли и аксессуары для геймеров. Начни свое приключение в виртуальном мире прямо сейчас.
+            </p>
+            <a href="#" class="card-link">Смотреть каталог &rarr;</a>
+        </div>
+
+        <div class="card">
+            <div class="card-icon">&#128295;</div> <h3 class="card-title">Аксессуары и Запчасти</h3>
+            <p class="card-description">
+                Все необходимое для ремонта, тюнинга и комфортного использования вашей техники. Кабели, чехлы, комплектующие.
+            </p>
+            <a href="#" class="card-link">Смотреть каталог &rarr;</a>
+        </div>
+    </div>
+</div>
+<div id="contacts" class="container-section scroll-mt-24">
+    <h2 class="info-sections">Контакты</h2>
+
+    <div class="contacts-grid">
+        <div class="contact-form-container">
+            <h3 class="contact-title">Форма обратной связи</h3>
+            <p class="contact-subtitle">
+                Задайте свой вопрос, и мы свяжемся с вами в течение 30 минут.
+            </p>
+            <form class="contact-form">
+                <div class="form-group">
+                    <label for="name">Ваше имя:</label>
+                    <input type="text" id="name" name="name" required placeholder="Иван Иванов" />
+                </div>
+                <div class="form-group">
+                    <label for="email">Email или телефон:</label>
+                    <input type="text" id="email" name="email" required placeholder="example@mail.ru или +7 (XXX) XXX-XX-XX" />
+                </div>
+                <div class="form-group">
+                    <label for="message">Сообщение:</label>
+                    <textarea id="message" name="message" rows="4" required placeholder="Опишите ваш вопрос или предложение..."></textarea>
+                </div>
+                <button type="submit" class="contact-submit-button">Отправить сообщение</button>
+            </form>
+        </div>
+
+        <div class="contact-info-container">
+            <h3 class="contact-title">Наши адреса и информация</h3>
+
+            <div class="info-block">
+                <h4>Центральный офис (Пункт выдачи 1)</h4>
+                <p>
+                    ул. Гагарина, д. 10, г. Тирасполь, ПМР
+                </p>
+                <p>Пн-Пт: 9:00 - 18:00, Сб-Вс: Выходной</p>
+            </div>
+
+            <div class="info-block">
+                <h4>Филиал (Пункт выдачи 2)</h4>
+                <p>
+                    ул. Шевченко, д. 52, г. Бендеры, ПМР
+                </p>
+                <p>Ежедневно: 10:00 - 19:00</p>
+            </div>
+
+            <div class="info-block">
+                <h4>Общая информация</h4>
+                <p>Телефон: +373 (533) 99-99-99</p>
+                <p>Email: support@electronicsstore.pmr</p>
+            </div>
+
+            <div class="map-placeholder">
+                [Место для интерактивной карты]
+            </div>
+
+        </div>
+    </div>
+
+</div> ```

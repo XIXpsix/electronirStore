@@ -164,7 +164,7 @@ footer {
     margin-top: auto;
 }
 
-    footer > div {
+    footer div {
         width: 100%;
         max-width: 1200px;
         margin: 0 auto;

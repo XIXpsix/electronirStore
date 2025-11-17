@@ -1,6 +1,4 @@
 ﻿@using ElectronicsStore.Domain.Entity
-@using Microsoft.AspNetCore.Hosting
-@using Microsoft.AspNetCore.Mvc.ViewEngines
 @using Microsoft.AspNetCore.Identity
 @inject SignInManager<ApplicationUser> SignInManager
 
@@ -11,7 +9,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - ElectronicsStore</title>
     <link rel="stylesheet" href="~/css/Shared.css" asp-append-version="true" />
-
     <link rel="stylesheet" href="~/css/login_and_registration.css" asp-append-version="true" />
 </head>
 <body>
@@ -22,7 +19,7 @@
             <div class="button-header">
                 @if (SignInManager.IsSignedIn(User))
                 {
-                    <a class="button" asp-page="/User/Profile" title="Управление">@User.Identity?.Name</a>
+                    <span class="button">@User.Identity?.Name</span>
                     <form class="form-inline-button" asp-page="/Account/Logout" method="post">
                         <button type="submit" class="button">Выход</button>
                     </form>
@@ -33,17 +30,18 @@
                     <button id="click-to-hide-register" class="button">Регистрация</button>
                 }
             </div>
-
         </div>
-
-        <div id="header-bottom" class="menu-container">
-            <nav class="menu">
-                <ul>
-                    <li><a asp-controller="Home" asp-action="Index" asp-fragment="about">О нас</a></li>
-                    <li><a asp-controller="Catalog" asp-action="Index">Каталог товаров</a></li>
-                    <li><a asp-controller="Home" asp-action="Index" asp-fragment="contacts">Контакты</a></li>
-                </ul>
-            </nav>
+        @await Html.PartialAsync("_LoginRegistrationPartial")
+        <div id="header-bottom">
+            <div class="menu-container">
+                <nav class="menu">
+                    <ul>
+                        <li><a href="/#about">О нас</a></li>
+                        <li><a href="/#catalog">Каталог товаров</a></li>
+                        <li><a href="/#contacts">Контакты</a></li>
+                    </ul>
+                </nav>
+            </div>
         </div>
     </header>
 
@@ -56,7 +54,7 @@
     <footer>
         <div>
             <div class="footer-left">
-                <a asp-controller="Home" asp-action="Index" class="logo">ElectronicsStore</a>
+                <a asp-page="/Index" class="logo">ElectronicsStore</a>
                 <p>
                     Ваш надежный поставщик электроники и бытовой техники.
                     Мы предлагаем только сертифицированную продукцию от ведущих мировых брендов.
@@ -68,21 +66,24 @@
                 <h4>Навигация</h4>
                 <nav class="menu">
                     <ul>
-                        <li><a asp-controller="Home" asp-action="Index" asp-fragment="about">О нас</a></li>
-                        <li><a asp-controller="Catalog" asp-action="Index">Каталог товаров</a></li>
-                        <li><a asp-controller="Home" asp-action="Index" asp-fragment="contacts">Контакты</a></li>
+                        <li><a href="/#about">О нас</a></li>
+                        <li><a href="/#catalog">Каталог товаров</a></li>
+                        <li><a href="/#contacts">Контакты</a></li>
                     </ul>
                 </nav>
+                <div class="card">
+                    <div class="card-icon">&#128295;</div>
+                    <h3 class="card-title">Аксессуары и Запчасти</h3>
+                    <p class="card-description">
+                        Все необходимое для ремонта, тюнинга и комфортного использования вашей техники. Кабели, чехлы, комплектующие.
+                    </p>
+                    <a href="#" class="card-link">Смотреть каталог &rarr;</a>
+                </div>
             </div>
         </div>
     </footer>
 
-    <script src="~/js/shared_script.js" asp-append-version="true"></script>
-
-    @await Html.PartialAsync("_LoginRegistrationPartial")
 
     <script src="~/js/login_and_registration_script.js" asp-append-version="true"></script>
-
-    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
