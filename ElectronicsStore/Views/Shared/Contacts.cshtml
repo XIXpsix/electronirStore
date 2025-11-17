@@ -1,0 +1,71 @@
+﻿@{
+    ViewData["Title"] = "Контакты";
+    Layout = "_Layout";
+}
+
+<div id="contacts" class="container-section scroll-mt-24">
+    <h2 class="info-sections hidden-on-scroll fade-in">Контакты</h2>
+
+    <div class="contacts-grid">
+
+        <div class="contact-form-container hidden-on-scroll slide-in-left">
+            <h3 class="contact-title">Форма обратной связи</h3>
+            <p class="contact-subtitle">
+                Задайте свой вопрос,
+                и мы свяжемся с вами в течение 30 минут.
+            </p>
+            <form class="contact-form">
+                <div class="form-group">
+                    <label for="name">Ваше имя:</label>
+                    <input type="text" id="name" name="name" required placeholder="Иван Иванов" />
+                </div>
+                <div class="form-group">
+                    <label for="email">Email или телефон:</label>
+                    <input type="text" id="email" name="email" required placeholder="example@mail.ru или +7 (XXX) XXX-XX-XX" />
+                </div>
+                <div class="form-group">
+                    <label for="message">Сообщение:</label>
+                    <textarea id="message" name="message" rows="4" required placeholder="Опишите ваш вопрос или предложение..."></textarea>
+                </div>
+                <button type="submit" class="contact-submit-button">Отправить сообщение</button>
+            </form>
+        </div>
+
+        <div class="contact-info-container hidden-on-scroll slide-in-right">
+            <h3 class="contact-title">Наши адреса и информация</h3>
+
+            <div class="info-block">
+                <h4>Центральный офис (Пункт выдачи 1)</h4>
+                <p>
+                    ул. Гагарина, д. 10, г.
+                    Тирасполь, ПМР
+                </p>
+                <p>Пн-Пт: 9:00 - 18:00, Сб-Вс: Выходной</p>
+            </div>
+
+            <div class="info-block">
+                <h4>Филиал (Пункт выдачи 2)</h4>
+                <p>
+                    ул.
+                    Шевченко, д. 52, г. Бендеры, ПМР
+                </p>
+                <p>Ежедневно: 10:00 - 19:00</p>
+            </div>
+
+            <div class="info-block">
+                <h4>Общая информация</h4>
+                <p>
+                    Телефон: +373
+                    (533) 99-99-99
+                </p>
+                <p>Email: support@electronicsstore.pmr</p>
+            </div>
+
+            <div class="map-placeholder">
+                [Место для интерактивной карты]
+            </div>
+
+        </div>
+    </div>
+
+</div>

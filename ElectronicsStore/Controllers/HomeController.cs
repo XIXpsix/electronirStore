@@ -1,19 +1,35 @@
-using ElectronicsStore.Models;
+п»їusing ElectronicsStore.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 
 namespace ElectronicsStore.Controllers
 {
-    // РЕШЕНИЕ: Вот так выглядит правильный основной конструктор
     public class HomeController(ILogger<HomeController> logger) : Controller
     {
-        // Поле _logger теперь инициализируется из параметра logger
         private readonly ILogger<HomeController> _logger = logger;
 
+        // вњ… Р­РўРћ РЎРўР РђРќРР¦Рђ "Р“Р›РђР’РќРђРЇ"
         public IActionResult Index()
         {
-            // Убедись, что у тебя нет второго public IActionResult Index()
+            return View();
+        }
+
+        // вњ… РќРћР’Р«Р™ РњР•РўРћР” Р”Р›РЇ РЎРўР РђРќРР¦Р« "Рћ РќРђРЎ"
+        public IActionResult About()
+        {
+            return View();
+        }
+
+        // вњ… РќРћР’Р«Р™ РњР•РўРћР” Р”Р›РЇ РЎРўР РђРќРР¦Р« "РљРђРўРђР›РћР“"
+        public IActionResult Catalog()
+        {
+            return View();
+        }
+
+        // вњ… РќРћР’Р«Р™ РњР•РўРћР” Р”Р›РЇ РЎРўР РђРќРР¦Р« "РљРћРќРўРђРљРўР«"
+        public IActionResult Contacts()
+        {
             return View();
         }
 

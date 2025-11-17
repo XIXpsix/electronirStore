@@ -14,7 +14,7 @@
 <body>
     <header>
         <div id="header-top">
-            <a asp-page="/Index" class="logo">ElectronicsStore</a>
+            <a asp-controller="Home" asp-action="Index" class="logo">ElectronicsStore</a>
 
             <div class="button-header">
                 @if (SignInManager.IsSignedIn(User))
@@ -31,14 +31,15 @@
                 }
             </div>
         </div>
-        @await Html.PartialAsync("_LoginRegistrationPartial")
+
         <div id="header-bottom">
             <div class="menu-container">
                 <nav class="menu">
                     <ul>
-                        <li><a href="/#about">О нас</a></li>
-                        <li><a href="/#catalog">Каталог товаров</a></li>
-                        <li><a href="/#contacts">Контакты</a></li>
+                        <li><a asp-controller="Home" asp-action="Index">Главная</a></li>
+                        <li><a asp-controller="Home" asp-action="About">О нас</a></li>
+                        <li><a asp-controller="Home" asp-action="Catalog">Каталог товаров</a></li>
+                        <li><a asp-controller="Home" asp-action="Contacts">Контакты</a></li>
                     </ul>
                 </nav>
             </div>
@@ -54,7 +55,7 @@
     <footer>
         <div>
             <div class="footer-left">
-                <a asp-page="/Index" class="logo">ElectronicsStore</a>
+                <a asp-controller="Home" asp-action="Index" class="logo">ElectronicsStore</a>
                 <p>
                     Ваш надежный поставщик электроники и бытовой техники.
                     Мы предлагаем только сертифицированную продукцию от ведущих мировых брендов.
@@ -66,9 +67,10 @@
                 <h4>Навигация</h4>
                 <nav class="menu">
                     <ul>
-                        <li><a href="/#about">О нас</a></li>
-                        <li><a href="/#catalog">Каталог товаров</a></li>
-                        <li><a href="/#contacts">Контакты</a></li>
+                        <li><a asp-controller="Home" asp-action="Index">Главная</a></li>
+                        <li><a asp-controller="Home" asp-action="About">О нас</a></li>
+                        <li><a asp-controller="Home" asp-action="Catalog">Каталог товаров</a></li>
+                        <li><a asp-controller="Home" asp-action="Contacts">Контакты</a></li>
                     </ul>
                 </nav>
                 <div class="card">
@@ -83,7 +85,9 @@
         </div>
     </footer>
 
-
+    @await Html.PartialAsync("_LoginRegistrationPartial")
     <script src="~/js/login_and_registration_script.js" asp-append-version="true"></script>
+
+    <script src="~/js/animation.js" asp-append-version="true"></script>
 </body>
 </html>
