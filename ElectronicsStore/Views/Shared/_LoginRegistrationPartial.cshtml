@@ -26,12 +26,6 @@
                         <input id="login-password" name="Password" class="modal-input" type="password" placeholder="Введите ваш пароль" required />
                     </div>
 
-                    <div class="modal-form-group">
-                        <label>
-                            <input type="checkbox" name="RememberMe" /> Запомнить меня
-                        </label>
-                    </div>
-
                     <button type="submit" class="modal-button">Войти</button>
                 </form>
 
@@ -43,21 +37,10 @@
             <div class="modal-form-container" id="register-form-container">
                 <h2 class="modal-title">Регистрация</h2>
                 <form asp-controller="Account" asp-action="Register" method="post">
-                    @Html.AntiForgeryToken()
 
                     <div class="modal-form-group">
-                        <label for="register-email">Email</label>
-                        <input id="register-email" name="Email" class="modal-input" type="email" placeholder="example@mail.ru" required />
-                    </div>
-
-                    <div class="modal-form-group">
-                        <label for="register-firstname">Имя</label>
-                        <input id="register-firstname" name="FirstName" class="modal-input" type="text" placeholder="Имя" />
-                    </div>
-
-                    <div class="modal-form-group">
-                        <label for="register-lastname">Фамилия</label>
-                        <input id="register-lastname" name="LastName" class="modal-input" type="text" placeholder="Фамилия" />
+                        <label for="register-name">Имя пользователя (Логин)</label>
+                        <input id="register-name" name="Name" class="modal-input" type="text" placeholder="Придумайте логин" required />
                     </div>
 
                     <div class="modal-form-group">
@@ -81,112 +64,3 @@
         </div>
     </div>
 </div>
-
-@section Scripts {
-    <script>
-        // Ждем, пока вся HTML-страница (DOM) загрузится
-        document.addEventListener("DOMContentLoaded", function () {
-
-            // --- Находим все нужные элементы на странице ---
-
-            // 1. Кнопки в шапке (header)
-            const loginButton = document.getElementById("click-to-hide-login");
-            const registerButton = document.getElementById("click-to-hide-register");
-
-            // 2. Элементы модального окна
-            const modalOverlay = document.getElementById("modal-overlay");
-            const modalCloseButton = document.getElementById("modal-close");
-
-            // Находим ГЛАВНОЕ ОКНО (белый блок) — сюда надо добавлять класс show-register
-            const modalContentBox = document.getElementById("modal-content-box");
-
-            // 3. Контейнеры форм (внутри модального окна)
-            const loginFormContainer = document.getElementById("login-form-container");
-            const registerFormContainer = document.getElementById("register-form-container");
-
-            // 4. Ссылки для переключения (внутри модального окна)
-            const showRegisterLink = document.getElementById("show-register-link");
-            const showLoginLink = document.getElementById("show-login-link");
-
-            // --- Функции для управления окном ---
-
-            function showModal() {
-                if (modalOverlay) {
-                    modalOverlay.classList.add("active");
-                }
-            }
-
-            function hideModal() {
-                if (modalOverlay) {
-                    modalOverlay.classList.remove("active");
-                }
-            }
-
-            // Всегда меняем класс на modalContentBox, т.к. CSS написан для .modal-content.show-register .modal-slider
-            function showLoginForm() {
-                if (modalContentBox) {
-                    modalContentBox.classList.remove("show-register");
-                }
-                showModal();
-            }
-
-            function showRegisterForm() {
-                if (modalContentBox) {
-                    modalContentBox.classList.add("show-register");
-                }
-                showModal();
-            }
-
-            // --- Назначаем "слушателей" событий ---
-
-            if (loginButton) {
-                loginButton.addEventListener("click", function (e) {
-                    e.preventDefault();
-                    showLoginForm();
-                });
-            }
-
-            if (registerButton) {
-                registerButton.addEventListener("click", function (e) {
-                    e.preventDefault();
-                    showRegisterForm();
-                });
-            }
-
-            if (modalCloseButton) {
-                modalCloseButton.addEventListener("click", function () {
-                    hideModal();
-                });
-            }
-
-            if (showRegisterLink) {
-                showRegisterLink.addEventListener("click", function (e) {
-                    e.preventDefault();
-                    showRegisterForm();
-                });
-            }
-
-            if (showLoginLink) {
-                showLoginLink.addEventListener("click", function (e) {
-                    e.preventDefault();
-                    showLoginForm();
-                });
-            }
-
-            if (modalOverlay) {
-                modalOverlay.addEventListener("click", function (e) {
-                    if (e.target === modalOverlay) {
-                        hideModal();
-                    }
-                });
-            }
-
-            document.addEventListener("keydown", function (e) {
-                if (e.key === "Escape" && modalOverlay && modalOverlay.classList.contains("active")) {
-                    hideModal();
-                }
-            });
-
-        });
-    </script>
-}

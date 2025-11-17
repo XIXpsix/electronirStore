@@ -14,16 +14,16 @@ document.addEventListener("DOMContentLoaded", function () {
     // Находим ГЛАВНОЕ ОКНО (белый блок)
     const modalContentBox = document.getElementById("modal-content-box");
 
-    // Находим слайдер внутри модального окна (куда нужно добавлять/убирать класс)
-    const modalSlider = modalContentBox ? modalContentBox.querySelector(".modal-slider") : null;
-
     // 3. Контейнеры форм (внутри модального окна)
     const loginFormContainer = document.getElementById("login-form-container");
     const registerFormContainer = document.getElementById("register-form-container");
 
     // 4. Ссылки для переключения (внутри модального окна)
+
+    // ✅ ✅ ✅ ВОТ ПРАВИЛЬНЫЙ КОД ✅ ✅ ✅
     const showRegisterLink = document.getElementById("show-register-link");
     const showLoginLink = document.getElementById("show-login-link");
+    // ✅ ✅ ✅ ✅ ✅ ✅ ✅ ✅ ✅ ✅ ✅ ✅ ✅
 
 
     // --- Функции для управления окном ---
@@ -44,22 +44,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Функция: Показать форму Входа
     function showLoginForm() {
-        if (modalSlider) {
-            modalSlider.classList.remove("show-register");
-        } else if (modalContentBox) {
+        if (modalContentBox) {
+            // Убираем класс, CSS вернет слайдер в исходное положение
             modalContentBox.classList.remove("show-register");
         }
-        showModal();
+        showModal(); // Показываем окно, если оно было скрыто
     }
 
     // Функция: Показать форму Регистрации
     function showRegisterForm() {
-        if (modalSlider) {
-            modalSlider.classList.add("show-register");
-        } else if (modalContentBox) {
+        if (modalContentBox) {
+            // Добавляем класс, CSS сдвинет слайдер
             modalContentBox.classList.add("show-register");
         }
-        showModal();
+        showModal(); // Показываем окно, если оно было скрыто
     }
 
 
@@ -115,7 +113,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // 7. Закрытие окна по нажатию Esc
     document.addEventListener("keydown", function (e) {
-        if (e.key === "Escape" && modalOverlay && modalOverlay.classList.contains("active")) {
+        if (e.key === "Escape" && modalOverlay.classList.contains("active")) {
             hideModal();
         }
     });
