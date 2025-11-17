@@ -73,7 +73,7 @@
 .modal-slider {
     display: flex;
     transition: transform 0.4s ease-in-out;
-    transform: translateX(0);
+    transform: translateX(-100%);
 }
 
 .modal-form-container {
@@ -166,3 +166,17 @@
         .modal-switcher a:hover {
             text-decoration: underline;
         }
+/* --- Стили для ошибок валидации --- */
+
+.modal-error-message {
+    color: #ff6600; /* Яркий оранжевый цвет ошибки */
+    font-size: 0.9rem;
+    font-weight: 500;
+    display: block; /* Показать как блок */
+    margin-top: 5px; /* Небольшой отступ сверху */
+}
+
+/* (По желанию) подсветить поле с ошибкой */
+.input-validation-error {
+    border-color: #ff6600 !important; /* Оранжевая рамка */
+}
