@@ -1,97 +1,41 @@
-﻿using ElectronicsStore.Domain.Entity; // <-- Добавлено, чтобы найти ApplicationUser
-using ElectronicsStore.Models;      // <-- Добавлено, чтобы найти Login/RegisterViewModel
-using Microsoft.AspNetCore.Identity;
+﻿using ElectronicsStore.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ElectronicsStore.Controllers
 {
-    // Используем основной конструктор, НО СРАЗУ СОХРАНЯЕМ ПОЛЯ
-    public class AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager) : Controller
+    public class AccountController : Controller
     {
-        // РЕШЕНИЕ: Эти поля ОБЯЗАТЕЛЬНЫ, чтобы остальной код их видел
-        private readonly UserManager<ApplicationUser> _userManager = userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager = signInManager;
-
-        // --- РЕГИСТРАЦИЯ ---
-
-        [HttpGet]
-        public IActionResult Register()
-        {
-            return View();
-        }
+        // (Здесь будет логика твоего друга)
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register(RegisterViewModel model)
+        public async Task<IActionResult> Register([FromBody] RegisterViewModel model)
         {
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser
-                {
-                    UserName = model.Email,
-                    Email = model.Email,
-                    FirstName = model.FirstName,
-                    LastName = model.LastName
-                };
+                // (Здесь будет логика сохранения в БД)
 
-                // Теперь _userManager существует
-                var result = await _userManager.CreateAsync(user, model.Password);
-
-                if (result.Succeeded)
-                {
-                    // И _signInManager существует
-                    await _signInManager.SignInAsync(user, isPersistent: false);
-                    return RedirectToAction("Index", "Home");
-                }
-
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError(string.Empty, error.Description);
-                }
+                // Возвращаем обратно ВСЮ МОДЕЛЬ (с email, password и т.д.)
+                return Ok(model);
             }
-            return View(model);
+
+            var errors = ModelState.Values.SelectMany(v => v.Errors.Select(e => e.ErrorMessage));
+            return BadRequest(new { message = string.Join("\n", errors) });
         }
 
-        // --- ЛОГИН (ВХОД) ---
-
-        [HttpGet]
-        public IActionResult Login(string? returnUrl = null)
-        {
-            return View(new LoginViewModel { ReturnUrl = returnUrl });
-        }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model)
+        public async Task<IActionResult> Login([FromBody] LoginViewModel model)
         {
             if (ModelState.IsValid)
             {
-                var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
+                // (Здесь будет логика входа)
 
-                if (result.Succeeded)
-                {
-                    if (!string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
-                    {
-                        return Redirect(model.ReturnUrl);
-                    }
-                    return RedirectToAction("Index", "Home");
-                }
-
-                ModelState.AddModelError(string.Empty, "Неверная попытка входа.");
-                return View(model);
+                // ✅ ИЗМЕНЕНИЕ: Мы возвращаем обратно МОДЕЛЬ ВХОДА
+                return Ok(model);
             }
 
-            return View(model);
-        }
-
-        // --- ВЫХОД ---
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Logout()
-        {
-            await _signInManager.SignOutAsync();
-            return RedirectToAction("Index", "Home");
+            var errors = ModelState.Values.SelectMany(v => v.Errors.Select(e => e.ErrorMessage));
+            return BadRequest(new { message = string.Join("\n", errors) });
         }
     }
 }

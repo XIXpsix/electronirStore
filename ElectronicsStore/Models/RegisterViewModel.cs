@@ -4,29 +4,21 @@ namespace ElectronicsStore.Models
 {
     public class RegisterViewModel
     {
-        // РЕШЕНИЕ: Добавь это свойство
-        [Required(ErrorMessage = "Email обязателен")]
+        [Required]
         [EmailAddress]
-        [Display(Name = "Email")]
-        public string Email { get; set; } = string.Empty;
+        public string Email { get; set; }
 
-        // И эти, которые мы добавили в прошлый раз
-        [Required(ErrorMessage = "Имя обязательно")]
-        [Display(Name = "Имя")]
-        public string FirstName { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Фамилия обязательна")]
-        [Display(Name = "Фамилия")]
-        public string LastName { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Пароль обязателен")]
+        [Required]
         [DataType(DataType.Password)]
-        [Display(Name = "Пароль")]
-        public string Password { get; set; } = string.Empty;
+        public string Password { get; set; }
 
+        // ✅ ИСПРАВЛЕНО: Раскомментировано и переименовано
         [DataType(DataType.Password)]
-        [Display(Name = "Подтвердить пароль")]
+        [Display(Name = "Confirm password")]
         [Compare("Password", ErrorMessage = "Пароли не совпадают.")]
-        public string ConfirmPassword { get; set; } = string.Empty;
+        public string PasswordConfirm { get; set; } // <-- Теперь это поле ЕСТЬ
+
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
     }
 }

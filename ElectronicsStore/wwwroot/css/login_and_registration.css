@@ -181,3 +181,46 @@
 .input-validation-error {
     border-color: #ff6600 !important; /* Оранжевая рамка */
 }
+/* --- Стили для ошибок СЕРВЕРА --- */
+.modal-server-error {
+    /* По умолчанию блок скрыт, пока в нем нет текста */
+    display: none;
+    color: #ff6600; /* Наш фирменный оранжевый */
+    font-size: 0.9rem;
+    font-weight: 500;
+    background-color: rgba(255, 102, 0, 0.1); /* Легкий оранжевый фон */
+    border: 1px solid #ff6600;
+    border-radius: 4px;
+    padding: 10px;
+    margin-bottom: 15px; /* Отступ перед полями ввода */
+    text-align: center;
+    /* Позволяет переносить строки, если ошибок несколько */
+    white-space: pre-wrap;
+}
+
+    /* Класс, который JS будет добавлять, чтобы показать ошибку */
+    .modal-server-error.show {
+        display: block;
+    }
+/* --- Стили для окна УСПЕХА --- */
+#registration-success-container {
+    padding: 30px 40px;
+    color: #e0e0e0;
+}
+
+.success-data {
+    background-color: #333;
+    border: 1px solid #555;
+    border-radius: 4px;
+    padding: 10px 15px;
+    margin-bottom: 12px;
+    font-size: 1rem;
+    word-wrap: break-word; /* Перенос длинных строк */
+}
+
+    .success-data strong {
+        color: #ff6600; /* Оранжевый акцент */
+        display: block;
+        font-size: 0.9rem;
+        margin-bottom: 5px;
+    }

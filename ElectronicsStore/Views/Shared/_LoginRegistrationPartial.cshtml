@@ -1,34 +1,73 @@
-﻿@*
-    Изменение: Обе формы обернуты в <div class="modal-slider">.
-    Добавлены правильные имена полей и antiforgery token.
-*@
+﻿@model ElectronicsStore.Models.RegisterViewModel
 
 <div class="modal-overlay" id="modal-overlay">
-
     <div class="modal-content" id="modal-content-box">
 
         <span class="modal-close" id="modal-close">&times;</span>
 
-        <div class="modal-slider">
+        <div id="registration-success-container" style="display: none;">
+            <h2 class="modal-title">Регистрация успешна!</h2>
+            <p style="text-align: center; color: #ccc; margin-bottom: 20px;">Ваши данные для входа:</p>
+
+            <div class="success-data">
+                <strong>Email (Логин):</strong>
+                <span id="success-reg-email"></span>
+            </div>
+            <div class="success-data">
+                <strong>Имя:</strong>
+                <span id="success-firstname"></span>
+            </div>
+            <div class="success-data">
+                <strong>Фамилия:</strong>
+                <span id="success-lastname"></span>
+            </div>
+            <div class="success-data">
+                <strong>Пароль:</strong>
+                <span id="success-reg-password"></span>
+            </div>
+
+            <p style="margin-top: 20px; text-align: center; color: #aaa; font-size: 0.9rem;">
+                Закройте это окно и войдите в систему.
+            </p>
+        </div>
+
+        <div id="login-success-container" style="display: none;">
+            <h2 class="modal-title">Вход успешен!</h2>
+            <p style="text-align: center; color: #ccc; margin-bottom: 20px;">C# (Бэкенд) получил ваши данные:</p>
+
+            <div class="success-data">
+                <strong>Email (Логин):</strong>
+                <span id="success-login-email"></span>
+            </div>
+            <div class="success-data">
+                <strong>Пароль:</strong>
+                <span id="success-login-password"></span>
+            </div>
+
+            <p style="margin-top: 20px; text-align: center; color: #aaa; font-size: 0.9rem;">
+                (В будущем здесь будет автоматическая перезагрузка)
+            </p>
+        </div>
+
+
+        <div class="modal-slider" id="modal-slider-container">
 
             <div class="modal-form-container" id="login-form-container">
                 <h2 class="modal-title">Вход</h2>
-                <form asp-controller="Account" asp-action="Login" method="post">
-                    @Html.AntiForgeryToken()
-
+                <form id="login-form" asp-controller="Account" asp-action="Login" method="post">
+                    <div id="login-error-container" class="modal-server-error"></div>
                     <div class="modal-form-group">
-                        <label for="login-email">Email</label>
-                        <input id="login-email" name="Email" class="modal-input" type="email" placeholder="Введите ваш email" required />
+                        <label asp-for="Email">Email</label>
+                        <input asp-for="Email" class="modal-input" type="text" placeholder="Введите ваш Email" />
+                        <span asp-validation-for="Email" class="modal-error-message"></span>
                     </div>
-
                     <div class="modal-form-group">
-                        <label for="login-password">Пароль</label>
-                        <input id="login-password" name="Password" class="modal-input" type="password" placeholder="Введите ваш пароль" required />
+                        <label asp-for="Password">Пароль</label>
+                        <input asp-for="Password" class="modal-input" type="password" placeholder="Введите ваш пароль" />
+                        <span asp-validation-for="Password" class="modal-error-message"></span>
                     </div>
-
                     <button type="submit" class="modal-button">Войти</button>
                 </form>
-
                 <p class="modal-switcher">
                     Нет аккаунта? <a href="#" id="show-register-link">Регистрация</a>
                 </p>
@@ -36,26 +75,35 @@
 
             <div class="modal-form-container" id="register-form-container">
                 <h2 class="modal-title">Регистрация</h2>
-                <form asp-controller="Account" asp-action="Register" method="post">
-
+                <form id="register-form" asp-controller="Account" asp-action="Register" method="post">
+                    <div id="register-error-container" class="modal-server-error"></div>
                     <div class="modal-form-group">
-                        <label for="register-name">Имя пользователя (Логин)</label>
-                        <input id="register-name" name="Name" class="modal-input" type="text" placeholder="Придумайте логин" required />
+                        <label asp-for="FirstName">Имя</label>
+                        <input asp-for="FirstName" class="modal-input" type="text" placeholder="Введите ваше имя" />
+                        <span asp-validation-for="FirstName" class="modal-error-message"></span>
                     </div>
-
                     <div class="modal-form-group">
-                        <label for="register-password">Пароль</label>
-                        <input id="register-password" name="Password" class="modal-input" type="password" placeholder="Придумайте пароль" required />
+                        <label asp-for="LastName">Фамилия</label>
+                        <input asp-for="LastName" class="modal-input" type="text" placeholder="Введите вашу фамилию" />
+                        <span asp-validation-for="LastName" class="modal-error-message"></span>
                     </div>
-                    
                     <div class="modal-form-group">
-                        <label for="register-password-confirm">Повторите пароль</label>
-                        <input id="register-password-confirm" name="ConfirmPassword" class="modal-input" type="password" placeholder="Повторите пароль" required />
+                        <label asp-for="Email">Email</label>
+                        <input asp-for="Email" class="modal-input" type="text" placeholder="Введите ваш Email" />
+                        <span asp-validation-for="Email" class="modal-error-message"></span>
                     </div>
-
+                    <div class="modal-form-group">
+                        <label asp-for="Password">Пароль</label>
+                        <input asp-for="Password" class="modal-input" type="password" placeholder="Придумайте пароль" />
+                        <span asp-validation-for="Password" class="modal-error-message"></span>
+                    </div>
+                    <div class="modal-form-group">
+                        <label asp-for="PasswordConfirm">Повторите пароль</label>
+                        <input asp-for="PasswordConfirm" class="modal-input" type="password" placeholder="Повторите пароль" />
+                        <span asp-validation-for="PasswordConfirm" class="modal-error-message"></span>
+                    </div>
                     <button type="submit" class="modal-button">Зарегистрироваться</button>
                 </form>
-
                 <p class="modal-switcher">
                     Уже есть аккаунт? <a href="#" id="show-login-link">Войти</a>
                 </p>
