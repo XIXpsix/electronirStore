@@ -12,8 +12,6 @@
     const registerForm = document.getElementById("register-form");
     const loginErrorContainer = document.getElementById("login-error-container");
     const registerErrorContainer = document.getElementById("register-error-container");
-
-    // ✅ НОВЫЕ ЭЛЕМЕНТЫ: ОБА окна успеха и слайдер
     const regSuccessContainer = document.getElementById("registration-success-container");
     const loginSuccessContainer = document.getElementById("login-success-container");
     const sliderContainer = document.getElementById("modal-slider-container");
@@ -23,11 +21,9 @@
 
     function hideModal() {
         if (modalOverlay) modalOverlay.classList.remove("active");
-
-        // ✅ При закрытии окна, возвращаем всё как было
         if (sliderContainer) sliderContainer.style.display = "block";
         if (regSuccessContainer) regSuccessContainer.style.display = "none";
-        if (loginSuccessContainer) loginSuccessContainer.style.display = "none"; // Прячем и окно успеха входа
+        if (loginSuccessContainer) loginSuccessContainer.style.display = "none";
     }
 
     function showLoginForm() {
@@ -53,26 +49,32 @@
 
         const url = form.action;
         const formData = new FormData(form);
+
+        // ✅ НОВЫЙ КОД: Ищем токен, который C# спрятал в форме
+        const token = formData.get("__RequestVerificationToken");
+
         const data = Object.fromEntries(formData.entries());
 
         try {
             const response = await fetch(url, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    // ✅ НОВЫЙ КОД: Добавляем токен в заголовки
+                    "RequestVerificationToken": token
+                },
                 body: JSON.stringify(data)
             });
 
             if (response.ok) {
                 // Успех
-                const result = await response.json(); // result = это наша ViewModel
+                const result = await response.json();
                 console.log("Успех:", result);
 
-                // 1. Прячем слайдер с формами
+                // (Если ты все еще хочешь показывать данные, этот код будет работать)
                 if (sliderContainer) sliderContainer.style.display = 'none';
 
-                // ✅ ИЗМЕНЕНИЕ: Проверяем, какая форма была отправлена
                 if (form.id === 'register-form') {
-                    // --- ЛОГИКА РЕГИСТРАЦИИ ---
                     document.getElementById('success-reg-email').textContent = result.email;
                     document.getElementById('success-firstname').textContent = result.firstName;
                     document.getElementById('success-lastname').textContent = result.lastName;
@@ -80,11 +82,13 @@
                     if (regSuccessContainer) regSuccessContainer.style.display = 'block';
 
                 } else if (form.id === 'login-form') {
-                    // --- ЛОГИКА ВХОДА ---
                     document.getElementById('success-login-email').textContent = result.email;
                     document.getElementById('success-login-password').textContent = result.password;
                     if (loginSuccessContainer) loginSuccessContainer.style.display = 'block';
                 }
+
+                // (Если ты хочешь просто перезагружать страницу - используй эту строку)
+                // window.location.reload(); 
 
             } else {
                 // Ошибка (BadRequest)
@@ -94,8 +98,9 @@
             }
 
         } catch (error) {
-            // Ошибка сети
-            errorContainer.textContent = "Ошибка сети. Попробуйте снова.";
+            // Ошибка сети (здесь мы сейчас находимся)
+            console.error("Сетевая ошибка:", error);
+            errorContainer.textContent = "Ошибка сети (возможно, Antiforgery Token). Попробуйте снова.";
             errorContainer.classList.add("show");
         }
     }

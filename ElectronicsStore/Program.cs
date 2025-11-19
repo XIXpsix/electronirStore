@@ -1,92 +1,58 @@
-﻿// 1. ВСЕ 'USING' ОБЯЗАТЕЛЬНО СНАРУЖИ, В САМОМ ВЕРХУ
-using ElectronicsStore.BLL;
+﻿// ✅ Подключаем ВСЕ необходимые нам "запчасти"
 using ElectronicsStore.DAL;
 using ElectronicsStore.Domain.Entity;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 
-// 2. ОПРЕДЕЛЕНИЕ КЛАССА
-internal class Program
+var builder = WebApplication.CreateBuilder(args);
+
+// --- 1. Подключаем Базу Данных (PostgreSQL) ---
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddDbContext<ElectronicsStoreContext>(options =>
+    options.UseNpgsql(connectionString));
+
+// --- 2. Подключаем "движок" Identity ---
+// Он будет управлять пользователями, паролями и ролями
+// Мы говорим ему: "Используй наш класс ApplicationUser и нашу базу ElectronicsStoreContext"
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+    .AddEntityFrameworkStores<ElectronicsStoreContext>()
+    .AddDefaultTokenProviders();
+
+// --- 3. Настраиваем "Куки" (Cookies) ---
+// Это нужно, чтобы SignInManager.IsSignedIn(User) в _Layout.cshtml заработал
+builder.Services.ConfigureApplicationCookie(options =>
 {
-    // 3. МЕТОД MAIN, ГДЕ ЖИВЕТ ВЕСЬ КОД
-    private static void Main(string[] args)
-    {
-        var builder = WebApplication.CreateBuilder(args);
+    // Если пользователь не вошел и пытается зайти туда, куда нельзя,
+    // его перекинет на главную страницу (где откроется модальное окно)
+    options.LoginPath = "/";
+    options.AccessDeniedPath = "/";
+    options.SlidingExpiration = true;
+});
 
-        // --- 1. Настройка сервисов ---
-        var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+// --- 4. Стандартные сервисы MVC ---
+builder.Services.AddControllersWithViews();
+// (Тут мы в будущем добавим сервисы из BLL, как в отчете Жени)
 
-        builder.Services.AddDbContext<ElectronicsStoreContext>(options =>
-        {
-            options.UseNpgsql(connectionString);
-        });
 
-        // Регистрируем сервисы Identity (UserManager, SignInManager и т.д.)
-        // Это чинит ошибку "No service registered"
-        builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
-        {
-            options.Password.RequireDigit = false;
-            options.Password.RequireLowercase = false;
-            options.Password.RequireNonAlphanumeric = false;
-            options.Password.RequireUppercase = false;
-            options.Password.RequiredLength = 4;
-        })
-            .AddEntityFrameworkStores<ElectronicsStoreContext>()
-            .AddDefaultTokenProviders();
+var app = builder.Build();
 
-        // Регистрируем твой сервис
-        builder.Services.AddScoped<ProductService>();
-
-        builder.Services.AddControllersWithViews();
-        builder.Services.AddRazorPages(); // ✅ Это есть?
-
-        var app = builder.Build();
-
-        // --- 2. Логика миграций ---
-        try
-        {
-            using var scope = app.Services.CreateScope();
-            var services = scope.ServiceProvider;
-            var context = services.GetRequiredService<ElectronicsStoreContext>();
-            context.Database.Migrate();
-        }
-        catch (Exception ex)
-        {
-            var logger = app.Services.GetRequiredService<ILogger<Program>>();
-            logger.LogError(ex, "An error occurred while migrating the database.");
-        }
-
-        // --- 3. Конвейер (Pipeline) ---
-        if (!app.Environment.IsDevelopment())
-        {
-            app.UseExceptionHandler("/Home/Error");
-            app.UseHsts();
-        }
-
-        app.UseHttpsRedirection();
-
-        // ✅ ПРАВИЛЬНЫЕ MIME ТИПЫ - БЕЗ ДУБЛИРОВАНИЯ
-        var provider = new FileExtensionContentTypeProvider();
-        provider.Mappings[".css"] = "text/css; charset=utf-8";
-        provider.Mappings[".js"] = "application/javascript; charset=utf-8";
-
-        app.UseStaticFiles(new StaticFileOptions
-        {
-            ContentTypeProvider = provider
-        });
-
-        app.UseRouting();
-
-        // 4. ПОРЯДОК ВАЖЕН: Аутентификация ДО Авторизации
-        app.UseAuthentication(); // <-- Убедись, что это есть
-        app.UseAuthorization(); // <-- У тебя уже было
-
-        app.MapControllerRoute(
-            name: "default",
-            pattern: "{controller=Home}/{action=Index}/{id?}");
-        app.MapRazorPages();
-
-        app.Run();
-    }
+// --- 5. Конвейер (Pipeline) ---
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
 }
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseRouting();
+
+// ✅ ВАЖНЫЙ ПОРЯДОК: Сначала "Аутентификация", потом "Авторизация"
+app.UseAuthentication(); // Проверяем, кто ты (читаем "куки")
+app.UseAuthorization();  // Проверяем, что тебе можно делать
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.Run();
