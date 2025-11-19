@@ -1,93 +1,94 @@
 ﻿using ElectronicsStore.Domain.Entity;
-using ElectronicsStore.Models;
-using Microsoft.AspNetCore.Identity; // <-- Это "движок"
+using ElectronicsStore.Models; // Убедитесь, что используете правильное пространство имен для моделей
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ElectronicsStore.Controllers
 {
-    // ✅ Мы "просим" C# дать нам доступ к UserManager и SignInManager
-    public class AccountController(
-        UserManager<ApplicationUser> userManager,
-        SignInManager<ApplicationUser> signInManager) : Controller
+    public class AccountController : Controller
     {
-        // Сохраняем их в приватные поля, чтобы использовать в методах
-        private readonly UserManager<ApplicationUser> _userManager = userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager = signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
 
+        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
+        {
+            _userManager = userManager;
+            _signInManager = signInManager;
+        }
+
+        [HttpGet]
+        public IActionResult Register()
+        {
+            return View();
+        }
 
         [HttpPost]
-        public async Task<IActionResult> Register([FromBody] RegisterViewModel model)
+        public async Task<IActionResult> Register(RegisterViewModel model)
         {
-            // Проверяем валидацию (из RegisterViewModel.cs)
             if (ModelState.IsValid)
             {
-                // Создаем нового пользователя на основе данных из формы
+                // Создаем пользователя
                 var user = new ApplicationUser
                 {
-                    UserName = model.Email, // Логин = Email
                     Email = model.Email,
+                    UserName = model.Email,
+                    EmailConfirmed = true, // В реальном проекте здесь нужна отправка подтверждения
                     FirstName = model.FirstName,
                     LastName = model.LastName
                 };
 
-                // ✅ ПЫТАЕМСЯ СОЗДАТЬ ПОЛЬЗОВАТЕЛЯ В БАЗЕ ДАННЫХ
-                // (CreateAsync сам хэширует пароль!)
                 var result = await _userManager.CreateAsync(user, model.Password);
 
                 if (result.Succeeded)
                 {
-                    // Если получилось, СРАЗУ ЖЕ ВХОДИМ В СИСТЕМУ (создаем "куки")
                     await _signInManager.SignInAsync(user, isPersistent: false);
-
-                    // Возвращаем Ok(), чтобы JS (fetch) перезагрузил страницу
-                    return Ok(new { message = "Регистрация успешна!" });
+                    return RedirectToAction("Index", "Home");
                 }
-                else
+
+                foreach (var error in result.Errors)
                 {
-                    // Если не получилось (например, "Email уже занят"),
-                    // отправляем ошибки обратно в JS
-                    var errors = result.Errors.Select(e => e.Description);
-                    return BadRequest(new { message = string.Join("\n", errors) });
+                    ModelState.AddModelError(string.Empty, error.Description);
                 }
             }
-
-            // Если модель (ViewModel) невалидна (например, пароли не совпали)
-            var modelErrors = ModelState.Values.SelectMany(v => v.Errors.Select(e => e.ErrorMessage));
-            return BadRequest(new { message = string.Join("\n", modelErrors) });
+            return View(model);
         }
 
+        [HttpGet]
+        public IActionResult Login(string returnUrl = null)
+        {
+            return View(new LoginViewModel { ReturnUrl = returnUrl });
+        }
 
         [HttpPost]
-        public async Task<IActionResult> Login([FromBody] LoginViewModel model)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Login(LoginViewModel model)
         {
             if (ModelState.IsValid)
             {
-                // ✅ ПЫТАЕМСЯ ВОЙТИ В СИСТЕМУ
-                // (Он сам берет пароль, хэширует его и сравнивает с хэшем в базе)
-                var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, false, false);
+                var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
 
                 if (result.Succeeded)
                 {
-                    // Если пароль верный, возвращаем Ok()
-                    return Ok(new { message = "Вход успешен!" });
+                    // Проверяем, есть ли URL для возврата и является ли он локальным
+                    if (!string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
+                    {
+                        return Redirect(model.ReturnUrl);
+                    }
+                    return RedirectToAction("Index", "Home");
                 }
-                else
-                {
-                    // Если пароль неверный
-                    return BadRequest(new { message = "Неверный Email или пароль." });
-                }
-            }
 
-            var modelErrors = ModelState.Values.SelectMany(v => v.Errors.Select(e => e.ErrorMessage));
-            return BadRequest(new { message = string.Join("\n", modelErrors) });
+                ModelState.AddModelError(string.Empty, "Неверный логин или пароль.");
+            }
+            return View(model);
         }
 
+        // ЭТО ЕДИНСТВЕННЫЙ МЕТОД LOGOUT
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
-            // ✅ ВЫХОДИМ ИЗ СИСТЕМЫ (удаляем "куки")
             await _signInManager.SignOutAsync();
-            return RedirectToAction("Index", "Home"); // Перезагружаем главную
+            return RedirectToAction("Index", "Home");
         }
     }
 }
