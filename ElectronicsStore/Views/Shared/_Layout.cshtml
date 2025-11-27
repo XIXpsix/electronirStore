@@ -85,7 +85,7 @@
         </div>
     </footer>
 
-    @await Html.PartialAsync("_LoginRegistrationPartial")
+    @await Html.PartialAsync("_LoginRegistrationPartial", new ElectronicsStore.Models.RegisterViewModel())
     <script src="~/js/login_and_registration_script.js" asp-append-version="true"></script>
 
     <script src="~/js/animation.js" asp-append-version="true"></script>

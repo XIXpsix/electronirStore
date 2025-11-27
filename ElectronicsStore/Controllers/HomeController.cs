@@ -1,39 +1,29 @@
-﻿using ElectronicsStore.Models;
+﻿using ElectronicsStore.DAL;
+using ElectronicsStore.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 
 namespace ElectronicsStore.Controllers
 {
-    public class HomeController(ILogger<HomeController> logger) : Controller
+    public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger = logger;
+        private readonly ILogger<HomeController> _logger;
+        private readonly ElectronicsStoreContext _context;
 
-        // ✅ ЭТО СТРАНИЦА "ГЛАВНАЯ"
-        public IActionResult Index()
+        public HomeController(ILogger<HomeController> logger, ElectronicsStoreContext context)
         {
-            return View();
+            _logger = logger;
+            _context = context;
         }
 
-        // ✅ НОВЫЙ МЕТОД ДЛЯ СТРАНИЦЫ "О НАС"
-        public IActionResult About()
-        {
-            return View();
-        }
+        public IActionResult Index() => View();
+        public IActionResult About() => View();
+        public IActionResult Contacts() => View();
+        public IActionResult Privacy() => View();
 
-        // ✅ НОВЫЙ МЕТОД ДЛЯ СТРАНИЦЫ "КАТАЛОГ"
+        // ✅ ВОТ ТУТ МЫ ОТКАТИЛИ ИЗМЕНЕНИЯ
         public IActionResult Catalog()
-        {
-            return View();
-        }
-
-        // ✅ НОВЫЙ МЕТОД ДЛЯ СТРАНИЦЫ "КОНТАКТЫ"
-        public IActionResult Contacts()
-        {
-            return View();
-        }
-
-        public IActionResult Privacy()
         {
             return View();
         }

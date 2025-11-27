@@ -1,6 +1,5 @@
 ﻿@{
     ViewData["Title"] = "Каталог товаров";
-    Layout = "_Layout";
 }
 
 <div id="catalog" class="container-section scroll-mt-24">
@@ -13,7 +12,7 @@
                 Широкий выбор последних моделей смартфонов, умных часов, наушников и аксессуаров.
                 Оставайтесь на связи и в тренде.
             </p>
-            <a href="#" class="card-link">Смотреть каталог &rarr;</a>
+            <a asp-controller="Home" asp-action="ProductsByCategory" asp-route-id="1" class="card-link">Смотреть каталог &rarr;</a>
         </div>
 
         <div class="card hidden-on-scroll slide-in-bottom" style="transition-delay: 100ms;">
