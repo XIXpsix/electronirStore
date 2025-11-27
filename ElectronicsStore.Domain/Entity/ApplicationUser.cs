@@ -1,13 +1,15 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System.Collections.Generic;
 
-
 namespace ElectronicsStore.Domain.Entity
 {
-    public class ApplicationUser : global::Microsoft.AspNetCore.Identity.IdentityUser
+    public class ApplicationUser : IdentityUser
     {
-        public required string FirstName { get; set; } 
-        public required string LastName { get; set; } 
-        
+        // Инициализируем пустой строкой, чтобы ошибка исчезла
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+
+        // Связь с отзывами (чтобы не было ошибки в базе данных)
+        public List<Review> Reviews { get; set; } = new List<Review>();
     }
 }

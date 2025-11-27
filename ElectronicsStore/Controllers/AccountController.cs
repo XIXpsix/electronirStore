@@ -1,5 +1,5 @@
 ﻿using ElectronicsStore.Domain.Entity;
-using ElectronicsStore.Models; // Убедитесь, что используете правильное пространство имен для моделей
+using ElectronicsStore.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,22 +17,18 @@ namespace ElectronicsStore.Controllers
         }
 
         [HttpGet]
-        public IActionResult Register()
-        {
-            return View();
-        }
+        public IActionResult Register() => View();
 
         [HttpPost]
-        public async Task<IActionResult> Register(RegisterViewModel model)
+        public async Task<IActionResult> Register([FromBody] RegisterViewModel model)
         {
             if (ModelState.IsValid)
             {
-                // Создаем пользователя
                 var user = new ApplicationUser
                 {
                     Email = model.Email,
                     UserName = model.Email,
-                    EmailConfirmed = true, // В реальном проекте здесь нужна отправка подтверждения
+                    EmailConfirmed = true,
                     FirstName = model.FirstName,
                     LastName = model.LastName
                 };
@@ -42,49 +38,45 @@ namespace ElectronicsStore.Controllers
                 if (result.Succeeded)
                 {
                     await _signInManager.SignInAsync(user, isPersistent: false);
-                    return RedirectToAction("Index", "Home");
+                    return Ok(new { email = model.Email, firstName = model.FirstName, lastName = model.LastName, password = model.Password });
                 }
 
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError(string.Empty, error.Description);
-                }
+                return BadRequest(new { message = string.Join("; ", result.Errors.Select(e => e.Description)) });
             }
-            return View(model);
+            return BadRequest(new { message = "Некорректные данные" });
         }
 
         [HttpGet]
-        public IActionResult Login(string returnUrl = null)
-        {
-            return View(new LoginViewModel { ReturnUrl = returnUrl });
-        }
+        public IActionResult Login(string returnUrl = null) => View(new LoginViewModel { ReturnUrl = returnUrl });
 
+        // --- ИСПРАВЛЕННЫЙ МЕТОД ВХОДА ---
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model)
+        // [ValidateAntiForgeryToken] // Убрали для работы JSON
+        public async Task<IActionResult> Login([FromBody] LoginViewModel model)
         {
             if (ModelState.IsValid)
             {
-                var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
+                // 1. Ищем пользователя по Email
+                var user = await _userManager.FindByEmailAsync(model.Email);
+                if (user == null)
+                {
+                    return BadRequest(new { message = "Пользователь не найден." });
+                }
+
+                // 2. Проверяем пароль
+                var result = await _signInManager.PasswordSignInAsync(user.UserName!, model.Password, model.RememberMe, lockoutOnFailure: false);
 
                 if (result.Succeeded)
                 {
-                    // Проверяем, есть ли URL для возврата и является ли он локальным
-                    if (!string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
-                    {
-                        return Redirect(model.ReturnUrl);
-                    }
-                    return RedirectToAction("Index", "Home");
+                    return Ok(new { email = user.Email, message = "Вход успешен!" });
                 }
-
-                ModelState.AddModelError(string.Empty, "Неверный логин или пароль.");
+                return BadRequest(new { message = "Неверный пароль." });
             }
-            return View(model);
+            return BadRequest(new { message = "Ошибка данных." });
         }
 
-        // ЭТО ЕДИНСТВЕННЫЙ МЕТОД LOGOUT
+        [HttpGet]
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();

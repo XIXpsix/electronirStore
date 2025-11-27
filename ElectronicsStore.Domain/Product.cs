@@ -1,23 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace ElectronicsStore.Domain
 {
     public class Product
     {
-        public int Id { get; set; } // Первичный ключ
-        public string Name { get; set; } = string.Empty; // Название товара
-        public string Description { get; set; } = string.Empty; // Описание
-        public decimal Price { get; set; } // Цена
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public decimal Price { get; set; }
 
-        // Внешний ключ: указывает, к какой категории принадлежит товар
+        // --- ВОТ ЭТОГО НЕ ХВАТАЛО ---
+        public string ImagePath { get; set; } = string.Empty;
+        // ----------------------------
+
         public int CategoryId { get; set; }
+        public Category Category { get; set; } = null!;
 
-        // Навигационные свойства (связи с другими таблицами)
-        public Category Category { get; set; } = null!; // Связанная категория (1 к 1)
-        public ICollection<Review> Reviews { get; set; } = new List<Review>(); // Список отзывов (1 ко многим)
+        public ICollection<Review> Reviews { get; set; } = new List<Review>();
     }
 }

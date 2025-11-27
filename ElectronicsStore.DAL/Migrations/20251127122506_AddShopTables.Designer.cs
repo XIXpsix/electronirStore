@@ -3,6 +3,7 @@ using System;
 using ElectronicsStore.DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ElectronicsStore.DAL.Migrations
 {
     [DbContext(typeof(ElectronicsStoreContext))]
-    partial class ElectronicsStoreContextModelSnapshot : ModelSnapshot
+    [Migration("20251127122506_AddShopTables")]
+    partial class AddShopTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -45,29 +48,6 @@ namespace ElectronicsStore.DAL.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Categories");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Description = "",
-                            Name = "Смартфоны",
-                            Slug = ""
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Description = "",
-                            Name = "Ноутбуки",
-                            Slug = ""
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Description = "",
-                            Name = "Аксессуары",
-                            Slug = ""
-                        });
                 });
 
             modelBuilder.Entity("ElectronicsStore.Domain.Entity.ApplicationUser", b =>
@@ -157,10 +137,6 @@ namespace ElectronicsStore.DAL.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("ImagePath")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -173,35 +149,6 @@ namespace ElectronicsStore.DAL.Migrations
                     b.HasIndex("CategoryId");
 
                     b.ToTable("Products");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CategoryId = 1,
-                            Description = "Флагманский смартфон Apple с титановым корпусом.",
-                            ImagePath = "/img/iphone15.jpg",
-                            Name = "iPhone 15 Pro",
-                            Price = 120000m
-                        },
-                        new
-                        {
-                            Id = 2,
-                            CategoryId = 2,
-                            Description = "Супермощный ноутбук на чипе M3 Max.",
-                            ImagePath = "/img/macbook.jpg",
-                            Name = "MacBook Pro 16",
-                            Price = 350000m
-                        },
-                        new
-                        {
-                            Id = 3,
-                            CategoryId = 3,
-                            Description = "Лучшие наушники с шумоподавлением.",
-                            ImagePath = "/img/airpods.jpg",
-                            Name = "AirPods Pro 2",
-                            Price = 25000m
-                        });
                 });
 
             modelBuilder.Entity("ElectronicsStore.Domain.Review", b =>
