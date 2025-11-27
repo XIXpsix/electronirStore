@@ -2,53 +2,19 @@
 
 <div class="modal-overlay" id="modal-overlay">
     <div class="modal-content" id="modal-content-box">
-
         <span class="modal-close" id="modal-close">&times;</span>
 
-        <div id="registration-success-container" style="display: none;">
-            <h2 class="modal-title">Регистрация успешна!</h2>
-            <p style="text-align: center; color: #ccc; margin-bottom: 20px;">Ваши данные для входа:</p>
-
-            <div class="success-data">
-                <strong>Email (Логин):</strong>
-                <span id="success-reg-email"></span>
-            </div>
-            <div class="success-data">
-                <strong>Имя:</strong>
-                <span id="success-firstname"></span>
-            </div>
-            <div class="success-data">
-                <strong>Фамилия:</strong>
-                <span id="success-lastname"></span>
-            </div>
-            <div class="success-data">
-                <strong>Пароль:</strong>
-                <span id="success-reg-password"></span>
-            </div>
-
-            <p style="margin-top: 20px; text-align: center; color: #aaa; font-size: 0.9rem;">
-                Закройте это окно и войдите в систему.
-            </p>
+        <div id="registration-success-container" style="display: none; text-align: center; padding: 20px;">
+            <div style="font-size: 50px; color: #28a745; margin-bottom: 15px;">&#10004;</div>
+            <h2 class="modal-title" style="color: #333;">Регистрация успешна!</h2>
+            <p style="color: #666; margin-top: 10px;">Аккаунт создан. Теперь вы можете войти.</p>
         </div>
 
-        <div id="login-success-container" style="display: none;">
-            <h2 class="modal-title">Вход успешен!</h2>
-            <p style="text-align: center; color: #ccc; margin-bottom: 20px;">C# (Бэкенд) получил ваши данные:</p>
-
-            <div class="success-data">
-                <strong>Email (Логин):</strong>
-                <span id="success-login-email"></span>
-            </div>
-            <div class="success-data">
-                <strong>Пароль:</strong>
-                <span id="success-login-password"></span>
-            </div>
-
-            <p style="margin-top: 20px; text-align: center; color: #aaa; font-size: 0.9rem;">
-                (В будущем здесь будет автоматическая перезагрузка)
-            </p>
+        <div id="login-success-container" style="display: none; text-align: center; padding: 20px;">
+            <div style="font-size: 50px; color: #28a745; margin-bottom: 15px;">&#10004;</div>
+            <h2 class="modal-title" style="color: #333;">Вход выполнен!</h2>
+            <p style="color: #666; margin-top: 10px;">Добро пожаловать.</p>
         </div>
-
 
         <div class="modal-slider" id="modal-slider-container">
 
@@ -56,57 +22,54 @@
                 <h2 class="modal-title">Вход</h2>
                 <form id="login-form" asp-controller="Account" asp-action="Login" method="post">
                     <div id="login-error-container" class="modal-server-error"></div>
+
                     <div class="modal-form-group">
-                        <label asp-for="Email">Email</label>
-                        <input asp-for="Email" class="modal-input" type="text" placeholder="Введите ваш Email" />
-                        <span asp-validation-for="Email" class="modal-error-message"></span>
+                        <label>Email или Логин</label>
+                        <input name="LoginOrEmail" class="modal-input" type="text" placeholder="Введите Email или Логин" required />
                     </div>
+
                     <div class="modal-form-group">
-                        <label asp-for="Password">Пароль</label>
-                        <input asp-for="Password" class="modal-input" type="password" placeholder="Введите ваш пароль" />
-                        <span asp-validation-for="Password" class="modal-error-message"></span>
+                        <label>Пароль</label>
+                        <input name="Password" class="modal-input" type="password" placeholder="Введите пароль" required />
                     </div>
+
                     <button type="submit" class="modal-button">Войти</button>
                 </form>
-                <p class="modal-switcher">
-                    Нет аккаунта? <a href="#" id="show-register-link">Регистрация</a>
-                </p>
+                <p class="modal-switcher">Нет аккаунта? <a href="#" id="show-register-link">Регистрация</a></p>
             </div>
 
             <div class="modal-form-container" id="register-form-container">
                 <h2 class="modal-title">Регистрация</h2>
                 <form id="register-form" asp-controller="Account" asp-action="Register" method="post">
                     <div id="register-error-container" class="modal-server-error"></div>
-                    <div class="modal-form-group">
-                        <label asp-for="FirstName">Имя</label>
-                        <input asp-for="FirstName" class="modal-input" type="text" placeholder="Введите ваше имя" />
-                        <span asp-validation-for="FirstName" class="modal-error-message"></span>
-                    </div>
-                    <div class="modal-form-group">
-                        <label asp-for="LastName">Фамилия</label>
-                        <input asp-for="LastName" class="modal-input" type="text" placeholder="Введите вашу фамилию" />
-                        <span asp-validation-for="LastName" class="modal-error-message"></span>
-                    </div>
+
                     <div class="modal-form-group">
                         <label asp-for="Email">Email</label>
-                        <input asp-for="Email" class="modal-input" type="text" placeholder="Введите ваш Email" />
+                        <input asp-for="Email" class="modal-input" type="text" placeholder="mail@example.com" />
                         <span asp-validation-for="Email" class="modal-error-message"></span>
                     </div>
+
+                    <div class="modal-form-group">
+                        <label asp-for="Login">Логин</label>
+                        <input asp-for="Login" class="modal-input" type="text" placeholder="Придумайте логин" />
+                        <span asp-validation-for="Login" class="modal-error-message"></span>
+                    </div>
+
                     <div class="modal-form-group">
                         <label asp-for="Password">Пароль</label>
-                        <input asp-for="Password" class="modal-input" type="password" placeholder="Придумайте пароль" />
+                        <input asp-for="Password" class="modal-input" type="password" placeholder="Пароль" />
                         <span asp-validation-for="Password" class="modal-error-message"></span>
                     </div>
+
                     <div class="modal-form-group">
-                        <label asp-for="PasswordConfirm">Повторите пароль</label>
+                        <label asp-for="PasswordConfirm">Повтор пароля</label>
                         <input asp-for="PasswordConfirm" class="modal-input" type="password" placeholder="Повторите пароль" />
                         <span asp-validation-for="PasswordConfirm" class="modal-error-message"></span>
                     </div>
+
                     <button type="submit" class="modal-button">Зарегистрироваться</button>
                 </form>
-                <p class="modal-switcher">
-                    Уже есть аккаунт? <a href="#" id="show-login-link">Войти</a>
-                </p>
+                <p class="modal-switcher">Уже есть аккаунт? <a href="#" id="show-login-link">Войти</a></p>
             </div>
 
         </div>

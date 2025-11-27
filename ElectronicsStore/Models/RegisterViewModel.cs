@@ -4,21 +4,22 @@ namespace ElectronicsStore.Models
 {
     public class RegisterViewModel
     {
-        [Required]
-        [EmailAddress]
+        [Required(ErrorMessage = "Введите Email")]
+        [EmailAddress(ErrorMessage = "Некорректный Email")]
         public string Email { get; set; }
 
-        [Required]
+        // ✅ НОВОЕ ПОЛЕ: Логин (вместо Имени и Фамилии)
+        [Required(ErrorMessage = "Придумайте логин")]
+        [Display(Name = "Логин")]
+        public string Login { get; set; }
+
+        [Required(ErrorMessage = "Придумайте пароль")]
         [DataType(DataType.Password)]
         public string Password { get; set; }
 
-        // ✅ ИСПРАВЛЕНО: Раскомментировано и переименовано
+        [Required(ErrorMessage = "Повторите пароль")]
         [DataType(DataType.Password)]
-        [Display(Name = "Confirm password")]
-        [Compare("Password", ErrorMessage = "Пароли не совпадают.")]
-        public string PasswordConfirm { get; set; } // <-- Теперь это поле ЕСТЬ
-
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
+        [Compare("Password", ErrorMessage = "Пароли не совпадают")]
+        public string PasswordConfirm { get; set; }
     }
 }

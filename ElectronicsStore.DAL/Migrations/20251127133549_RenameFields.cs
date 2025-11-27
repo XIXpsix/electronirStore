@@ -9,7 +9,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ElectronicsStore.DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class Init : Migration
+    public partial class RenameFields : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -185,6 +185,7 @@ namespace ElectronicsStore.DAL.Migrations
                     Name = table.Column<string>(type: "text", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false),
                     Price = table.Column<decimal>(type: "numeric", nullable: false),
+                    ImagePath = table.Column<string>(type: "text", nullable: false),
                     CategoryId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -207,11 +208,17 @@ namespace ElectronicsStore.DAL.Migrations
                     ProductId = table.Column<int>(type: "integer", nullable: false),
                     Author = table.Column<string>(type: "text", nullable: false),
                     Rating = table.Column<int>(type: "integer", nullable: false),
-                    Text = table.Column<string>(type: "text", nullable: false)
+                    Text = table.Column<string>(type: "text", nullable: false),
+                    ApplicationUserId = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Reviews", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Reviews_AspNetUsers_ApplicationUserId",
+                        column: x => x.ApplicationUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Reviews_Products_ProductId",
                         column: x => x.ProductId,
@@ -225,28 +232,19 @@ namespace ElectronicsStore.DAL.Migrations
                 columns: new[] { "Id", "Description", "Name", "Slug" },
                 values: new object[,]
                 {
-                    { 1, "", "Смартфоны", "smartphones" },
-                    { 2, "", "Ноутбуки", "laptops" },
-                    { 3, "", "Аксессуары", "accessories" }
+                    { 1, "", "Смартфоны", "" },
+                    { 2, "", "Ноутбуки", "" },
+                    { 3, "", "Аксессуары", "" }
                 });
 
             migrationBuilder.InsertData(
                 table: "Products",
-                columns: new[] { "Id", "CategoryId", "Description", "Name", "Price" },
+                columns: new[] { "Id", "CategoryId", "Description", "ImagePath", "Name", "Price" },
                 values: new object[,]
                 {
-                    { 1, 1, "Флагманский смартфон с чипом A17 Bionic.", "iPhone 15 Pro", 99999.99m },
-                    { 2, 2, "Мощный ноутбук для профессионалов.", "MacBook Pro M3", 189999.00m },
-                    { 3, 3, "Компактное и быстрое зарядное устройство.", "Зарядное устройство 65W", 2999.00m }
-                });
-
-            migrationBuilder.InsertData(
-                table: "Reviews",
-                columns: new[] { "Id", "Author", "ProductId", "Rating", "Text" },
-                values: new object[,]
-                {
-                    { 1, "Иван Петров", 1, 5, "Отличный телефон, работает невероятно быстро." },
-                    { 2, "Елена Смирнова", 2, 4, "Ноутбук мощный, но немного тяжеловат." }
+                    { 1, 1, "Флагманский смартфон Apple с титановым корпусом.", "/img/iphone15.jpg", "iPhone 15 Pro", 120000m },
+                    { 2, 2, "Супермощный ноутбук на чипе M3 Max.", "/img/macbook.jpg", "MacBook Pro 16", 350000m },
+                    { 3, 3, "Лучшие наушники с шумоподавлением.", "/img/airpods.jpg", "AirPods Pro 2", 25000m }
                 });
 
             migrationBuilder.CreateIndex(
@@ -290,6 +288,11 @@ namespace ElectronicsStore.DAL.Migrations
                 name: "IX_Products_CategoryId",
                 table: "Products",
                 column: "CategoryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Reviews_ApplicationUserId",
+                table: "Reviews",
+                column: "ApplicationUserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Reviews_ProductId",

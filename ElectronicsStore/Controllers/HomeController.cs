@@ -22,12 +22,29 @@ namespace ElectronicsStore.Controllers
         public IActionResult Contacts() => View();
         public IActionResult Privacy() => View();
 
-        // ✅ ВОТ ТУТ МЫ ОТКАТИЛИ ИЗМЕНЕНИЯ
         public IActionResult Catalog()
         {
             return View();
         }
+        // Метод для показа товаров по категории
+        [HttpGet]
+        public async Task<IActionResult> ProductsByCategory(int id)
+        {
+            // Ищем товары, у которых CategoryId совпадает с тем, что мы нажали
+            var products = await _context.Products
+                .Where(p => p.CategoryId == id)
+                .Include(p => p.Category)
+                .ToListAsync();
 
+            if (!products.Any())
+            {
+                // Если товаров нет, можно вернуть пустую View или сообщение
+                return View("Catalog"); // Пока просто вернем в каталог
+            }
+
+            // Создадим новую View (страницу) для списка товаров
+            return View("ProductList", products);
+        }
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {

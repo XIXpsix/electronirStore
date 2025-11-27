@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ElectronicsStore.DAL.Migrations
 {
     [DbContext(typeof(ElectronicsStoreContext))]
-    [Migration("20251127123545_AddSeedData")]
-    partial class AddSeedData
+    [Migration("20251127133549_RenameFields")]
+    partial class RenameFields
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
