@@ -7,14 +7,14 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - ElectronicsStore</title>
+    <title>@ViewData["Title"] - ElectronicHub</title>
     <link rel="stylesheet" href="~/css/Shared.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/login_and_registration.css" asp-append-version="true" />
 </head>
 <body>
     <header>
         <div id="header-top">
-            <a asp-controller="Home" asp-action="Index" class="logo">ElectronicsStore</a>
+            <a asp-controller="Home" asp-action="Index" class="logo">ElectronicHub</a>
 
             <div class="button-header">
                 @if (SignInManager.IsSignedIn(User))
@@ -55,12 +55,12 @@
     <footer>
         <div>
             <div class="footer-left">
-                <a asp-controller="Home" asp-action="Index" class="logo">ElectronicsStore</a>
+                <a asp-controller="Home" asp-action="Index" class="logo">ElectronicHub</a>
                 <p>
                     Ваш надежный поставщик электроники и бытовой техники.
                     Мы предлагаем только сертифицированную продукцию от ведущих мировых брендов.
                 </p>
-                <p class="footer-copy">© @DateTime.Now.Year ElectronicsStore. Все права защищены.</p>
+                <p class="footer-copy">© @DateTime.Now.Year ElectronicHub. Все права защищены.</p>
             </div>
 
             <div class="footer-right">

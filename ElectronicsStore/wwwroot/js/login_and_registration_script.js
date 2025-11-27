@@ -21,7 +21,10 @@
 
     function hideModal() {
         if (modalOverlay) modalOverlay.classList.remove("active");
-        if (sliderContainer) sliderContainer.style.display = "block";
+
+        // ✅ ИСПРАВЛЕНИЕ 1: Ставим 'flex', чтобы формы были в ряд, а не друг под другом
+        if (sliderContainer) sliderContainer.style.display = "flex";
+
         if (regSuccessContainer) regSuccessContainer.style.display = "none";
         if (loginSuccessContainer) loginSuccessContainer.style.display = "none";
     }
@@ -39,7 +42,7 @@
     }
 
 
-    // --- ✅ ОБНОВЛЕННАЯ ФУНКЦИЯ ДЛЯ FETCH-ЗАПРОСА ---
+    // --- Функция для отправки форм ---
     async function handleFormSubmit(event, form) {
         event.preventDefault();
         const errorContainer = form.id === "login-form" ? loginErrorContainer : registerErrorContainer;
@@ -49,10 +52,7 @@
 
         const url = form.action;
         const formData = new FormData(form);
-
-        // ✅ НОВЫЙ КОД: Ищем токен, который C# спрятал в форме
         const token = formData.get("__RequestVerificationToken");
-
         const data = Object.fromEntries(formData.entries());
 
         try {
@@ -60,18 +60,15 @@
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    // ✅ НОВЫЙ КОД: Добавляем токен в заголовки
                     "RequestVerificationToken": token
                 },
                 body: JSON.stringify(data)
             });
 
             if (response.ok) {
-                // Успех
                 const result = await response.json();
                 console.log("Успех:", result);
 
-                // (Если ты все еще хочешь показывать данные, этот код будет работать)
                 if (sliderContainer) sliderContainer.style.display = 'none';
 
                 if (form.id === 'register-form') {
@@ -87,20 +84,15 @@
                     if (loginSuccessContainer) loginSuccessContainer.style.display = 'block';
                 }
 
-                // (Если ты хочешь просто перезагружать страницу - используй эту строку)
-                // window.location.reload(); 
-
             } else {
-                // Ошибка (BadRequest)
                 const errorResult = await response.json();
                 errorContainer.textContent = errorResult.message;
                 errorContainer.classList.add("show");
             }
 
         } catch (error) {
-            // Ошибка сети (здесь мы сейчас находимся)
             console.error("Сетевая ошибка:", error);
-            errorContainer.textContent = "Ошибка сети (возможно, Antiforgery Token). Попробуйте снова.";
+            errorContainer.textContent = "Ошибка сети. Попробуйте снова.";
             errorContainer.classList.add("show");
         }
     }
@@ -111,7 +103,9 @@
     if (modalCloseButton) modalCloseButton.addEventListener("click", hideModal);
     if (showRegisterLink) showRegisterLink.addEventListener("click", (e) => { e.preventDefault(); showRegisterForm(); });
     if (showLoginLink) showLoginLink.addEventListener("click", (e) => { e.preventDefault(); showLoginForm(); });
-    if (modalOverlay) modalOverlay.addEventListener("click", (e) => { if (e.target === modalOverlay) hideModal(); });
+
+    // ✅ ИСПРАВЛЕНИЕ 2: Убрали закрытие по клику на фон (modalOverlay)
+
     document.addEventListener("keydown", (e) => { if (e.key === "Escape" && modalOverlay.classList.contains("active")) hideModal(); });
 
     // Перехватываем отправку форм

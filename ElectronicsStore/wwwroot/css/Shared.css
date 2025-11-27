@@ -55,7 +55,7 @@ header {
 .logo {
     font-size: 1.5rem;
     font-weight: 700;
-    color: #ffffff;
+    color: #ff6600; /* ✅ ИЗМЕНЕНО: было #ffffff */
     text-decoration: none;
 }
 
@@ -376,7 +376,7 @@ footer {
 }
 
     .footer-left .logo {
-        color: #fff;
+        color: #ff6600;
         font-size: 1.8rem;
         display: block;
         margin-bottom: 15px;
