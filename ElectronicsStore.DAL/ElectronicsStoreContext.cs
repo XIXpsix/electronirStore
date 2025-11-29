@@ -20,10 +20,46 @@ namespace ElectronicsStore.DAL
         {
             base.OnModelCreating(modelBuilder);
 
-            // 1. Категории
-            var catSmartphones = new Category { Id = 1, Name = "Смартфоны" };
-            var catLaptops = new Category { Id = 2, Name = "Ноутбуки" };
-            var catAccessories = new Category { Id = 3, Name = "Аксессуары" };
+            // --- Настройка связей ---
+
+            // Связь: Один пользователь -> Много отзывов
+            modelBuilder.Entity<Review>()
+                .HasOne(r => r.User)
+                .WithMany(u => u.Reviews)
+                .HasForeignKey(r => r.UserId)
+                .OnDelete(DeleteBehavior.Cascade); // Если удалить юзера, удалятся отзывы
+
+            // Связь: Один товар -> Много отзывов
+            modelBuilder.Entity<Review>()
+                .HasOne(r => r.Product)
+                .WithMany(p => p.Reviews)
+                .HasForeignKey(r => r.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // --- Начальные данные (Seed Data) ---
+
+            // 1. Категории (Заполняем и Slug, и Description)
+            var catSmartphones = new Category
+            {
+                Id = 1,
+                Name = "Смартфоны",
+                Slug = "smartphones",
+                Description = "Мобильные телефоны и смартфоны"
+            };
+            var catLaptops = new Category
+            {
+                Id = 2,
+                Name = "Ноутбуки",
+                Slug = "laptops",
+                Description = "Лэптопы для работы и игр"
+            };
+            var catAccessories = new Category
+            {
+                Id = 3,
+                Name = "Аксессуары",
+                Slug = "accessories",
+                Description = "Наушники, чехлы и зарядки"
+            };
 
             modelBuilder.Entity<Category>().HasData(catSmartphones, catLaptops, catAccessories);
 
@@ -44,7 +80,7 @@ namespace ElectronicsStore.DAL
                     Name = "MacBook Pro 16",
                     Description = "Супермощный ноутбук на чипе M3 Max.",
                     Price = 350000m,
-                    ImagePath = "/img/macbook.jpg",
+                    ImagePath = "/img/macbook.jpg", // Убедитесь, что такой файл есть или замените
                     CategoryId = 2
                 },
                 new Product

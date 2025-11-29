@@ -59,18 +59,20 @@
             });
 
             if (response.ok) {
-                // ✅ УСПЕХ: Никаких паролей не показываем
+                // ✅ УСПЕХ: Скрываем формы
                 if (sliderContainer) sliderContainer.style.display = 'none';
 
                 if (form.id === 'register-form') {
-                    // Просто сообщение "Успешно"
+                    // Регистрация: просто показываем сообщение
                     if (regSuccessContainer) regSuccessContainer.style.display = 'block';
                 } else if (form.id === 'login-form') {
-                    // Сообщение и перезагрузка через 1 секунду
+                    // Вход: показываем сообщение и ждем 3 секунды
                     if (loginSuccessContainer) loginSuccessContainer.style.display = 'block';
+
+                    // ИЗМЕНЕНИЕ: Задержка увеличена до 3000 мс (3 секунды)
                     setTimeout(() => {
                         window.location.reload();
-                    }, 1000);
+                    }, 3000);
                 }
 
             } else {
