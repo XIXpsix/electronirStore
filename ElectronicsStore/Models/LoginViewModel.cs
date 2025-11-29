@@ -4,19 +4,14 @@ namespace ElectronicsStore.Models
 {
     public class LoginViewModel
     {
-        // ✅ Теперь это универсальное поле
-        [Required(ErrorMessage = "Введите Email или Логин")]
-        [Display(Name = "Email или Логин")]
-        public string LoginOrEmail { get; set; }
+        [Required(ErrorMessage = "Введите почту или логин")]
+        public string LoginOrEmail { get; set; } = string.Empty; // ✅ Исправлено
 
         [Required(ErrorMessage = "Введите пароль")]
         [DataType(DataType.Password)]
-        [Display(Name = "Пароль")]
-        public string Password { get; set; }
+        public string Password { get; set; } = string.Empty; // ✅ Исправлено
 
-        [Display(Name = "Запомнить меня")]
         public bool RememberMe { get; set; }
-
-        public string? ReturnUrl { get; set; }
+        public string? ReturnUrl { get; set; } // ? означает, что здесь МОЖЕТ быть null
     }
 }

@@ -2,8 +2,8 @@
 using ElectronicsStore.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Caching.Memory; // Нужен для хранения кода
-using MailKit.Net.Smtp; // Нужен для отправки почты
+using Microsoft.Extensions.Caching.Memory;
+using MailKit.Net.Smtp;
 using MimeKit;
 
 namespace ElectronicsStore.Controllers
@@ -12,7 +12,7 @@ namespace ElectronicsStore.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly IMemoryCache _cache; // Временная память
+        private readonly IMemoryCache _cache;
 
         public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IMemoryCache cache)
         {
@@ -29,24 +29,20 @@ namespace ElectronicsStore.Controllers
         {
             if (ModelState.IsValid)
             {
-                // 1. Проверка: занят ли Логин?
                 var existingUserByName = await _userManager.FindByNameAsync(model.Login);
                 if (existingUserByName != null)
                 {
                     return BadRequest(new { message = "Такой логин уже занят." });
                 }
 
-                // 2. Проверка: занят ли Email? (Требование методички)
                 var existingUserByEmail = await _userManager.FindByEmailAsync(model.Email);
                 if (existingUserByEmail != null)
                 {
                     return BadRequest(new { message = "Пользователь с такой почтой уже существует." });
                 }
 
-                // 3. Генерация кода (4-6 цифр)
                 var code = new Random().Next(1000, 9999).ToString();
 
-                // 4. Отправка письма (как в методичке, глава 18)
                 try
                 {
                     await SendEmailAsync(model.Email, "Код подтверждения", $"Ваш код: {code}");
@@ -56,32 +52,24 @@ namespace ElectronicsStore.Controllers
                     return BadRequest(new { message = "Ошибка отправки письма: " + ex.Message });
                 }
 
-                // 5. Сохраняем данные во временную память на 5 минут, чтобы проверить код позже
-                // Ключ - это почта, Значение - объект с данными и кодом
                 _cache.Set(model.Email, new { Model = model, Code = code }, TimeSpan.FromMinutes(5));
 
-                // Возвращаем ОК, но не создаем пользователя в БД!
-                // Фронтенд должен теперь показать форму ввода кода.
                 return Ok(new { needConfirm = true, email = model.Email });
             }
             return BadRequest(new { message = "Некорректные данные" });
         }
 
-        // Новый метод для проверки кода
         [HttpPost]
         public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailViewModel data)
         {
-            // Пытаемся найти данные во временной памяти по почте
-            if (_cache.TryGetValue(data.Email, out object cachedData))
+            if (_cache.TryGetValue(data.Email, out object? cachedData) && cachedData != null) 
             {
-                // Используем dynamic, чтобы достать свойства анонимного объекта
                 dynamic userData = cachedData;
                 string correctCode = userData.Code;
                 RegisterViewModel model = userData.Model;
 
                 if (data.Code == correctCode)
                 {
-                    // КОД ВЕРНЫЙ! Теперь создаем пользователя в БД
                     var user = new ApplicationUser
                     {
                         Email = model.Email,
@@ -96,24 +84,22 @@ namespace ElectronicsStore.Controllers
                     if (result.Succeeded)
                     {
                         await _signInManager.SignInAsync(user, isPersistent: false);
-                        _cache.Remove(data.Email); // Чистим память
+                        _cache.Remove(data.Email);
                         return Ok(new { message = "Регистрация успешна!" });
                     }
-                    return BadRequest(new { message = "Ошибка создания пользователя в БД." });
+                    return BadRequest(new { message = "Ошибка создания: " + string.Join(", ", result.Errors.Select(e => e.Description)) });
                 }
                 return BadRequest(new { message = "Неверный код." });
             }
 
-            return BadRequest(new { message = "Время действия кода истекло. Попробуйте снова." });
+            return BadRequest(new { message = "Время действия кода истекло." });
         }
 
-        // Метод отправки почты (MailKit)
         private async Task SendEmailAsync(string email, string subject, string message)
         {
             var emailMessage = new MimeMessage();
 
-            // ВАЖНО: Укажите здесь вашу почту и имя
-            emailMessage.From.Add(new MailboxAddress("Администрация сайта", "ВАША_ПОЧТА@gmail.com"));
+            emailMessage.From.Add(new MailboxAddress("Electronics Store", "xixpsix2@gmail.com"));
             emailMessage.To.Add(new MailboxAddress("", email));
             emailMessage.Subject = subject;
             emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Html)
@@ -123,17 +109,15 @@ namespace ElectronicsStore.Controllers
 
             using (var client = new SmtpClient())
             {
-                // Настройки для Gmail (нужен пароль приложения, см. методичку рис. 168)
                 await client.ConnectAsync("smtp.gmail.com", 465, true);
-                await client.AuthenticateAsync("ВАША_ПОЧТА@gmail.com", "ВАШ_ПАРОЛЬ_ПРИЛОЖЕНИЯ");
+                await client.AuthenticateAsync("xixpsix2@gmail.com", "Bobokayustac20");
                 await client.SendAsync(emailMessage);
                 await client.DisconnectAsync(true);
             }
         }
 
-        // ... (Методы Login и Logout оставьте без изменений или добавьте проверку почты и там)
         [HttpGet]
-        public IActionResult Login(string returnUrl = null) => View(new LoginViewModel { ReturnUrl = returnUrl });
+        public IActionResult Login(string? returnUrl = null) => View(new LoginViewModel { ReturnUrl = returnUrl }); 
 
         [HttpPost]
         public async Task<IActionResult> Login([FromBody] LoginViewModel model)
@@ -151,6 +135,7 @@ namespace ElectronicsStore.Controllers
                     return BadRequest(new { message = "Пользователь не найден." });
                 }
 
+                
                 var result = await _signInManager.PasswordSignInAsync(user.UserName!, model.Password, model.RememberMe, lockoutOnFailure: false);
 
                 if (result.Succeeded)
