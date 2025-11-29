@@ -2,6 +2,7 @@
 using ElectronicsStore.Domain.Entity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using ElectronicsStore.Models; // Для доступа к EmailSettings
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,7 +21,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     options.Password.RequireLowercase = false;
 })
     .AddEntityFrameworkStores<ElectronicsStoreContext>()
-    .AddDefaultTokenProviders(); 
+    .AddDefaultTokenProviders();
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
@@ -30,12 +31,11 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 builder.Services.AddControllersWithViews();
-
 builder.Services.AddMemoryCache();
 
-builder.Services.Configure<ElectronicsStore.Models.EmailSettings>(
+// Подключаем настройки из appsettings.json
+builder.Services.Configure<EmailSettings>(
     builder.Configuration.GetSection("EmailSettings"));
-
 
 var app = builder.Build();
 
@@ -50,8 +50,8 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseAuthentication(); 
-app.UseAuthorization();  
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",

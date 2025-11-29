@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using MailKit.Net.Smtp;
 using MimeKit;
-using Microsoft.Extensions.Options; // Обязательно добавьте этот using
+using Microsoft.Extensions.Options;
 
 namespace ElectronicsStore.Controllers
 {
@@ -14,21 +14,18 @@ namespace ElectronicsStore.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IMemoryCache _cache;
-
-        // Поле для хранения настроек почты
         private readonly EmailSettings _emailSettings;
 
-        // Обновленный конструктор
         public AccountController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             IMemoryCache cache,
-            IOptions<EmailSettings> emailSettings) // Получаем настройки
+            IOptions<EmailSettings> emailSettings)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _cache = cache;
-            _emailSettings = emailSettings.Value; // Сохраняем значения в поле
+            _emailSettings = emailSettings.Value;
         }
 
         [HttpGet]
@@ -37,16 +34,24 @@ namespace ElectronicsStore.Controllers
         [HttpPost]
         public async Task<IActionResult> Register([FromBody] RegisterViewModel model)
         {
-            // ... (весь код метода Register оставляем без изменений) ...
             if (ModelState.IsValid)
             {
-                // ... проверки на существование ...
+                var existingUserByName = await _userManager.FindByNameAsync(model.Login);
+                if (existingUserByName != null)
+                {
+                    return BadRequest(new { message = "Такой логин уже занят." });
+                }
+
+                var existingUserByEmail = await _userManager.FindByEmailAsync(model.Email);
+                if (existingUserByEmail != null)
+                {
+                    return BadRequest(new { message = "Пользователь с такой почтой уже существует." });
+                }
 
                 var code = new Random().Next(1000, 9999).ToString();
 
                 try
                 {
-                    // Вызываем метод отправки (он теперь использует настройки)
                     await SendEmailAsync(model.Email, "Код подтверждения", $"Ваш код: {code}");
                 }
                 catch (Exception ex)
@@ -61,16 +66,47 @@ namespace ElectronicsStore.Controllers
             return BadRequest(new { message = "Некорректные данные" });
         }
 
-        // ... метод ConfirmEmail оставляем без изменений ...
+        [HttpPost]
+        public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailViewModel data)
+        {
+            if (_cache.TryGetValue(data.Email, out object? cachedData) && cachedData != null)
+            {
+                dynamic userData = cachedData;
+                string correctCode = userData.Code;
+                RegisterViewModel model = userData.Model;
 
-        // ВОТ ЗДЕСЬ ГЛАВНЫЕ ИЗМЕНЕНИЯ:
+                if (data.Code == correctCode)
+                {
+                    var user = new ApplicationUser
+                    {
+                        Email = model.Email,
+                        UserName = model.Login,
+                        EmailConfirmed = true,
+                        FirstName = "",
+                        LastName = ""
+                    };
+
+                    var result = await _userManager.CreateAsync(user, model.Password);
+
+                    if (result.Succeeded)
+                    {
+                        await _signInManager.SignInAsync(user, isPersistent: false);
+                        _cache.Remove(data.Email);
+                        return Ok(new { message = "Регистрация успешна!" });
+                    }
+                    return BadRequest(new { message = "Ошибка создания: " + string.Join(", ", result.Errors.Select(e => e.Description)) });
+                }
+                return BadRequest(new { message = "Неверный код." });
+            }
+
+            return BadRequest(new { message = "Время действия кода истекло." });
+        }
+
         private async Task SendEmailAsync(string email, string subject, string message)
         {
             var emailMessage = new MimeMessage();
 
-            // Берем имя и почту отправителя из настроек (_emailSettings)
             emailMessage.From.Add(new MailboxAddress(_emailSettings.SenderName, _emailSettings.SenderEmail));
-
             emailMessage.To.Add(new MailboxAddress("", email));
             emailMessage.Subject = subject;
             emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Html)
@@ -80,17 +116,49 @@ namespace ElectronicsStore.Controllers
 
             using (var client = new SmtpClient())
             {
-                // Берем сервер и порт из настроек
                 await client.ConnectAsync(_emailSettings.SmtpServer, _emailSettings.SmtpPort, true);
-
-                // Берем почту и пароль из настроек (никакого хардкода!)
                 await client.AuthenticateAsync(_emailSettings.SenderEmail, _emailSettings.Password);
-
                 await client.SendAsync(emailMessage);
                 await client.DisconnectAsync(true);
             }
         }
 
-        // ... остальные методы (Login, Logout) оставляем без изменений ...
+        [HttpGet]
+        public IActionResult Login(string? returnUrl = null) => View(new LoginViewModel { ReturnUrl = returnUrl });
+
+        [HttpPost]
+        public async Task<IActionResult> Login([FromBody] LoginViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await _userManager.FindByEmailAsync(model.LoginOrEmail);
+                if (user == null)
+                {
+                    user = await _userManager.FindByNameAsync(model.LoginOrEmail);
+                }
+
+                if (user == null)
+                {
+                    return BadRequest(new { message = "Пользователь не найден." });
+                }
+
+                var result = await _signInManager.PasswordSignInAsync(user.UserName!, model.Password, model.RememberMe, lockoutOnFailure: false);
+
+                if (result.Succeeded)
+                {
+                    return Ok(new { email = user.Email, message = "Вход успешен!" });
+                }
+                return BadRequest(new { message = "Неверный пароль." });
+            }
+            return BadRequest(new { message = "Введите логин и пароль." });
+        }
+
+        [HttpPost]
+        [HttpGet]
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            return RedirectToAction("Index", "Home");
+        }
     }
 }
