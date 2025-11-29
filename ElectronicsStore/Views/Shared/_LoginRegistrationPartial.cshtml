@@ -4,17 +4,41 @@
     <div class="modal-content" id="modal-content-box">
         <span class="modal-close" id="modal-close">&times;</span>
 
-        <div id="registration-success-container" style="display: none; text-align: center; padding: 20px;">
+        <div id="registration-success-container" style="display: none; text-align: center; padding: 30px;">
             <img src="~/img/party.gif" alt="Успешно" style="width: 100px; height: 100px; margin-bottom: 15px; object-fit: contain;" />
-            <h2 class="modal-title" style="color: #333;">Регистрация успешна!</h2>
-            <p style="color: #666; margin-top: 10px;">Аккаунт создан. Теперь вы можете войти.</p>
+            <h2 class="modal-title" style="color: #ffffff;">Регистрация успешна!</h2>
+            <p style="color: #ccc; margin-top: 10px;">Аккаунт создан. Теперь вы можете войти.</p>
         </div>
 
-        <div id="login-success-container" style="display: none; text-align: center; padding: 20px;">
+        <div id="login-success-container" style="display: none; text-align: center; padding: 30px;">
             <img src="~/img/party.gif" alt="Успешно" style="width: 100px; height: 100px; margin-bottom: 15px; object-fit: contain;" />
+            <h2 class="modal-title" style="color: #ffffff;">Вход выполнен!</h2>
+            <p style="color: #ccc; margin-top: 10px;">Добро пожаловать.</p>
+        </div>
 
-            <h2 class="modal-title" style="color: #333;">Вход выполнен!</h2>
-            <p style="color: #666; margin-top: 10px;">Добро пожаловать.</p>
+        <div id="confirm-email-container" style="display: none; padding: 30px 40px;">
+            <h2 class="modal-title">Подтверждение</h2>
+            <p style="color: #ccc; text-align: center; margin-bottom: 20px; font-size: 0.9rem;">
+                Мы отправили код на вашу почту.<br>Введите его ниже.
+            </p>
+
+            <form id="confirm-email-form" asp-controller="Account" asp-action="ConfirmEmail" method="post">
+                <div id="confirm-error-container" class="modal-server-error"></div>
+                <input type="hidden" name="Email" id="confirm-email-hidden-input" />
+
+                <div class="modal-form-group">
+                    <label>Код из письма</label>
+                    <input name="Code" class="modal-input" type="text" placeholder="Например: 1234" required autocomplete="off" />
+                </div>
+
+                <button type="submit" class="modal-button">Подтвердить</button>
+            </form>
+
+            <div class="modal-switcher" style="margin-top: 20px; display: flex; justify-content: space-between; font-size: 0.9rem;">
+                <a href="#" id="back-to-register-link" style="color: #aaa; text-decoration: none;">← Назад</a>
+                <a href="#" id="resend-code-link">Отправить код снова</a>
+            </div>
+            <p id="resend-message" style="display:none; color: #4caf50; text-align: center; margin-top: 10px; font-size: 0.85rem;">Код отправлен!</p>
         </div>
 
         <div class="modal-slider" id="modal-slider-container">
