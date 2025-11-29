@@ -33,6 +33,9 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddMemoryCache();
 
+builder.Services.Configure<ElectronicsStore.Models.EmailSettings>(
+    builder.Configuration.GetSection("EmailSettings"));
+
 
 var app = builder.Build();
 
