@@ -6,6 +6,9 @@ using Microsoft.Extensions.Caching.Memory;
 using MailKit.Net.Smtp;
 using MimeKit;
 using Microsoft.Extensions.Options;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ElectronicsStore.Controllers
 {
@@ -27,6 +30,84 @@ namespace ElectronicsStore.Controllers
             _cache = cache;
             _emailSettings = emailSettings.Value;
         }
+
+        // ===================== НОВЫЕ МЕТОДЫ ДЛЯ GOOGLE (НАЧАЛО) =====================
+
+        // 1. Запуск авторизации через Google (на этот метод ведет кнопка)
+        [HttpGet]
+        public async Task AuthenticationGoogle(string returnUrl = "/")
+        {
+            // Формируем URL, на который Google вернет пользователя после входа
+            var redirectUrl = Url.Action("GoogleResponse", "Account", new { returnUrl });
+
+            var properties = _signInManager.ConfigureExternalAuthenticationProperties("Google", redirectUrl);
+
+            // Перенаправляем пользователя на сайт Google
+            await HttpContext.ChallengeAsync("Google", properties);
+        }
+
+        // 2. Возврат пользователя из Google
+        [HttpGet]
+        public async Task<IActionResult> GoogleResponse(string returnUrl = "/")
+        {
+            var info = await _signInManager.GetExternalLoginInfoAsync();
+            if (info == null)
+            {
+                return RedirectToAction("Login");
+            }
+
+            var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false);
+
+            if (result.Succeeded)
+            {
+                // ИСПРАВЛЕНИЕ: Проверяем, локальная ли ссылка
+                if (Url.IsLocalUrl(returnUrl))
+                {
+                    return LocalRedirect(returnUrl);
+                }
+                return RedirectToAction("Index", "Home");
+            }
+
+            var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+
+            if (email != null)
+            {
+                var user = await _userManager.FindByEmailAsync(email);
+
+                if (user == null)
+                {
+                    user = new ApplicationUser
+                    {
+                        UserName = email,
+                        Email = email,
+                        EmailConfirmed = true,
+                        FirstName = info.Principal.FindFirstValue(ClaimTypes.GivenName) ?? "GoogleUser",
+                        LastName = info.Principal.FindFirstValue(ClaimTypes.Surname) ?? ""
+                    };
+
+                    var createResult = await _userManager.CreateAsync(user);
+                    if (!createResult.Succeeded)
+                    {
+                        return RedirectToAction("Login");
+                    }
+                }
+
+                await _userManager.AddLoginAsync(user, info);
+                await _signInManager.SignInAsync(user, isPersistent: false);
+
+                // ИСПРАВЛЕНИЕ ТУТ ТОЖЕ
+                if (Url.IsLocalUrl(returnUrl))
+                {
+                    return LocalRedirect(returnUrl);
+                }
+                return RedirectToAction("Index", "Home");
+            }
+
+            return RedirectToAction("Login");
+        }
+
+        // ===================== НОВЫЕ МЕТОДЫ ДЛЯ GOOGLE (КОНЕЦ) =====================
+
 
         [HttpGet]
         public IActionResult Register() => View();

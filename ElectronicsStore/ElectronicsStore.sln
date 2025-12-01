@@ -9,8 +9,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DAL", "DAL", "{36D591C7-65C
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Domain", "Domain", "{95AEBFC5-E56F-4687-9C64-662C9119D053}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Service", "Service", "{E08191AF-B638-41A3-A776-D93D07EB8319}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElectronicsStore.DAL", "..\ElectronicsStore.DAL\ElectronicsStore.DAL.csproj", "{5872BA98-8D13-4C61-9C56-A0C4E8A78418}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElectronicsStore.Domain", "..\ElectronicsStore.Domain\ElectronicsStore.Domain.csproj", "{7CC1DB06-EBF9-447B-85DB-01485FC68D3B}"
