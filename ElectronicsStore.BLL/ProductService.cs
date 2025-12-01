@@ -1,42 +1,55 @@
-﻿using ElectronicsStore.DAL;
+﻿using ElectronicsStore.DAL.Interfaces;
 using ElectronicsStore.Domain;
-using ElectronicsStore.Domain.Entity;
 using ElectronicsStore.Domain.Enum;
-using ElectronicsStore.Domain.Response;
+using ElectronicsStore.BLL.Interfaces;
+using ElectronicsStore.BLL;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace ElectronicsStore.BLL
+namespace ElectronicsStore.BLL.Realizations
 {
-    public class ProductService(ElectronicsStoreContext db) : IProductService
+    public class ProductService : IProductService
     {
-        public async Task<IBaseResponse<IEnumerable<Product>>> GetProducts()
+        private readonly IBaseStorage<Product> _productStorage;
+
+        public ProductService(IBaseStorage<Product> productStorage)
         {
-            var baseResponse = new BaseResponse<IEnumerable<Product>>();
+            _productStorage = productStorage;
+        }
+
+        public async Task<IBaseResponse<List<Product>>> GetProductsByCategory(int categoryId)
+        {
             try
             {
-                var products = await db.Products.ToListAsync();
-                if (products.Count == 0)
+                // Фильтруем товары по CategoryId
+                var products = await _productStorage.GetAll()
+                    .Where(x => x.CategoryId == categoryId)
+                    .ToListAsync();
+
+                if (!products.Any())
                 {
-                    // Теперь мы должны явно задать Description
-                    return new BaseResponse<IEnumerable<Product>>
+                    return new BaseResponse<List<Product>>()
                     {
-                        Description = "Найдено 0 элементов", // <-- ОБЯЗАТЕЛЬНОЕ ПОЛЕ
-                        StatusCode = StatusCode.ProductNotFound
+                        Description = "Товары не найдены",
+                        StatusCode = StatusCode.OK,
+                        Data = new List<Product>() // Возвращаем пустой список, чтобы не было ошибки
                     };
                 }
 
-                baseResponse.Data = products;
-                baseResponse.StatusCode = StatusCode.OK;
-                baseResponse.Description = "Успешно"; // <-- ОБЯЗАТЕЛЬНОЕ ПОЛЕ
-
-                return baseResponse;
+                return new BaseResponse<List<Product>>()
+                {
+                    Data = products,
+                    StatusCode = StatusCode.OK
+                };
             }
             catch (Exception ex)
             {
-                // И здесь задаем Description
-                return new BaseResponse<IEnumerable<Product>>()
+                return new BaseResponse<List<Product>>()
                 {
-                    Description = $"[GetProducts]: {ex.Message}",
+                    Description = $"[GetProductsByCategory] : {ex.Message}",
                     StatusCode = StatusCode.InternalServerError
                 };
             }

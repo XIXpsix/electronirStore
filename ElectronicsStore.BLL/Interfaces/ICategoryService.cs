@@ -1,12 +1,13 @@
-﻿using System;
+﻿using ElectronicsStore.Domain;
+using ElectronicsStore.BLL;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace ElectronicsStore.BLL.Interfaces
 {
-    internal interface ICategoryService
+    // Обязательно public!
+    public interface ICategoryService
     {
+        Task<IBaseResponse<List<Category>>> GetAllCategories();
     }
 }

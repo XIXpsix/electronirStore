@@ -2,7 +2,19 @@
 using ElectronicsStore.Domain.Entity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using ElectronicsStore.Models; // Для доступа к EmailSettings
+using ElectronicsStore.Models;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Http;
+
+// Подключаем наши сервисы из BLL
+using ElectronicsStore.BLL.Interfaces;
+using ElectronicsStore.BLL.Realizations;
+
+// Подключаем DAL
+using ElectronicsStore.DAL.Interfaces;
+using ElectronicsStore.DAL.Repositories; // Убедитесь, что BaseStorage здесь
+using ElectronicsStore.Domain;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,12 +23,10 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<ElectronicsStoreContext>(options =>
     options.UseNpgsql(connectionString));
 
-// 2. Настройка Identity (пользователи и роли)
+// 2. Настройка Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
     options.User.RequireUniqueEmail = true;
-
-    // Настройки пароля (как у вас было)
     options.Password.RequireDigit = false;
     options.Password.RequiredLength = 6;
     options.Password.RequireNonAlphanumeric = false;
@@ -26,19 +36,21 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     .AddEntityFrameworkStores<ElectronicsStoreContext>()
     .AddDefaultTokenProviders();
 
-// 3. Настройка аутентификации через Google (ВСТАВЛЕНО СЮДА)
+// 3. Настройка Google
 builder.Services.AddAuthentication()
     .AddGoogle(options =>
     {
         IConfigurationSection googleAuthNSection =
             builder.Configuration.GetSection("Authentication:Google");
 
-        // Берет ID и Секрет из secrets.json или appsettings.json
         options.ClientId = googleAuthNSection["ClientId"];
         options.ClientSecret = googleAuthNSection["ClientSecret"];
+
+        options.CorrelationCookie.SameSite = SameSiteMode.Lax;
+        options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
     });
 
-// 4. Настройка Cookie (пути для входа)
+// 4. Настройка Cookie
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/";
@@ -46,17 +58,24 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.SlidingExpiration = true;
 });
 
-// 5. Подключение MVC и других сервисов
+// 5. Регистрация Сервисов (Dependency Injection)
+
+// Регистрируем репозиторий для Категорий
+builder.Services.AddScoped<IBaseStorage<Category>, BaseStorage<Category>>();
+
+// Регистрируем Сервис категорий
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+
+
+// 6. MVC
 builder.Services.AddControllersWithViews();
 builder.Services.AddMemoryCache();
 
-// Подключаем настройки почты из appsettings.json
 builder.Services.Configure<EmailSettings>(
     builder.Configuration.GetSection("EmailSettings"));
 
 var app = builder.Build();
 
-// Настройка конвейера обработки запросов (Pipeline)
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -68,8 +87,8 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseAuthentication(); // Аутентификация (кто ты?)
-app.UseAuthorization();  // Авторизация (что тебе можно?)
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
