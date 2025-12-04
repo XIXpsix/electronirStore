@@ -12,7 +12,7 @@ namespace ElectronicsStore.Domain.Filters
         public decimal MinPrice { get; set; }
         public decimal MaxPrice { get; set; }
 
-        // Тип сортировки: "price_asc", "price_desc", "name_asc"
-        public string SortType { get; set; }
+        // Инициализируем значением по умолчанию
+        public string SortType { get; set; } = "price_asc";
     }
 }

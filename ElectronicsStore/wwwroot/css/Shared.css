@@ -756,3 +756,61 @@ footer {
     }
     /* Ставим просто темный фон */
 }
+
+/* --- Стили для Поиска (Глава 25) --- */
+
+.search-container {
+    position: relative;
+    width: 100%;
+    max-width: 600px; /* Ограничиваем ширину поиска */
+    margin: 0 auto 20px auto; /* Центрируем и добавляем отступ снизу */
+}
+
+    /* Поле ввода */
+    .search-container input {
+        width: 100%;
+        padding: 12px 40px 12px 20px; /* Отступ справа 40px, чтобы текст не наезжал на крестик */
+        font-size: 16px;
+        border: 2px solid #444; /* Темная рамка */
+        border-radius: 25px; /* Закругленные края */
+        background-color: #222; /* Темный фон */
+        color: #fff; /* Белый текст */
+        outline: none; /* Убираем стандартную обводку при фокусе */
+        transition: all 0.3s ease;
+    }
+
+        /* Эффект при клике на поиск */
+        .search-container input:focus {
+            border-color: #ff9900; /* Оранжевая рамка при фокусе */
+            box-shadow: 0 0 10px rgba(255, 153, 0, 0.3);
+        }
+
+/* Крестик очистки (span) */
+.clear-search {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%); /* Центрируем по вертикали */
+    font-size: 20px;
+    color: #888;
+    cursor: pointer;
+    display: none; /* Скрыт по умолчанию, пока нет текста */
+    transition: color 0.3s;
+}
+
+    .clear-search:hover {
+        color: #ff9900; /* Оранжевый цвет при наведении */
+    }
+
+/* Класс для скрытия элементов (будет использоваться в JS) */
+.hide {
+    display: none !important;
+}
+
+/* Подсветка найденного текста */
+mark {
+    background-color: #ff9900;
+    color: #000;
+    padding: 0 2px;
+    border-radius: 2px;
+}

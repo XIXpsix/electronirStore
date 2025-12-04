@@ -159,4 +159,65 @@
     if (sortSelect) {
         sortSelect.addEventListener('change', fetchProducts);
     }
+    // --- ЖИВОЙ ПОИСК (Глава 25) ---
+
+    const searchInput = document.getElementById('elasticSearch');
+    const clearBtn = document.querySelector('.clear-search');
+
+    // Функция поиска
+    function triggerSearch() {
+        const val = searchInput.value.trim().toLowerCase(); // Получаем текст из поля (маленькими буквами)
+        const products = document.querySelectorAll('.product-card'); // Берем все карточки
+
+        // Управление крестиком очистки
+        if (clearBtn) {
+            clearBtn.style.display = val.length > 0 ? 'block' : 'none';
+        }
+
+        if (products.length > 0) {
+            products.forEach(function (elem) {
+                // Находим заголовок внутри текущей карточки
+                const titleElem = elem.querySelector('.card-title');
+
+                if (titleElem) {
+                    // Берем оригинальный текст (без тегов <mark>) для проверки
+                    const textOriginal = titleElem.innerText;
+
+                    // Если текст не содержит искомую фразу
+                    if (val !== '' && textOriginal.toLowerCase().search(val) === -1) {
+                        elem.classList.add('hide'); // Скрываем карточку
+                        titleElem.innerHTML = textOriginal; // Сбрасываем подсветку
+                    }
+                    else {
+                        elem.classList.remove('hide'); // Показываем карточку
+
+                        // --- ПОДСВЕТКА ТЕКСТА ---
+                        if (val !== '') {
+                            // Создаем регулярное выражение для поиска (gi = глобально, без учета регистра)
+                            const regex = new RegExp(`(${val})`, 'gi');
+                            // Оборачиваем найденное в тег <mark>
+                            titleElem.innerHTML = textOriginal.replace(regex, '<mark>$1</mark>');
+                        } else {
+                            titleElem.innerHTML = textOriginal; // Если поиск пуст, убираем теги
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    // Слушатель ввода текста
+    if (searchInput) {
+        searchInput.addEventListener('input', triggerSearch);
+    }
+
+    // Слушатель кнопки очистки (крестик)
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function () {
+            if (searchInput) {
+                searchInput.value = ''; // Очищаем поле
+                triggerSearch(); // Запускаем поиск (чтобы вернуть все товары)
+            }
+        });
+    }
 });

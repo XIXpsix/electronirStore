@@ -22,10 +22,11 @@ namespace ElectronicsStore.DAL.Repositories
             await _db.SaveChangesAsync();
         }
 
-        public void Delete(ProductImage entity)
+        // ИСПРАВЛЕНО: добавлен async Task и await
+        public async Task Delete(ProductImage entity)
         {
             _db.ProductImages.Remove(entity);
-            _db.SaveChanges();
+            await _db.SaveChangesAsync();
         }
 
         public IQueryable<ProductImage> GetAll()
