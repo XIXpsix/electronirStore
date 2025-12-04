@@ -9,7 +9,7 @@
 <div class="container mt-5">
     <div class="row">
         <div class="col-md-3">
-            <div class="p-3 border rounded bg-light">
+            <div class="p-3 border rounded bg-light text-dark">
                 <h4 class="mb-4">Фильтры</h4>
 
                 <div class="filter-item mb-4">
@@ -45,7 +45,7 @@
                 <h2>Товары</h2>
 
                 <div class="sorting-section">
-                    <select class="form-select" id="sortSelect">
+                    <select class="form-select text-dark" id="sortSelect" style="width: auto;">
                         <option value="default" selected>По умолчанию</option>
                         <option value="price_asc">Сначала дешевле</option>
                         <option value="price_desc">Сначала дороже</option>
@@ -64,16 +64,14 @@
                     @foreach (var product in Model)
                     {
                         <div class="col product-card" data-price="@product.Price" data-name="@product.Name">
-                            <div class="card h-100">
-                                @* <img src="@product.ImagePath" class="card-img-top" alt="@product.Name" style="height: 200px; object-fit: contain;"> *@
-
-                                <div class="card-body">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body text-dark">
                                     <h5 class="card-title">@product.Name</h5>
-                                    <p class="card-text text-truncate">@product.Description</p>
-                                    <h6 class="text-primary price-display">@product.Price ₽</h6>
+                                    <p class="card-text text-truncate text-muted">@product.Description</p>
+                                    <h5 class="text-primary mb-0">@product.Price ₽</h5>
                                 </div>
-                                <div class="card-footer bg-transparent border-top-0">
-                                    <a asp-controller="Product" asp-action="GetProduct" asp-route-id="@product.Id" class="btn btn-primary w-100">Подробнее</a>
+                                <div class="card-footer bg-white border-top-0">
+                                    <a asp-controller="Product" asp-action="GetProduct" asp-route-id="@product.Id" class="btn btn-outline-primary w-100">Подробнее</a>
                                 </div>
                             </div>
                         </div>
@@ -108,6 +106,11 @@
             -moz-appearance: none;
             box-shadow: 0 0 6px rgba(0,0,0,0.05);
             cursor: pointer;
+        }
+        /* Дополнительный фикс для карточек товара, чтобы они были белыми с темным текстом */
+        .card {
+            background-color: #fff;
+            color: #212529;
         }
     </style>
 }
