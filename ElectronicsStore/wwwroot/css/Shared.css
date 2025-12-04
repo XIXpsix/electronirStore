@@ -14,18 +14,14 @@ html {
     box-sizing: inherit;
 }
 /* --- ОСНОВНОЙ МАКЕТ (ТЕМНАЯ ТЕМА + ФОН) --- */
+/* --- ОСНОВНОЙ МАКЕТ --- */
 body {
     width: 100%;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('../img/piy.png'); /* Твой фон */
-
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-    background-repeat: no-repeat;
-    background-color: #1a1a1a;
+    /* ВАЖНО: Убираем фон-картинку и цвет, чтобы видео стало видно */
+    background: transparent !important;
     color: #e0e0e0;
 }
 
@@ -882,49 +878,62 @@ input[type="number"]::-webkit-inner-spin-button {
     }
 
 
+/* --- ВИДЕО ФОН ПО БОКАМ --- */
+
 .video-background-holder {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100vh;
-    z-index: -100; /* На самый задний план */
-    display: flex; /* Ставим видео в ряд */
+    z-index: -100; /* На задний план */
+    /* ВКЛЮЧАЕМ СЕТКУ (GRID) */
+    display: grid;
+    /* 1 колонка (1fr) - занимает всё место слева
+       2 колонка (min(1200px, 82%)) - ровно ширина вашего .container-body
+       3 колонка (1fr) - занимает всё место справа
+    */
+    grid-template-columns: 1fr min(1200px, 82%) 1fr;
     overflow: hidden;
 }
 
-/* Половинка экрана */
-.video-split {
-    width: 50%; /* Ровно половина ширины */
-    height: 100%; /* Полная высота */
+/* Боковые блоки для видео */
+.video-side {
     position: relative;
+    width: 100%;
+    height: 100%;
     overflow: hidden;
 }
 
-    /* Само видео внутри половинки */
-    .video-split video {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%); /* Центрируем видео */
-        /* Растягиваем, чтобы не было пустых полей */
-        min-width: 100%;
-        min-height: 100%;
-        object-fit: cover;
-    }
+/* Пустой центр (скрыт за контентом сайта) */
+.video-center-gap {
+    background: transparent;
+}
 
-/* Общее затемнение (Оверлей) */
+/* Настройки самого видео */
+.video-side video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    /* Растягиваем видео, чтобы заполнить боковину без дырок */
+    min-width: 100%;
+    min-height: 100%;
+    object-fit: cover;
+}
+
+/* Затемнение (Оверлей) */
 .video-background-overlay {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.7); /* Степень затемнения (0.7 = 70%) */
+    background: rgba(0, 0, 0, 0.5); /* Затемнение 50% */
     z-index: 1; /* Поверх видео */
-}
+    pointer-events: none; /* Чтобы клики проходили сквозь него */
+}/* Прозрачный фон body */
 
-/* Прозрачный фон body */
 body {
     background-color: transparent !important;
 }
