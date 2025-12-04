@@ -5,6 +5,8 @@ html {
     box-sizing: border-box;
     font-family: "Montserrat", sans-serif;
     scroll-behavior: smooth;
+    /* ✅ НОВЫЙ КОД: Фон всей страницы - черный (на всякий случай) */
+    background-color: #000000;
 }
 
 *,
@@ -13,13 +15,13 @@ html {
     /*margin: 0;*/
     box-sizing: inherit;
 }
-
+/* --- ОСНОВНОЙ МАКЕТ --- */
 body {
     width: 100%;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    /* ✅ УБИРАЕМ ВСЕ ФОНЫ, чтобы было видно видео */
+    /* ✅ ГЛАВНЫЙ ФИКС: УДАЛИТЬ ВСЕ background-image и background-color */
     background: transparent !important;
     color: #e0e0e0;
 }
@@ -928,7 +930,7 @@ input[type="number"]::-webkit-inner-spin-button {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5); /* Затемнение 50% */
+    background: rgba(0, 0, 0, 0.3); /* Затемнение 50% */
     z-index: 1; /* Поверх видео */
     pointer-events: none; /* Чтобы клики проходили сквозь него */
 }/* Прозрачный фон body */
