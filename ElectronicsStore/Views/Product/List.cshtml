@@ -5,31 +5,108 @@
 }
 
 <div class="container mt-5">
-    <h2 class="mb-4">Товары</h2>
+    <div class="row">
+        <div class="col-md-3">
+            <div class="p-3 border rounded bg-light">
+                <h4 class="mb-4">Фильтры</h4>
 
-    @if (Model == null || !Model.Any())
-    {
-        <div class="alert alert-info">В этой категории пока нет товаров.</div>
-    }
-    else
-    {
-        <div class="row row-cols-1 row-cols-md-3 g-4">
-            @foreach (var product in Model)
-            {
-                <div class="col">
-                    <div class="card h-100">
-                        @* <img src="@product.ImagePath" class="card-img-top" alt="@product.Name" style="height: 200px; object-fit: contain;"> *@
-
-                        <div class="card-body">
-                            <h5 class="card-title">@product.Name</h5>
-                            <p class="card-text">@product.Description</p> <h6 class="text-primary">@product.Price ₽</h6>
+                <div class="filter-item mb-4">
+                    <label class="form-label fw-bold">Цена</label>
+                    <div class="price-input d-flex align-items-center justify-content-between mb-2">
+                        <div class="field">
+                            <span class="text-muted">От</span>
+                            <input type="number" class="input-min form-control form-control-sm" value="0">
                         </div>
-                        <div class="card-footer">
-                            <a href="#" class="btn btn-primary w-100">Подробнее</a>
+                        <div class="separator mx-2">-</div>
+                        <div class="field">
+                            <span class="text-muted">До</span>
+                            <input type="number" class="input-max form-control form-control-sm" value="100000">
                         </div>
                     </div>
+
+                    <div class="slider position-relative mb-3" style="height: 5px; background: #ddd; border-radius: 5px;">
+                        <div class="progress position-absolute" style="height: 100%; left: 0%; right: 0%; background: #0d6efd; border-radius: 5px;"></div>
+                    </div>
+
+                    <div class="range-input position-relative">
+                        <input type="range" class="range-min position-absolute w-100" min="0" max="100000" value="0" step="100" style="pointer-events: none; -webkit-appearance: none; background: none; top: -5px;">
+                        <input type="range" class="range-max position-absolute w-100" min="0" max="100000" value="100000" step="100" style="pointer-events: none; -webkit-appearance: none; background: none; top: -5px;">
+                    </div>
+                </div>
+
+                <button class="btn btn-primary w-100" id="applyFiltersBtn">Применить</button>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Товары</h2>
+                <input type="hidden" id="categoryId" value="@ViewBag.CategoryId" />
+                <div class="sorting-section">
+                    <select class="form-select" id="sortSelect">
+                        <option value="default" selected>По умолчанию</option>
+                        <option value="price_asc">Сначала дешевле</option>
+                        <option value="price_desc">Сначала дороже</option>
+                        <option value="name_asc">По названию (А-Я)</option>
+                    </select>
+                </div>
+            </div>
+
+            @if (Model == null || !Model.Any())
+            {
+                <div class="alert alert-info">В этой категории пока нет товаров.</div>
+            }
+            else
+            {
+                <div class="row row-cols-1 row-cols-md-3 g-4" id="productsContainer">
+                    @foreach (var product in Model)
+                    {
+                        <div class="col product-card" data-price="@product.Price" data-name="@product.Name">
+                            <div class="card h-100">
+                                @* <img src="@product.ImagePath" class="card-img-top" alt="@product.Name" style="height: 200px; object-fit: contain;"> *@
+
+                                <div class="card-body">
+                                    <h5 class="card-title">@product.Name</h5>
+                                    <p class="card-text text-truncate">@product.Description</p>
+                                    <h6 class="text-primary price-display">@product.Price ₽</h6>
+                                </div>
+                                <div class="card-footer bg-transparent border-top-0">
+                                    <a href="#" class="btn btn-primary w-100">Подробнее</a>
+                                </div>
+                            </div>
+                        </div>
+                    }
                 </div>
             }
         </div>
-    }
+    </div>
 </div>
+
+@section Scripts {
+    <script src="~/js/catalog_script.js"></script>
+    <style>
+        /* Небольшие стили для слайдера, чтобы он выглядел корректно */
+        input[type="range"]::-webkit-slider-thumb {
+            height: 17px;
+            width: 17px;
+            border-radius: 50%;
+            background: #0d6efd;
+            pointer-events: auto;
+            -webkit-appearance: none;
+            box-shadow: 0 0 6px rgba(0,0,0,0.05);
+            cursor: pointer;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            height: 17px;
+            width: 17px;
+            border: none;
+            border-radius: 50%;
+            background: #0d6efd;
+            pointer-events: auto;
+            -moz-appearance: none;
+            box-shadow: 0 0 6px rgba(0,0,0,0.05);
+            cursor: pointer;
+        }
+    </style>
+}
