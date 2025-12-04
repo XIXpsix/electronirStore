@@ -7,23 +7,23 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 
-// Подключаем наши сервисы из BLL
+// Подключаем логику (BLL)
 using ElectronicsStore.BLL.Interfaces;
 using ElectronicsStore.BLL.Realizations;
 
-// Подключаем DAL
+// Подключаем базу данных (DAL)
 using ElectronicsStore.DAL.Interfaces;
-using ElectronicsStore.DAL.Repositories; // Убедитесь, что BaseStorage здесь
-using ElectronicsStore.Domain;
+using ElectronicsStore.DAL.Repositories;
+using ElectronicsStore.Domain; // Для классов Category и Product
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Подключение к базе данных
+// 1. Подключение к базе данных PostgreSQL
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ElectronicsStoreContext>(options =>
     options.UseNpgsql(connectionString));
 
-// 2. Настройка Identity
+// 2. Настройка Identity (пользователи, пароли)
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
     options.User.RequireUniqueEmail = true;
@@ -36,7 +36,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     .AddEntityFrameworkStores<ElectronicsStoreContext>()
     .AddDefaultTokenProviders();
 
-// 3. Настройка Google
+// 3. Настройка входа через Google
 builder.Services.AddAuthentication()
     .AddGoogle(options =>
     {
@@ -46,11 +46,12 @@ builder.Services.AddAuthentication()
         options.ClientId = googleAuthNSection["ClientId"];
         options.ClientSecret = googleAuthNSection["ClientSecret"];
 
+        // Исправление ошибки "Correlation failed" для localhost
         options.CorrelationCookie.SameSite = SameSiteMode.Lax;
         options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
     });
 
-// 4. Настройка Cookie
+// 4. Настройка Cookie (пути перенаправления)
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/";
@@ -60,22 +61,26 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 // 5. Регистрация Сервисов (Dependency Injection)
 
-// Регистрируем репозиторий для Категорий
+// --- Категории ---
 builder.Services.AddScoped<IBaseStorage<Category>, BaseStorage<Category>>();
-
-// Регистрируем Сервис категорий
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 
+// --- ТОВАРЫ (Новое) ---
+builder.Services.AddScoped<IBaseStorage<Product>, BaseStorage<Product>>();
+builder.Services.AddScoped<IProductService, ProductService>();
 
-// 6. MVC
+
+// 6. Подключение MVC и кэширования
 builder.Services.AddControllersWithViews();
 builder.Services.AddMemoryCache();
 
+// Настройки почты
 builder.Services.Configure<EmailSettings>(
     builder.Configuration.GetSection("EmailSettings"));
 
 var app = builder.Build();
 
+// Настройка конвейера запросов (Pipeline)
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -87,8 +92,8 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseAuthentication();
-app.UseAuthorization();
+app.UseAuthentication(); // Кто это?
+app.UseAuthorization();  // Что ему можно?
 
 app.MapControllerRoute(
     name: "default",

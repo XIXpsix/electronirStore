@@ -1,6 +1,7 @@
-﻿using ElectronicsStore.BLL.Interfaces;
+﻿using ElectronicsStore.BLL.Interfaces; // Подключаем интерфейс из BLL
 using ElectronicsStore.Domain;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace ElectronicsStore.Controllers
 {
@@ -19,12 +20,12 @@ namespace ElectronicsStore.Controllers
             var response = await _productService.GetProductsByCategory(categoryId);
 
             // Если успех — показываем список товаров
-            if (response.StatusCode == Domain.Enum.StatusCode.OK)
+            if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK)
             {
                 return View(response.Data);
             }
 
-            return RedirectToAction("Error");
+            return RedirectToAction("Error", "Home");
         }
     }
 }

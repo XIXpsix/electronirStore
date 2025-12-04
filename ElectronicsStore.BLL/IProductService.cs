@@ -7,7 +7,10 @@ namespace ElectronicsStore.BLL.Interfaces
 {
     public interface IProductService
     {
-        // Метод для получения товаров конкретной категории
+        // Метод для фильтрации по категории
         Task<IBaseResponse<List<Product>>> GetProductsByCategory(int categoryId);
+
+        // Метод для получения всех товаров (пригодится для админки или поиска)
+        Task<IBaseResponse<IEnumerable<Product>>> GetProducts();
     }
 }

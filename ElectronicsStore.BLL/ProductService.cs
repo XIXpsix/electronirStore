@@ -1,7 +1,7 @@
 ﻿using ElectronicsStore.DAL.Interfaces;
 using ElectronicsStore.Domain;
 using ElectronicsStore.Domain.Enum;
-using ElectronicsStore.BLL.Interfaces;
+using ElectronicsStore.BLL.Interfaces; // Ссылка на интерфейс выше
 using ElectronicsStore.BLL;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -24,7 +24,6 @@ namespace ElectronicsStore.BLL.Realizations
         {
             try
             {
-                // Фильтруем товары по CategoryId
                 var products = await _productStorage.GetAll()
                     .Where(x => x.CategoryId == categoryId)
                     .ToListAsync();
@@ -35,7 +34,7 @@ namespace ElectronicsStore.BLL.Realizations
                     {
                         Description = "Товары не найдены",
                         StatusCode = StatusCode.OK,
-                        Data = new List<Product>() // Возвращаем пустой список, чтобы не было ошибки
+                        Data = new List<Product>()
                     };
                 }
 
@@ -50,6 +49,27 @@ namespace ElectronicsStore.BLL.Realizations
                 return new BaseResponse<List<Product>>()
                 {
                     Description = $"[GetProductsByCategory] : {ex.Message}",
+                    StatusCode = StatusCode.InternalServerError
+                };
+            }
+        }
+
+        public async Task<IBaseResponse<IEnumerable<Product>>> GetProducts()
+        {
+            try
+            {
+                var products = await _productStorage.GetAll().ToListAsync();
+                return new BaseResponse<IEnumerable<Product>>()
+                {
+                    Data = products,
+                    StatusCode = StatusCode.OK
+                };
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponse<IEnumerable<Product>>()
+                {
+                    Description = $"[GetProducts] : {ex.Message}",
                     StatusCode = StatusCode.InternalServerError
                 };
             }
