@@ -1,0 +1,82 @@
+﻿@model ElectronicsStore.Domain.Product
+
+@{
+    ViewData["Title"] = Model.Name;
+    // Логика проверки картинки, как в каталоге
+    var imagePath = string.IsNullOrEmpty(Model.ImagePath)
+        ? "https://dummyimage.com/600x600/dee2e6/6c757d.jpg&text=No+Image"
+        : Model.ImagePath;
+}
+
+<div class="container mt-5 mb-5">
+    <a asp-controller="Product" asp-action="List" asp-route-categoryId="@Model.CategoryId" class="btn btn-outline-light mb-4">
+        &larr; Вернуться к списку
+    </a>
+
+    <div class="card bg-dark text-white border-0 shadow-lg overflow-hidden" style="border-radius: 15px;">
+        <div class="row g-0">
+            <div class="col-md-6 bg-white d-flex align-items-center justify-content-center p-5 position-relative">
+                <img src="@imagePath"
+                     class="img-fluid"
+                     alt="@Model.Name"
+                     style="max-height: 500px; object-fit: contain; transition: transform 0.3s ease;">
+            </div>
+
+            <div class="col-md-6">
+                <div class="card-body p-4 p-md-5 d-flex flex-column h-100">
+
+                    @if (Model.Category != null)
+                    {
+                        <span class="text-uppercase fw-bold mb-2" style="color: #6c757d; font-size: 0.9rem; letter-spacing: 1px;">
+                            @Model.Category.Name
+                        </span>
+                    }
+
+                    <h1 class="card-title fw-bold mb-4" style="color: #ff9900;">@Model.Name</h1>
+
+                    <div class="mb-4">
+                        <span class="display-5 fw-bold text-white">@Model.Price.ToString("N0") ₽</span>
+                    </div>
+
+                    <div class="mb-5">
+                        <h5 class="text-white border-bottom pb-2 mb-3" style="border-color: #495057 !important;">Описание</h5>
+                        <p class="card-text text-light" style="line-height: 1.6; opacity: 0.9;">
+                            @Model.Description
+                        </p>
+                    </div>
+
+                    <div class="mt-auto d-grid gap-3 d-md-flex">
+                        <button class="btn btn-warning btn-lg fw-bold px-5 py-3 flex-grow-1">
+                            В корзину
+                        </button>
+                        @* Если нужна кнопка избранного *@
+                        @* <button class="btn btn-outline-light btn-lg px-4">
+                            &#9825;
+                        </button> *@
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <style>
+        /* Небольшой эффект увеличения картинки при наведении на блок */
+        .card:hover img {
+            transform: scale(1.05);
+        }
+
+        /* Стилизация кнопки */
+        .btn-warning {
+            background-color: #ff9900;
+            border: none;
+            color: #000;
+        }
+
+            .btn-warning:hover {
+                background-color: #e68a00;
+                color: #fff;
+            }
+    </style>
+}

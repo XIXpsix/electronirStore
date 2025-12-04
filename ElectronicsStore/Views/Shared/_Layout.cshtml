@@ -10,11 +10,25 @@
     <title>@ViewData["Title"] - ElectronicsHub</title>
 
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-
     <link rel="stylesheet" href="~/css/Shared.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/login_and_registration.css" asp-append-version="true" />
 </head>
 <body>
+    <div class="video-background-holder">
+        <div class="video-background-overlay"></div>
+
+        <div class="video-split">
+            <video playsinline="playsinline" autoplay="autoplay" muted="muted" loop="loop">
+                <source src="~/video/pc.mp4" type="video/mp4">
+            </video>
+        </div>
+
+        <div class="video-split">
+            <video playsinline="playsinline" autoplay="autoplay" muted="muted" loop="loop">
+                <source src="~/video/pc1.mp4" type="video/mp4">
+            </video>
+        </div>
+    </div>
     <header>
         <div id="header-top">
             <a asp-controller="Home" asp-action="Index" class="logo">ElectronicsHub</a>

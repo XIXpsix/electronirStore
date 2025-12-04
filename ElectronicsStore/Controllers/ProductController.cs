@@ -17,15 +17,16 @@ namespace ElectronicsStore.Controllers
         [HttpGet]
         public async Task<IActionResult> List(int categoryId)
         {
-            ViewBag.CategoryId = categoryId;
+            ViewBag.CategoryId = categoryId; // Это важно для работы JS фильтра
             var response = await _productService.GetProductsByCategory(categoryId);
 
-            // ВРЕМЕННО: Если ошибка, покажем её прямо в браузере, а не перенаправим
             if (response.StatusCode != ElectronicsStore.Domain.Enum.StatusCode.OK)
             {
+                // Обработка ошибки
                 return Content($"Ошибка: {response.Description}");
             }
 
+            // Возвращает Views/Product/List.cshtml, где есть фильтры
             return View(response.Data);
         }
 

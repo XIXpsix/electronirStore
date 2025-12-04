@@ -1,21 +1,25 @@
 ﻿document.addEventListener("DOMContentLoaded", function () {
 
-    // --- ЛОГИКА СЛАЙДЕРА ЦЕНЫ ---
+    // --- НАСТРОЙКИ СЛАЙДЕРА ---
     const rangeInput = document.querySelectorAll(".range-input input"),
         priceInput = document.querySelectorAll(".price-input input"),
         range = document.querySelector(".slider .progress");
 
     let priceGap = 1000;
 
+    // Обновление полоски прогресса
     function updateProgress() {
         let minVal = parseInt(rangeInput[0].value),
             maxVal = parseInt(rangeInput[1].value);
-        let maxRange = parseInt(rangeInput[0].max);
+        let maxRange = parseInt(rangeInput[0].max); // Берем макс из атрибута
+
+        if (maxRange === 0) return; // Защита
 
         range.style.left = ((minVal / maxRange) * 100) + "%";
         range.style.right = (100 - (maxVal / maxRange) * 100) + "%";
     }
 
+    // Ввод вручную в поля (Input numbers)
     priceInput.forEach(input => {
         input.addEventListener("input", e => {
             let minPrice = parseInt(priceInput[0].value),
@@ -34,6 +38,7 @@
         });
     });
 
+    // Движение ползунков (Range sliders)
     rangeInput.forEach(input => {
         input.addEventListener("input", e => {
             let minVal = parseInt(rangeInput[0].value),
@@ -53,23 +58,29 @@
         });
     });
 
+    // Инициализация при загрузке
     updateProgress();
 
-    // --- ЛОГИКА ОТПРАВКИ ДАННЫХ (AJAX) ---
+
+    // --- ЛОГИКА AJAX (Сортировка и Фильтрация) ---
+
+    const productsContainer = document.getElementById('productsContainer');
+    const categoryId = document.getElementById('categoryId')?.value || 0;
 
     async function fetchProducts() {
-        const minPrice = parseInt(priceInput[0].value);
-        const maxPrice = parseInt(priceInput[1].value);
+        // Собираем данные
+        const minPrice = parseInt(priceInput[0].value) || 0;
+        const maxPrice = parseInt(priceInput[1].value) || 300000;
         const sortType = document.getElementById('sortSelect').value;
 
-        // Получаем ID категории из скрытого поля в List.cshtml
-        const categoryId = document.getElementById('categoryId')?.value || 0;
+        // Показываем загрузку (опционально)
+        productsContainer.style.opacity = '0.5';
 
         const filterData = {
             CategoryId: parseInt(categoryId),
             MinPrice: minPrice,
             MaxPrice: maxPrice,
-            SortType: sortType
+            SortType: sortType // "price_asc", "name_asc", etc.
         };
 
         try {
@@ -83,51 +94,67 @@
 
             if (response.ok) {
                 const result = await response.json();
-                renderProducts(result.data);
+                const products = result.data ? result.data : result;
+                renderProducts(products);
             } else {
-                console.error("Ошибка при получении данных");
+                console.error("Ошибка сервера: " + response.status);
             }
         } catch (error) {
             console.error("Ошибка сети:", error);
+        } finally {
+            productsContainer.style.opacity = '1';
         }
     }
 
-    // Функция перерисовки товаров
     function renderProducts(products) {
-        const container = document.getElementById('productsContainer');
-        container.innerHTML = '';
+        productsContainer.innerHTML = '';
 
         if (!products || products.length === 0) {
-            container.innerHTML = '<div class="col-12"><div class="alert alert-info">Товары не найдены</div></div>';
+            productsContainer.innerHTML = '<div class="col-12"><div class="alert alert-dark text-center">Товары не найдены</div></div>';
             return;
         }
 
         products.forEach(product => {
-            // Генерируем HTML для одной карточки
-            const productHtml = `
+            const imagePath = product.imagePath ? product.imagePath : "https://dummyimage.com/300x300/dee2e6/6c757d.jpg&text=No+Image";
+            const formattedPrice = new Intl.NumberFormat('ru-RU').format(product.price);
+
+            const html = `
                 <div class="col product-card">
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <h5 class="card-title">${product.name}</h5>
-                            <p class="card-text text-truncate">${product.description}</p>
-                            <h6 class="text-primary">${product.price} ₽</h6>
+                    <div class="card h-100 shadow border-0 bg-dark overflow-hidden">
+                        <div class="d-flex align-items-center justify-content-center bg-white p-2" style="height: 160px;">
+                            <img src="${imagePath}" class="img-fluid" alt="${product.name}" style="max-height: 100%; max-width: 100%; object-fit: contain;">
                         </div>
-                        <div class="card-footer bg-transparent border-top-0">
-                            <a href="/Product/GetProduct?id=${product.id}" class="btn btn-primary w-100">Подробнее</a>
+
+                        <div class="card-body d-flex flex-column p-3">
+                            <h5 class="card-title font-weight-bold mb-1" style="color: #ff9900; font-size: 1.1rem;">${product.name}</h5>
+                            <p class="card-text text-white small mb-3" style="opacity: 0.8;">${product.description}</p>
+                            
+                            <div class="mt-auto">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="font-weight-bold text-white fs-5">${formattedPrice} ₽</span>
+                                    <button class="btn btn-sm btn-warning fw-bold">В корзину</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent border-top-0 p-2">
+                            <a href="/Product/GetProduct?id=${product.id}" class="btn btn-outline-light w-100 btn-sm">Подробнее</a>
                         </div>
                     </div>
                 </div>
             `;
-            container.insertAdjacentHTML('beforeend', productHtml);
+            productsContainer.insertAdjacentHTML('beforeend', html);
         });
     }
 
-    // Привязываем события
+    // --- ПРИВЯЗКА СОБЫТИЙ ---
+
+    // 1. Кнопка "Применить" (фильтр цены)
     const applyBtn = document.getElementById('applyFiltersBtn');
     if (applyBtn) {
         applyBtn.addEventListener('click', fetchProducts);
     }
 
+    // 2. Выпадающий список сортировки (СРАЗУ ПРИ ИЗМЕНЕНИИ)
     const sortSelect = document.getElementById('sortSelect');
     if (sortSelect) {
         sortSelect.addEventListener('change', fetchProducts);

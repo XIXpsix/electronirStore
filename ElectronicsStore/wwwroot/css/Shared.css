@@ -10,7 +10,7 @@ html {
 *,
 *::before,
 *::after {
-    margin: 0;
+    /*margin: 0;*/
     box-sizing: inherit;
 }
 /* --- ОСНОВНОЙ МАКЕТ (ТЕМНАЯ ТЕМА + ФОН) --- */
@@ -538,4 +538,393 @@ footer {
 /* 4. Выезд справа (для инфо-блока контактов) */
 .slide-in-right {
     transform: translateX(50px); /* Изначально сдвинут на 50px вправо */
+}
+
+/* Стили для контейнера фильтров */
+.filter-item {
+    width: 100%;
+}
+
+.price-input {
+    width: 100%;
+    display: flex;
+    margin: 30px 0 35px;
+}
+
+    .price-input .field {
+        display: flex;
+        width: 100%;
+        height: 45px;
+        align-items: center;
+    }
+
+.field input {
+    width: 100%;
+    height: 100%;
+    outline: none;
+    font-size: 16px;
+    margin-left: 12px;
+    border-radius: 5px;
+    text-align: center;
+    border: 1px solid #999;
+    -moz-appearance: textfield;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+}
+
+/* Слайдер */
+.slider {
+    height: 5px;
+    position: relative;
+    background: #ddd;
+    border-radius: 5px;
+}
+
+    .slider .progress {
+        height: 100%;
+        left: 0%; /* Значения по умолчанию, JS их поправит */
+        right: 0%;
+        position: absolute;
+        border-radius: 5px;
+        background: #17A2B8; /* Цвет полоски */
+    }
+
+/* Ползунки */
+.range-input {
+    position: relative;
+}
+
+    .range-input input {
+        position: absolute;
+        width: 100%;
+        height: 5px;
+        top: -5px;
+        background: none;
+        pointer-events: none; /* Важно: чтобы клики проходили сквозь полоску */
+        -webkit-appearance: none;
+        -moz-appearance: none;
+    }
+
+        .range-input input::-webkit-slider-thumb {
+            height: 17px;
+            width: 17px;
+            border-radius: 50%;
+            background: #17A2B8;
+            pointer-events: auto; /* Возвращаем кликабельность кругляшку */
+            -webkit-appearance: none;
+            box-shadow: 0 0 6px rgba(0,0,0,0.05);
+        }
+
+        /* Стили для "кругляшка" ползунка (Firefox) */
+        .range-input input::-moz-range-thumb {
+            height: 17px;
+            width: 17px;
+            border: none;
+            border-radius: 50%;
+            background: #17A2B8;
+            pointer-events: auto;
+            -moz-appearance: none;
+            box-shadow: 0 0 6px rgba(0,0,0,0.05);
+        }
+/* --- ТЕМНЫЙ ФИЛЬТР (Dark Mode) --- */
+
+/* --- ОСНОВНОЙ КОНТЕЙНЕР ФИЛЬТРА --- */
+.filter-sidebar {
+    background-color: #212529; /* Темный фон */
+    color: #ffffff;
+    border: 1px solid #343a40;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    /* "Липкий" эффект */
+    position: -webkit-sticky;
+    position: sticky;
+    top: 20px;
+    z-index: 100;
+}
+
+    /* Заголовки */
+    .filter-sidebar h4,
+    .filter-sidebar label {
+        color: #ff9900; /* Оранжевый текст */
+        font-weight: 600;
+    }
+
+/* --- ПОЛЯ ВВОДА ЦЕНЫ (Input) --- */
+.price-input {
+    width: 100%;
+    display: flex;
+    margin: 20px 0 30px;
+    align-items: center;
+}
+
+    .price-input .field {
+        display: flex;
+        width: 100%;
+        height: 40px;
+        align-items: center;
+    }
+
+.field input {
+    width: 100%;
+    height: 100%;
+    outline: none;
+    font-size: 15px;
+    margin: 0 5px;
+    border-radius: 8px;
+    text-align: center;
+    border: 1px solid #495057;
+    background-color: #343a40; /* Темный инпут */
+    color: #fff;
+    transition: all 0.3s ease;
+}
+
+    /* Оранжевая рамка при фокусе */
+    .field input:focus {
+        border-color: #ff9900;
+        box-shadow: 0 0 5px rgba(255, 153, 0, 0.5);
+    }
+
+.separator {
+    color: #aaa;
+    font-weight: bold;
+    padding: 0 5px;
+}
+
+/* --- СЛАЙДЕР (Полоска) --- */
+.slider {
+    height: 6px;
+    position: relative;
+    background: #495057;
+    border-radius: 5px;
+}
+
+    /* Прогресс-бар (активная часть полоски) */
+    .slider .progress {
+        height: 100%;
+        position: absolute;
+        border-radius: 5px;
+        background: #ff9900; /* Оранжевая заливка */
+    }
+
+/* --- ПОЛЗУНКИ (Кругляшки) --- */
+.range-input {
+    position: relative;
+}
+
+    .range-input input {
+        position: absolute;
+        width: 100%;
+        height: 6px;
+        top: -6px;
+        background: none;
+        pointer-events: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+    }
+
+        /* Chrome, Safari, Edge */
+        .range-input input::-webkit-slider-thumb {
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            border: 2px solid #fff; /* Белая обводка для контраста */
+            background: #ff9900; /* Оранжевый центр */
+            pointer-events: auto;
+            -webkit-appearance: none;
+            box-shadow: 0 0 6px rgba(0,0,0,0.5);
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+            .range-input input::-webkit-slider-thumb:hover {
+                transform: scale(1.2); /* Увеличение при наведении */
+            }
+
+        /* Firefox */
+        .range-input input::-moz-range-thumb {
+            height: 20px;
+            width: 20px;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            background: #ff9900;
+            pointer-events: auto;
+            -moz-appearance: none;
+            box-shadow: 0 0 6px rgba(0,0,0,0.5);
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+/* --- КНОПКА "ПРИМЕНИТЬ" --- */
+.btn-apply {
+    background-color: #ff9900;
+    color: #000; /* Черный текст для контраста */
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    margin-top: 15px;
+}
+
+    .btn-apply:hover {
+        background-color: #e68a00; /* Чуть темнее при наведении */
+        color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(255, 153, 0, 0.4);
+    }
+
+/* --- СОРТИРОВКА (Select) --- */
+.sort-select {
+    background-color: #212529;
+    color: #fff;
+    border: 1px solid #495057;
+    border-radius: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+}
+
+    .sort-select:focus {
+        border-color: #ff9900; /* Оранжевая рамка */
+        box-shadow: 0 0 0 0.25rem rgba(255, 153, 0, 0.25); /* Оранжевое свечение */
+    }
+
+    .sort-select option {
+        background-color: #212529;
+        color: #fff;
+    }
+
+/* --- КНОПКИ НА КАРТОЧКЕ ТОВАРА --- */
+
+/* Кнопка "В корзину" */
+.btn-warning {
+    background-color: #ff9900;
+    border-color: #ff9900;
+    color: #000;
+    font-weight: bold;
+}
+
+    .btn-warning:hover {
+        background-color: #e68a00;
+        border-color: #e68a00;
+        color: #fff;
+    }
+
+/* Кнопка "Подробнее" */
+.product-card .btn-outline-light {
+    border-color: #495057;
+    color: #adb5bd;
+    transition: all 0.3s ease;
+}
+
+    .product-card .btn-outline-light:hover {
+        background-color: #ff9900; /* Оранжевый фон при наведении */
+        border-color: #ff9900;
+        color: #000; /* Черный текст */
+    }
+/* --- КНОПКА "ВЕРНУТЬСЯ К ВЫБОРУ КАТЕГОРИЙ" --- */
+.btn-back-orange {
+    border: 2px solid #ff9900;
+    color: #ff9900; /* Оранжевый текст */
+    background-color: transparent;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border-radius: 8px; /* Немного скруглим, как и фильтры */
+}
+
+    .btn-back-orange:hover {
+        background-color: #ff9900; /* Оранжевая заливка при наведении */
+        color: #fff; /* Белый текст */
+        box-shadow: 0 4px 12px rgba(255, 153, 0, 0.3); /* Легкое свечение */
+        transform: translateY(-2px); /* Эффект нажатия */
+        text-decoration: none;
+    }
+/* --- СОРТИРОВКА (Select) --- */
+.sort-select {
+    background-color: #212529; /* Темный фон */
+    color: #ff9900; /* Оранжевый текст выбранного элемента */
+    border: 1px solid #495057; /* Рамка (по умолчанию серая, чтобы не рябило) */
+    border-radius: 8px;
+    padding: 8px 30px 8px 12px; /* Увеличенный отступ справа для стрелочки */
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    /* Кастомная оранжевая стрелочка (работает в современных браузерах) */
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ff9900' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 16px 12px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+    .sort-select:hover {
+        border-color: #ff9900; /* Оранжевая рамка при наведении */
+    }
+
+    .sort-select:focus {
+        border-color: #ff9900;
+        outline: none;
+        box-shadow: 0 0 0 0.25rem rgba(255, 153, 0, 0.25);
+    }
+
+    /* Опции выпадающего списка */
+    .sort-select option {
+        background-color: #212529;
+        color: #fff; /* Текст опций внутри списка оставим белым для читаемости */
+        padding: 10px;
+    }
+
+
+.video-background-holder {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    z-index: -100; /* На самый задний план */
+    display: flex; /* Ставим видео в ряд */
+    overflow: hidden;
+}
+
+/* Половинка экрана */
+.video-split {
+    width: 50%; /* Ровно половина ширины */
+    height: 100%; /* Полная высота */
+    position: relative;
+    overflow: hidden;
+}
+
+    /* Само видео внутри половинки */
+    .video-split video {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%); /* Центрируем видео */
+        /* Растягиваем, чтобы не было пустых полей */
+        min-width: 100%;
+        min-height: 100%;
+        object-fit: cover;
+    }
+
+/* Общее затемнение (Оверлей) */
+.video-background-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7); /* Степень затемнения (0.7 = 70%) */
+    z-index: 1; /* Поверх видео */
+}
+
+/* Прозрачный фон body */
+body {
+    background-color: transparent !important;
 }
