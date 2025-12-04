@@ -13,14 +13,13 @@ html {
     /*margin: 0;*/
     box-sizing: inherit;
 }
-/* --- ОСНОВНОЙ МАКЕТ (ТЕМНАЯ ТЕМА + ФОН) --- */
-/* --- ОСНОВНОЙ МАКЕТ --- */
+
 body {
     width: 100%;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    /* ВАЖНО: Убираем фон-картинку и цвет, чтобы видео стало видно */
+    /* ✅ УБИРАЕМ ВСЕ ФОНЫ, чтобы было видно видео */
     background: transparent !important;
     color: #e0e0e0;
 }
