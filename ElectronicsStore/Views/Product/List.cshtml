@@ -4,6 +4,8 @@
     ViewData["Title"] = "Список товаров";
 }
 
+<input type="hidden" id="categoryId" value="@ViewBag.CategoryId" />
+
 <div class="container mt-5">
     <div class="row">
         <div class="col-md-3">
@@ -41,7 +43,7 @@
         <div class="col-md-9">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2>Товары</h2>
-                <input type="hidden" id="categoryId" value="@ViewBag.CategoryId" />
+
                 <div class="sorting-section">
                     <select class="form-select" id="sortSelect">
                         <option value="default" selected>По умолчанию</option>
@@ -71,7 +73,7 @@
                                     <h6 class="text-primary price-display">@product.Price ₽</h6>
                                 </div>
                                 <div class="card-footer bg-transparent border-top-0">
-                                    <a href="#" class="btn btn-primary w-100">Подробнее</a>
+                                    <a asp-controller="Product" asp-action="GetProduct" asp-route-id="@product.Id" class="btn btn-primary w-100">Подробнее</a>
                                 </div>
                             </div>
                         </div>
@@ -85,7 +87,6 @@
 @section Scripts {
     <script src="~/js/catalog_script.js"></script>
     <style>
-        /* Небольшие стили для слайдера, чтобы он выглядел корректно */
         input[type="range"]::-webkit-slider-thumb {
             height: 17px;
             width: 17px;

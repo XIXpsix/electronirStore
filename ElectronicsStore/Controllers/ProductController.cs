@@ -30,7 +30,19 @@ namespace ElectronicsStore.Controllers
             return RedirectToAction("Error", "Home");
         }
 
-        // НОВЫЙ МЕТОД для обработки AJAX запроса
+        [HttpGet]
+        public async Task<IActionResult> GetProduct(int id)
+        {
+            var response = await _productService.GetProduct(id);
+
+            if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK)
+            {
+                return View(response.Data);
+            }
+
+            return RedirectToAction("Error");
+        }
+
         [HttpPost]
         public async Task<IActionResult> Filter([FromBody] ProductFilter filter)
         {

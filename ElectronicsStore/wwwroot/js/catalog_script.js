@@ -1,32 +1,25 @@
 ﻿document.addEventListener("DOMContentLoaded", function () {
 
     // --- ЛОГИКА СЛАЙДЕРА ЦЕНЫ ---
-
     const rangeInput = document.querySelectorAll(".range-input input"),
         priceInput = document.querySelectorAll(".price-input input"),
         range = document.querySelector(".slider .progress");
 
-    let priceGap = 1000; // Минимальная разница между ползунками
+    let priceGap = 1000;
 
-    // Функция обновления полосы прогресса (синей линии между ползунками)
     function updateProgress() {
         let minVal = parseInt(rangeInput[0].value),
             maxVal = parseInt(rangeInput[1].value);
-
-        // Расчет процентов для позиционирования
-        let maxRange = parseInt(rangeInput[0].max); // Берем максимум из атрибута max
+        let maxRange = parseInt(rangeInput[0].max);
 
         range.style.left = ((minVal / maxRange) * 100) + "%";
         range.style.right = (100 - (maxVal / maxRange) * 100) + "%";
     }
 
-    // Обработка ввода цифр в инпуты (От/До)
     priceInput.forEach(input => {
         input.addEventListener("input", e => {
             let minPrice = parseInt(priceInput[0].value),
                 maxPrice = parseInt(priceInput[1].value);
-
-            // Валидация: макс. цена не меньше мин., и в пределах допустимого
             let maxRange = parseInt(rangeInput[0].max);
 
             if ((maxPrice - minPrice >= priceGap) && maxPrice <= maxRange) {
@@ -41,7 +34,6 @@
         });
     });
 
-    // Обработка движения ползунков
     rangeInput.forEach(input => {
         input.addEventListener("input", e => {
             let minVal = parseInt(rangeInput[0].value),
@@ -61,68 +53,83 @@
         });
     });
 
-    // Инициализация прогресс-бара при загрузке
     updateProgress();
 
+    // --- ЛОГИКА ОТПРАВКИ ДАННЫХ (AJAX) ---
 
-    // --- ЛОГИКА СОРТИРОВКИ ---
+    async function fetchProducts() {
+        const minPrice = parseInt(priceInput[0].value);
+        const maxPrice = parseInt(priceInput[1].value);
+        const sortType = document.getElementById('sortSelect').value;
 
-    const sortSelect = document.getElementById('sortSelect');
-    const productsContainer = document.getElementById('productsContainer');
+        // Получаем ID категории из скрытого поля в List.cshtml
+        const categoryId = document.getElementById('categoryId')?.value || 0;
 
-    if (sortSelect && productsContainer) {
-        sortSelect.addEventListener('change', function () {
-            const sortValue = this.value;
-            const products = Array.from(productsContainer.getElementsByClassName('product-card'));
+        const filterData = {
+            CategoryId: parseInt(categoryId),
+            MinPrice: minPrice,
+            MaxPrice: maxPrice,
+            SortType: sortType
+        };
 
-            products.sort((a, b) => {
-                const priceA = parseFloat(a.dataset.price);
-                const priceB = parseFloat(b.dataset.price);
-                const nameA = a.dataset.name.toLowerCase();
-                const nameB = b.dataset.name.toLowerCase();
-
-                if (sortValue === 'price_asc') {
-                    return priceA - priceB;
-                } else if (sortValue === 'price_desc') {
-                    return priceB - priceA;
-                } else if (sortValue === 'name_asc') {
-                    if (nameA < nameB) return -1;
-                    if (nameA > nameB) return 1;
-                    return 0;
-                } else {
-                    // default - можно вернуть исходный порядок, если бы мы хранили индексы, 
-                    // но пока оставим как есть или добавим data-id для сортировки по id
-                    return 0;
-                }
+        try {
+            const response = await fetch('/Product/Filter', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(filterData)
             });
 
-            // Очищаем контейнер и добавляем отсортированные элементы
-            productsContainer.innerHTML = '';
-            products.forEach(product => productsContainer.appendChild(product));
+            if (response.ok) {
+                const result = await response.json();
+                renderProducts(result.data);
+            } else {
+                console.error("Ошибка при получении данных");
+            }
+        } catch (error) {
+            console.error("Ошибка сети:", error);
+        }
+    }
+
+    // Функция перерисовки товаров
+    function renderProducts(products) {
+        const container = document.getElementById('productsContainer');
+        container.innerHTML = '';
+
+        if (!products || products.length === 0) {
+            container.innerHTML = '<div class="col-12"><div class="alert alert-info">Товары не найдены</div></div>';
+            return;
+        }
+
+        products.forEach(product => {
+            // Генерируем HTML для одной карточки
+            const productHtml = `
+                <div class="col product-card">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">${product.name}</h5>
+                            <p class="card-text text-truncate">${product.description}</p>
+                            <h6 class="text-primary">${product.price} ₽</h6>
+                        </div>
+                        <div class="card-footer bg-transparent border-top-0">
+                            <a href="/Product/GetProduct?id=${product.id}" class="btn btn-primary w-100">Подробнее</a>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', productHtml);
         });
     }
 
-
-    // --- ЛОГИКА ФИЛЬТРАЦИИ (Кнопка "Применить") ---
-
+    // Привязываем события
     const applyBtn = document.getElementById('applyFiltersBtn');
-
     if (applyBtn) {
-        applyBtn.addEventListener('click', function () {
-            let minPrice = parseInt(priceInput[0].value);
-            let maxPrice = parseInt(priceInput[1].value);
+        applyBtn.addEventListener('click', fetchProducts);
+    }
 
-            const products = productsContainer.getElementsByClassName('product-card');
-
-            Array.from(products).forEach(product => {
-                const productPrice = parseFloat(product.dataset.price);
-
-                if (productPrice >= minPrice && productPrice <= maxPrice) {
-                    product.style.display = 'block'; // Показываем
-                } else {
-                    product.style.display = 'none'; // Скрываем
-                }
-            });
-        });
+    const sortSelect = document.getElementById('sortSelect');
+    if (sortSelect) {
+        sortSelect.addEventListener('change', fetchProducts);
     }
 });

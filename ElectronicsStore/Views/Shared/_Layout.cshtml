@@ -8,6 +8,9 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - ElectronicsHub</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
     <link rel="stylesheet" href="~/css/Shared.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/login_and_registration.css" asp-append-version="true" />
 </head>
@@ -19,8 +22,8 @@
             <div class="button-header">
                 @if (SignInManager.IsSignedIn(User))
                 {
-                    <span class="button">@User.Identity?.Name</span>
-                    <form class="form-inline-button" asp-controller="Account" asp-action="Logout" method="post">
+                    <span class="button" style="color: white; margin-right: 10px;">@User.Identity?.Name</span>
+                    <form class="form-inline-button d-inline" asp-controller="Account" asp-action="Logout" method="post">
                         <button type="submit" class="button">Выход</button>
                     </form>
                 }
@@ -51,8 +54,9 @@
             @RenderBody()
         </main>
     </div>
+
     <footer>
-        <div>
+        <div class="footer-content">
             <div class="footer-left">
                 <a asp-controller="Home" asp-action="Index" class="logo">ElectronicsHub</a>
                 <p>
@@ -60,8 +64,7 @@
                     Мы предлагаем только сертифицированную продукцию от ведущих мировых брендов.
                 </p>
                 <p class="footer-copy">
-                    © @DateTime.Now.Year ElectronicsHub.
-                    Все права защищены.
+                    © @DateTime.Now.Year ElectronicsHub. Все права защищены.
                 </p>
             </div>
 
@@ -75,23 +78,18 @@
                         <li><a asp-controller="Home" asp-action="Contacts">Контакты</a></li>
                     </ul>
                 </nav>
-                <div class="card">
-                    <div class="card-icon">&#128295;</div>
-                    <h3 class="card-title">Аксессуары и Запчасти</h3>
-                    <p class="card-description">
-                        Все необходимое для ремонта, тюнинга и комфортного использования вашей техники.
-                        Кабели, чехлы, комплектующие.
-                    </p>
-                    <a href="#" class="card-link">Смотреть каталог &rarr;</a>
-                </div>
             </div>
         </div>
     </footer>
 
     @await Html.PartialAsync("_LoginRegistrationPartial", new ElectronicsStore.Models.RegisterViewModel())
 
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
     <script src="~/js/login_and_registration_script.js" asp-append-version="true"></script>
     <script src="~/js/animation.js" asp-append-version="true"></script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

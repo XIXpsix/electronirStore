@@ -132,5 +132,36 @@ namespace ElectronicsStore.BLL.Realizations
                 };
             }
         }
+        // Реализация метода получения одного товара
+        public async Task<IBaseResponse<Product>> GetProduct(int id)
+        {
+            try
+            {
+                var product = await _productStorage.GetAll().FirstOrDefaultAsync(x => x.Id == id);
+
+                if (product == null)
+                {
+                    return new BaseResponse<Product>()
+                    {
+                        Description = "Товар не найден",
+                        StatusCode = StatusCode.ProductNotFound // Или просто StatusCode.InternalServerError, если нет такого енама
+                    };
+                }
+
+                return new BaseResponse<Product>()
+                {
+                    Data = product,
+                    StatusCode = StatusCode.OK
+                };
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponse<Product>()
+                {
+                    Description = $"[GetProduct] : {ex.Message}",
+                    StatusCode = StatusCode.InternalServerError
+                };
+            }
+        }
     }
 }
