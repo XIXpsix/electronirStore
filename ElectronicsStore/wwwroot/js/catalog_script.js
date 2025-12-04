@@ -166,8 +166,10 @@
 
     // Функция поиска
     function triggerSearch() {
-        const val = searchInput.value.trim().toLowerCase(); // Получаем текст из поля (маленькими буквами)
-        const products = document.querySelectorAll('.product-card'); // Берем все карточки
+        const val = searchInput.value.trim().toLowerCase();
+        const products = document.querySelectorAll('.product-card');
+        const noResultsMsg = document.getElementById('noResults'); // Получаем наш блок сообщения
+        let visibleCount = 0; // Счетчик видимых товаров
 
         // Управление крестиком очистки
         if (clearBtn) {
@@ -176,35 +178,42 @@
 
         if (products.length > 0) {
             products.forEach(function (elem) {
-                // Находим заголовок внутри текущей карточки
                 const titleElem = elem.querySelector('.card-title');
 
                 if (titleElem) {
-                    // Берем оригинальный текст (без тегов <mark>) для проверки
                     const textOriginal = titleElem.innerText;
 
                     // Если текст не содержит искомую фразу
                     if (val !== '' && textOriginal.toLowerCase().search(val) === -1) {
-                        elem.classList.add('hide'); // Скрываем карточку
-                        titleElem.innerHTML = textOriginal; // Сбрасываем подсветку
-                    }
-                    else {
-                        elem.classList.remove('hide'); // Показываем карточку
+                        elem.classList.add('hide'); // Скрываем
+                        titleElem.innerHTML = textOriginal;
+                    } else {
+                        elem.classList.remove('hide'); // Показываем
+                        visibleCount++; // Увеличиваем счетчик видимых
 
-                        // --- ПОДСВЕТКА ТЕКСТА ---
+                        // Подсветка текста
                         if (val !== '') {
-                            // Создаем регулярное выражение для поиска (gi = глобально, без учета регистра)
                             const regex = new RegExp(`(${val})`, 'gi');
-                            // Оборачиваем найденное в тег <mark>
                             titleElem.innerHTML = textOriginal.replace(regex, '<mark>$1</mark>');
                         } else {
-                            titleElem.innerHTML = textOriginal; // Если поиск пуст, убираем теги
+                            titleElem.innerHTML = textOriginal;
                         }
                     }
                 }
             });
         }
+
+        // --- ЛОГИКА ОТОБРАЖЕНИЯ "НИЧЕГО НЕ НАЙДЕНО" ---
+        if (noResultsMsg) {
+            // Если видимых товаров 0, но на странице вообще были товары (products.length > 0)
+            if (visibleCount === 0 && products.length > 0) {
+                noResultsMsg.style.display = 'block';
+            } else {
+                noResultsMsg.style.display = 'none';
+            }
+        }
     }
+    
 
     // Слушатель ввода текста
     if (searchInput) {
