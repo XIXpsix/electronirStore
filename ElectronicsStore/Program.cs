@@ -6,15 +6,11 @@ using ElectronicsStore.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
-
-// Подключаем логику (BLL)
 using ElectronicsStore.BLL.Interfaces;
 using ElectronicsStore.BLL.Realizations;
-
-// Подключаем базу данных (DAL)
 using ElectronicsStore.DAL.Interfaces;
 using ElectronicsStore.DAL.Repositories;
-using ElectronicsStore.Domain; // Для классов Category и Product
+using ElectronicsStore.Domain; 
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,7 +19,6 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<ElectronicsStoreContext>(options =>
     options.UseNpgsql(connectionString));
 
-// 2. Настройка Identity (пользователи, пароли)
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
     options.User.RequireUniqueEmail = true;
