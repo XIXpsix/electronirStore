@@ -10,7 +10,7 @@ using ElectronicsStore.BLL.Interfaces;
 using ElectronicsStore.BLL.Realizations;
 using ElectronicsStore.DAL.Interfaces;
 using ElectronicsStore.DAL.Repositories;
-using ElectronicsStore.Domain; 
+using ElectronicsStore.Domain;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -60,9 +60,12 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Services.AddScoped<IBaseStorage<Category>, BaseStorage<Category>>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 
-// --- ТОВАРЫ (Новое) ---
+// --- ТОВАРЫ ---
 builder.Services.AddScoped<IBaseStorage<Product>, BaseStorage<Product>>();
 builder.Services.AddScoped<IProductService, ProductService>();
+
+// --- КАРТИНКИ ТОВАРОВ (Для галереи) ---
+builder.Services.AddScoped<IBaseStorage<ProductImage>, ProductImageStorage>();
 
 
 // 6. Подключение MVC и кэширования

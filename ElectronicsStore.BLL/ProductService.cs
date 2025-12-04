@@ -1,8 +1,9 @@
 ﻿using ElectronicsStore.DAL.Interfaces;
 using ElectronicsStore.Domain;
+using ElectronicsStore.Domain.Entity; // Добавлено для доступа к ProductImage
 using ElectronicsStore.Domain.Enum;
-using ElectronicsStore.Domain.Filters; // Подключаем фильтры
-using ElectronicsStore.Domain.Response; // Подключаем ответы
+using ElectronicsStore.Domain.Filters;
+using ElectronicsStore.Domain.Response;
 using ElectronicsStore.BLL.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -15,31 +16,34 @@ namespace ElectronicsStore.BLL.Realizations
     public class ProductService : IProductService
     {
         private readonly IBaseStorage<Product> _productStorage;
+        // Добавляем хранилище для картинок
+        private readonly IBaseStorage<ProductImage> _productImageStorage;
 
-        public ProductService(IBaseStorage<Product> productStorage)
+        // Обновляем конструктор: внедряем оба хранилища
+        public ProductService(IBaseStorage<Product> productStorage, IBaseStorage<ProductImage> productImageStorage)
         {
             _productStorage = productStorage;
+            _productImageStorage = productImageStorage;
         }
 
-        // НОВЫЙ МЕТОД: Фильтрация и сортировка
+        // --- МЕТОДЫ ФИЛЬТРАЦИИ И ПОИСКА ---
+
         public async Task<IBaseResponse<List<Product>>> GetProductsByFilter(ProductFilter filter)
         {
             try
             {
-                // 1. Начинаем запрос ко всем товарам
                 var query = _productStorage.GetAll();
 
-                // 2. Фильтруем по категории (обязательно)
+                // Фильтр по категории
                 query = query.Where(x => x.CategoryId == filter.CategoryId);
 
-                // 3. Фильтруем по цене (если задан диапазон)
-                // Проверяем, чтобы MaxPrice был больше 0, иначе считаем фильтр цены отключенным
+                // Фильтр по цене
                 if (filter.MaxPrice > 0)
                 {
                     query = query.Where(x => x.Price >= filter.MinPrice && x.Price <= filter.MaxPrice);
                 }
 
-                // 4. Сортировка
+                // Сортировка
                 switch (filter.SortType)
                 {
                     case "price_asc":
@@ -52,12 +56,10 @@ namespace ElectronicsStore.BLL.Realizations
                         query = query.OrderBy(x => x.Name);
                         break;
                     default:
-                        // Сортировка по умолчанию (например, по ID)
                         query = query.OrderBy(x => x.Id);
                         break;
                 }
 
-                // 5. Выполняем запрос к базе
                 var products = await query.ToListAsync();
 
                 return new BaseResponse<List<Product>>()
@@ -76,7 +78,6 @@ namespace ElectronicsStore.BLL.Realizations
             }
         }
 
-        // СТАРЫЙ МЕТОД
         public async Task<IBaseResponse<List<Product>>> GetProductsByCategory(int categoryId)
         {
             try
@@ -111,7 +112,6 @@ namespace ElectronicsStore.BLL.Realizations
             }
         }
 
-        // СТАРЫЙ МЕТОД
         public async Task<IBaseResponse<IEnumerable<Product>>> GetProducts()
         {
             try
@@ -132,19 +132,24 @@ namespace ElectronicsStore.BLL.Realizations
                 };
             }
         }
-        // Реализация метода получения одного товара
+
+        // --- МЕТОДЫ ПОЛУЧЕНИЯ ОДНОГО ТОВАРА ---
+
         public async Task<IBaseResponse<Product>> GetProduct(int id)
         {
             try
             {
-                var product = await _productStorage.GetAll().FirstOrDefaultAsync(x => x.Id == id);
+                // Важно: Include(x => x.Category) нужен, чтобы отобразить название категории
+                var product = await _productStorage.GetAll()
+                    .Include(x => x.Category)
+                    .FirstOrDefaultAsync(x => x.Id == id);
 
                 if (product == null)
                 {
                     return new BaseResponse<Product>()
                     {
                         Description = "Товар не найден",
-                        StatusCode = StatusCode.ProductNotFound // Или просто StatusCode.InternalServerError, если нет такого енама
+                        StatusCode = StatusCode.ProductNotFound
                     };
                 }
 
@@ -159,6 +164,33 @@ namespace ElectronicsStore.BLL.Realizations
                 return new BaseResponse<Product>()
                 {
                     Description = $"[GetProduct] : {ex.Message}",
+                    StatusCode = StatusCode.InternalServerError
+                };
+            }
+        }
+
+        // --- НОВЫЙ МЕТОД ДЛЯ ГАЛЕРЕИ (ГЛАВА 24) ---
+        public async Task<IBaseResponse<List<string>>> GetImagesByProductId(int id)
+        {
+            try
+            {
+                // Ищем все картинки, привязанные к productID
+                var images = await _productImageStorage.GetAll()
+                    .Where(x => x.ProductId == id)
+                    .Select(x => x.ImagePath) // Выбираем только пути к файлам
+                    .ToListAsync();
+
+                return new BaseResponse<List<string>>()
+                {
+                    Data = images,
+                    StatusCode = StatusCode.OK
+                };
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponse<List<string>>()
+                {
+                    Description = $"[GetImagesByProductId] : {ex.Message}",
                     StatusCode = StatusCode.InternalServerError
                 };
             }

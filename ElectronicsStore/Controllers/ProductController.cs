@@ -1,5 +1,6 @@
 ﻿using ElectronicsStore.BLL.Interfaces;
 using ElectronicsStore.Domain.Filters; // Обязательно подключаем фильтры
+using ElectronicsStore.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
@@ -33,11 +34,29 @@ namespace ElectronicsStore.Controllers
         [HttpGet]
         public async Task<IActionResult> GetProduct(int id)
         {
-            var response = await _productService.GetProduct(id);
+            // 1. Получаем сам товар
+            var productResponse = await _productService.GetProduct(id);
 
-            if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK)
+            // 2. Получаем дополнительные картинки
+            var imagesResponse = await _productService.GetImagesByProductId(id);
+
+            if (productResponse.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK)
             {
-                return View(response.Data);
+                var product = productResponse.Data;
+
+                // 3. Создаем ViewModel и заполняем данными
+                var model = new GetProductViewModel
+                {
+                    Id = product.Id,
+                    Name = product.Name,
+                    Description = product.Description,
+                    Price = product.Price,
+                    ImagePath = product.ImagePath,
+                    CategoryName = product.Category?.Name ?? "Без категории",
+                    GalleryImages = imagesResponse.Data ?? new List<string>()
+                };
+
+                return View(model);
             }
 
             return RedirectToAction("Error");
