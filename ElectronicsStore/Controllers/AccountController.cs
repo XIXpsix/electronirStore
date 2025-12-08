@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ElectronicsStore.Controllers
 {
@@ -19,44 +20,52 @@ namespace ElectronicsStore.Controllers
             _context = context;
         }
 
-        // --- ЛОГИН ---
+        // ===================== ВХОД (LOGIN) =====================
         [HttpGet]
-        public IActionResult Login() => View();
+        public IActionResult Login(string? returnUrl = null)
+        {
+            return View(new LoginViewModel { ReturnUrl = returnUrl });
+        }
 
         [HttpPost]
         public async Task<IActionResult> Login([FromBody] LoginViewModel model)
         {
-            // Ищем пользователя в БД
+            // 1. Ищем пользователя в базе (по Email или Логину)
             var user = await _context.Users
                 .FirstOrDefaultAsync(u => u.Email == model.LoginOrEmail || u.Login == model.LoginOrEmail);
 
-            if (user == null || user.Password != model.Password) // Тут лучше добавить хеширование!
+            // 2. Проверяем пароль (Внимание: тут сравнение без хеша, как у друга. Для продакшена нужен хеш!)
+            if (user == null || user.Password != model.Password)
             {
                 return BadRequest(new { message = "Неверный логин или пароль" });
             }
 
-            await Authenticate(user); // Ставим куки
-            return Ok(new { message = "Вход выполнен" });
+            // 3. Авторизуем (ставим куки)
+            await Authenticate(user);
+
+            return Ok(new { message = "Вход выполнен успешно!", returnUrl = model.ReturnUrl ?? "/" });
         }
 
-        // --- РЕГИСТРАЦИЯ ---
+        // ===================== РЕГИСТРАЦИЯ =====================
         [HttpGet]
         public IActionResult Register() => View();
 
         [HttpPost]
         public async Task<IActionResult> Register([FromBody] RegisterViewModel model)
         {
+            // 1. Проверяем, есть ли такой email
             if (await _context.Users.AnyAsync(u => u.Email == model.Email))
             {
-                return BadRequest(new { message = "Почта занята" });
+                return BadRequest(new { message = "Пользователь с такой почтой уже существует" });
             }
 
+            // 2. Создаем нового пользователя
             var user = new User
             {
                 Id = Guid.NewGuid(),
                 Login = model.Login,
                 Email = model.Email,
-                Password = model.Password, // В реальном проекте хешируем!
+                Password = model.Password, // В методичке друга сохраняют пароль. В идеале нужен HashPasswordHelper
                 Role = "User",
                 CreatedAt = DateTime.UtcNow
             };
@@ -64,54 +73,61 @@ namespace ElectronicsStore.Controllers
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
+            // 3. Сразу авторизуем
             await Authenticate(user);
-            return Ok(new { message = "Регистрация успешна" });
+
+            return Ok(new { message = "Регистрация успешна!" });
         }
 
-        // --- GOOGLE ---
-        public async Task GoogleLogin()
+        // ===================== GOOGLE AUTH =====================
+        [HttpGet]
+        public async Task AuthenticationGoogle(string returnUrl = "/")
         {
             await HttpContext.ChallengeAsync(GoogleDefaults.AuthenticationScheme, new AuthenticationProperties
             {
-                RedirectUri = Url.Action("GoogleResponse")
+                RedirectUri = Url.Action("GoogleResponse", new { returnUrl })
             });
         }
 
-        public async Task<IActionResult> GoogleResponse()
+        [HttpGet]
+        public async Task<IActionResult> GoogleResponse(string returnUrl = "/")
         {
             var result = await HttpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
             if (!result.Succeeded) return RedirectToAction("Login");
 
             var email = result.Principal.FindFirst(ClaimTypes.Email)?.Value;
 
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
-            if (user == null)
+            if (email != null)
             {
-                user = new User
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+                if (user == null)
                 {
-                    Id = Guid.NewGuid(),
-                    Email = email,
-                    Login = email,
-                    Password = "", // Без пароля
-                    Role = "User",
-                    CreatedAt = DateTime.UtcNow
-                };
-                _context.Users.Add(user);
-                await _context.SaveChangesAsync();
+                    user = new User
+                    {
+                        Id = Guid.NewGuid(),
+                        Email = email,
+                        Login = email,
+                        Password = "", // Без пароля
+                        Role = "User",
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    _context.Users.Add(user);
+                    await _context.SaveChangesAsync();
+                }
+                await Authenticate(user);
+                return LocalRedirect(returnUrl ?? "/");
             }
-
-            await Authenticate(user);
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Login");
         }
 
-        // --- ВЫХОД ---
+        // ===================== ВЫХОД =====================
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Index", "Home");
         }
 
-        // Вспомогательный метод установки куки
+        // Вспомогательный метод
         private async Task Authenticate(User user)
         {
             var claims = new List<Claim>
