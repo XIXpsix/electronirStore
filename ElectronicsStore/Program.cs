@@ -1,84 +1,42 @@
 ﻿using ElectronicsStore.DAL;
-using ElectronicsStore.Domain.Entity;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using ElectronicsStore.Models;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Http;
-using ElectronicsStore.BLL.Interfaces;
-using ElectronicsStore.BLL.Realizations;
-using ElectronicsStore.DAL.Interfaces;
-using ElectronicsStore.DAL.Repositories;
-using ElectronicsStore.Domain;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Подключение к базе данных PostgreSQL
+// 1. Подключение БД
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ElectronicsStoreContext>(options =>
     options.UseNpgsql(connectionString));
 
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+// 2. Настройка Аутентификации (Куки + Google)
+builder.Services.AddAuthentication(options =>
 {
-    options.User.RequireUniqueEmail = true;
-    options.Password.RequireDigit = false;
-    options.Password.RequiredLength = 6;
-    options.Password.RequireNonAlphanumeric = false;
-    options.Password.RequireUppercase = false;
-    options.Password.RequireLowercase = false;
+    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
 })
-    .AddEntityFrameworkStores<ElectronicsStoreContext>()
-    .AddDefaultTokenProviders();
-
-// 3. Настройка входа через Google
-builder.Services.AddAuthentication()
-    .AddGoogle(options =>
-    {
-        IConfigurationSection googleAuthNSection =
-            builder.Configuration.GetSection("Authentication:Google");
-
-        options.ClientId = googleAuthNSection["ClientId"];
-        options.ClientSecret = googleAuthNSection["ClientSecret"];
-
-        // Исправление ошибки "Correlation failed" для localhost
-        options.CorrelationCookie.SameSite = SameSiteMode.Lax;
-        options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
-    });
-
-// 4. Настройка Cookie (пути перенаправления)
-builder.Services.ConfigureApplicationCookie(options =>
+.AddCookie(options =>
 {
-    options.LoginPath = "/";
-    options.AccessDeniedPath = "/";
-    options.SlidingExpiration = true;
+    options.LoginPath = "/Account/Login";
+    options.AccessDeniedPath = "/Account/Login";
+})
+.AddGoogle(options =>
+{
+    IConfigurationSection googleAuthNSection = builder.Configuration.GetSection("Authentication:Google");
+    options.ClientId = googleAuthNSection["ClientId"];
+    options.ClientSecret = googleAuthNSection["ClientSecret"];
 });
 
-// 5. Регистрация Сервисов (Dependency Injection)
-
-// --- Категории ---
-builder.Services.AddScoped<IBaseStorage<Category>, BaseStorage<Category>>();
-builder.Services.AddScoped<ICategoryService, CategoryService>();
-
-// --- ТОВАРЫ ---
-builder.Services.AddScoped<IBaseStorage<Product>, BaseStorage<Product>>();
-builder.Services.AddScoped<IProductService, ProductService>();
-
-// --- КАРТИНКИ ТОВАРОВ (Для галереи) ---
-builder.Services.AddScoped<IBaseStorage<ProductImage>, ProductImageStorage>();
-
-
-// 6. Подключение MVC и кэширования
+// 3. Сервисы
 builder.Services.AddControllersWithViews();
 builder.Services.AddMemoryCache();
 
-// Настройки почты
-builder.Services.Configure<EmailSettings>(
-    builder.Configuration.GetSection("EmailSettings"));
+// Зарегистрируйте ваши сервисы (BLL) здесь, когда они будут готовы
+// builder.Services.AddScoped<IAccountService, AccountService>();
 
 var app = builder.Build();
 
-// Настройка конвейера запросов (Pipeline)
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -90,8 +48,8 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseAuthentication(); // Кто это?
-app.UseAuthorization();  // Что ему можно?
+app.UseAuthentication(); // Проверка кук
+app.UseAuthorization();  // Проверка прав
 
 app.MapControllerRoute(
     name: "default",

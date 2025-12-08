@@ -1,245 +1,126 @@
-﻿using ElectronicsStore.Domain.Entity;
+﻿using ElectronicsStore.DAL;
+using ElectronicsStore.Domain.Entity;
 using ElectronicsStore.Models;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Caching.Memory;
-using MailKit.Net.Smtp;
-using MimeKit;
-using Microsoft.Extensions.Options;
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace ElectronicsStore.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly IMemoryCache _cache;
-        private readonly EmailSettings _emailSettings;
+        private readonly ElectronicsStoreContext _context;
 
-        public AccountController(
-            UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager,
-            IMemoryCache cache,
-            IOptions<EmailSettings> emailSettings)
+        public AccountController(ElectronicsStoreContext context)
         {
-            _userManager = userManager;
-            _signInManager = signInManager;
-            _cache = cache;
-            _emailSettings = emailSettings.Value;
+            _context = context;
         }
 
-        // ===================== НОВЫЕ МЕТОДЫ ДЛЯ GOOGLE (НАЧАЛО) =====================
-
-        // 1. Запуск авторизации через Google (на этот метод ведет кнопка)
+        // --- ЛОГИН ---
         [HttpGet]
-        public async Task AuthenticationGoogle(string returnUrl = "/")
+        public IActionResult Login() => View();
+
+        [HttpPost]
+        public async Task<IActionResult> Login([FromBody] LoginViewModel model)
         {
-            // Формируем URL, на который Google вернет пользователя после входа
-            var redirectUrl = Url.Action("GoogleResponse", "Account", new { returnUrl });
+            // Ищем пользователя в БД
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.Email == model.LoginOrEmail || u.Login == model.LoginOrEmail);
 
-            var properties = _signInManager.ConfigureExternalAuthenticationProperties("Google", redirectUrl);
+            if (user == null || user.Password != model.Password) // Тут лучше добавить хеширование!
+            {
+                return BadRequest(new { message = "Неверный логин или пароль" });
+            }
 
-            // Перенаправляем пользователя на сайт Google
-            await HttpContext.ChallengeAsync("Google", properties);
+            await Authenticate(user); // Ставим куки
+            return Ok(new { message = "Вход выполнен" });
         }
 
-        // 2. Возврат пользователя из Google
-        [HttpGet]
-        public async Task<IActionResult> GoogleResponse(string returnUrl = "/")
-        {
-            var info = await _signInManager.GetExternalLoginInfoAsync();
-            if (info == null)
-            {
-                return RedirectToAction("Login");
-            }
-
-            var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false);
-
-            if (result.Succeeded)
-            {
-                // ИСПРАВЛЕНИЕ: Проверяем, локальная ли ссылка
-                if (Url.IsLocalUrl(returnUrl))
-                {
-                    return LocalRedirect(returnUrl);
-                }
-                return RedirectToAction("Index", "Home");
-            }
-
-            var email = info.Principal.FindFirstValue(ClaimTypes.Email);
-
-            if (email != null)
-            {
-                var user = await _userManager.FindByEmailAsync(email);
-
-                if (user == null)
-                {
-                    user = new ApplicationUser
-                    {
-                        UserName = email,
-                        Email = email,
-                        EmailConfirmed = true,
-                        FirstName = info.Principal.FindFirstValue(ClaimTypes.GivenName) ?? "GoogleUser",
-                        LastName = info.Principal.FindFirstValue(ClaimTypes.Surname) ?? ""
-                    };
-
-                    var createResult = await _userManager.CreateAsync(user);
-                    if (!createResult.Succeeded)
-                    {
-                        return RedirectToAction("Login");
-                    }
-                }
-
-                await _userManager.AddLoginAsync(user, info);
-                await _signInManager.SignInAsync(user, isPersistent: false);
-
-                // ИСПРАВЛЕНИЕ ТУТ ТОЖЕ
-                if (Url.IsLocalUrl(returnUrl))
-                {
-                    return LocalRedirect(returnUrl);
-                }
-                return RedirectToAction("Index", "Home");
-            }
-
-            return RedirectToAction("Login");
-        }
-
-        // ===================== НОВЫЕ МЕТОДЫ ДЛЯ GOOGLE (КОНЕЦ) =====================
-
-
+        // --- РЕГИСТРАЦИЯ ---
         [HttpGet]
         public IActionResult Register() => View();
 
         [HttpPost]
         public async Task<IActionResult> Register([FromBody] RegisterViewModel model)
         {
-            if (ModelState.IsValid)
+            if (await _context.Users.AnyAsync(u => u.Email == model.Email))
             {
-                var existingUserByName = await _userManager.FindByNameAsync(model.Login);
-                if (existingUserByName != null)
-                {
-                    return BadRequest(new { message = "Такой логин уже занят." });
-                }
-
-                var existingUserByEmail = await _userManager.FindByEmailAsync(model.Email);
-                if (existingUserByEmail != null)
-                {
-                    return BadRequest(new { message = "Пользователь с такой почтой уже существует." });
-                }
-
-                var code = new Random().Next(1000, 9999).ToString();
-
-                try
-                {
-                    await SendEmailAsync(model.Email, "Код подтверждения", $"Ваш код: {code}");
-                }
-                catch (Exception ex)
-                {
-                    return BadRequest(new { message = "Ошибка отправки письма: " + ex.Message });
-                }
-
-                _cache.Set(model.Email, new { Model = model, Code = code }, TimeSpan.FromMinutes(5));
-
-                return Ok(new { needConfirm = true, email = model.Email });
-            }
-            return BadRequest(new { message = "Некорректные данные" });
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailViewModel data)
-        {
-            if (_cache.TryGetValue(data.Email, out object? cachedData) && cachedData != null)
-            {
-                dynamic userData = cachedData;
-                string correctCode = userData.Code;
-                RegisterViewModel model = userData.Model;
-
-                if (data.Code == correctCode)
-                {
-                    var user = new ApplicationUser
-                    {
-                        Email = model.Email,
-                        UserName = model.Login,
-                        EmailConfirmed = true,
-                        FirstName = "",
-                        LastName = ""
-                    };
-
-                    var result = await _userManager.CreateAsync(user, model.Password);
-
-                    if (result.Succeeded)
-                    {
-                        await _signInManager.SignInAsync(user, isPersistent: false);
-                        _cache.Remove(data.Email);
-                        return Ok(new { message = "Регистрация успешна!" });
-                    }
-                    return BadRequest(new { message = "Ошибка создания: " + string.Join(", ", result.Errors.Select(e => e.Description)) });
-                }
-                return BadRequest(new { message = "Неверный код." });
+                return BadRequest(new { message = "Почта занята" });
             }
 
-            return BadRequest(new { message = "Время действия кода истекло." });
-        }
-
-        private async Task SendEmailAsync(string email, string subject, string message)
-        {
-            var emailMessage = new MimeMessage();
-
-            emailMessage.From.Add(new MailboxAddress(_emailSettings.SenderName, _emailSettings.SenderEmail));
-            emailMessage.To.Add(new MailboxAddress("", email));
-            emailMessage.Subject = subject;
-            emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Html)
+            var user = new User
             {
-                Text = message
+                Id = Guid.NewGuid(),
+                Login = model.Login,
+                Email = model.Email,
+                Password = model.Password, // В реальном проекте хешируем!
+                Role = "User",
+                CreatedAt = DateTime.UtcNow
             };
 
-            using (var client = new SmtpClient())
-            {
-                await client.ConnectAsync(_emailSettings.SmtpServer, _emailSettings.SmtpPort, true);
-                await client.AuthenticateAsync(_emailSettings.SenderEmail, _emailSettings.Password);
-                await client.SendAsync(emailMessage);
-                await client.DisconnectAsync(true);
-            }
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+
+            await Authenticate(user);
+            return Ok(new { message = "Регистрация успешна" });
         }
 
-        [HttpGet]
-        public IActionResult Login(string? returnUrl = null) => View(new LoginViewModel { ReturnUrl = returnUrl });
-
-        [HttpPost]
-        public async Task<IActionResult> Login([FromBody] LoginViewModel model)
+        // --- GOOGLE ---
+        public async Task GoogleLogin()
         {
-            if (ModelState.IsValid)
+            await HttpContext.ChallengeAsync(GoogleDefaults.AuthenticationScheme, new AuthenticationProperties
             {
-                var user = await _userManager.FindByEmailAsync(model.LoginOrEmail);
-                if (user == null)
-                {
-                    user = await _userManager.FindByNameAsync(model.LoginOrEmail);
-                }
-
-                if (user == null)
-                {
-                    return BadRequest(new { message = "Пользователь не найден." });
-                }
-
-                var result = await _signInManager.PasswordSignInAsync(user.UserName!, model.Password, model.RememberMe, lockoutOnFailure: false);
-
-                if (result.Succeeded)
-                {
-                    return Ok(new { email = user.Email, message = "Вход успешен!" });
-                }
-                return BadRequest(new { message = "Неверный пароль." });
-            }
-            return BadRequest(new { message = "Введите логин и пароль." });
+                RedirectUri = Url.Action("GoogleResponse")
+            });
         }
 
-        [HttpPost]
-        [HttpGet]
+        public async Task<IActionResult> GoogleResponse()
+        {
+            var result = await HttpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
+            if (!result.Succeeded) return RedirectToAction("Login");
+
+            var email = result.Principal.FindFirst(ClaimTypes.Email)?.Value;
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+            if (user == null)
+            {
+                user = new User
+                {
+                    Id = Guid.NewGuid(),
+                    Email = email,
+                    Login = email,
+                    Password = "", // Без пароля
+                    Role = "User",
+                    CreatedAt = DateTime.UtcNow
+                };
+                _context.Users.Add(user);
+                await _context.SaveChangesAsync();
+            }
+
+            await Authenticate(user);
+            return RedirectToAction("Index", "Home");
+        }
+
+        // --- ВЫХОД ---
         public async Task<IActionResult> Logout()
         {
-            await _signInManager.SignOutAsync();
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Index", "Home");
+        }
+
+        // Вспомогательный метод установки куки
+        private async Task Authenticate(User user)
+        {
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimsIdentity.DefaultNameClaimType, user.Login),
+                new Claim(ClaimsIdentity.DefaultRoleClaimType, user.Role)
+            };
+            var id = new ClaimsIdentity(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(id));
         }
     }
 }

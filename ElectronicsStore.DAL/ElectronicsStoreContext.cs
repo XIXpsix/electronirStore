@@ -1,97 +1,46 @@
 ﻿using ElectronicsStore.Domain;
 using ElectronicsStore.Domain.Entity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace ElectronicsStore.DAL
 {
-    public class ElectronicsStoreContext : IdentityDbContext<ApplicationUser>
+    // 1. Наследуемся от обычного DbContext
+    public class ElectronicsStoreContext : DbContext
     {
         public ElectronicsStoreContext(DbContextOptions<ElectronicsStoreContext> options)
             : base(options)
         {
         }
 
+        // 2. Явно указываем таблицу пользователей
+        public DbSet<User> Users { get; set; }
+
         public DbSet<Product> Products { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Review> Reviews { get; set; }
         public DbSet<ProductImage> ProductImages { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
+            // УБИРАЕМ base.OnModelCreating(modelBuilder); так как это не Identity
 
-            // --- Настройка связей ---
-
-            // Связь: Один пользователь -> Много отзывов
+            // Настройка связей
             modelBuilder.Entity<Review>()
                 .HasOne(r => r.User)
                 .WithMany(u => u.Reviews)
                 .HasForeignKey(r => r.UserId)
-                .OnDelete(DeleteBehavior.Cascade); // Если удалить юзера, удалятся отзывы
+                .OnDelete(DeleteBehavior.Cascade);
 
-            // Связь: Один товар -> Много отзывов
             modelBuilder.Entity<Review>()
                 .HasOne(r => r.Product)
                 .WithMany(p => p.Reviews)
                 .HasForeignKey(r => r.ProductId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // --- Начальные данные (Seed Data) ---
-
-            // 1. Категории (Заполняем и Slug, и Description)
-            var catSmartphones = new Category
-            {
-                Id = 1,
-                Name = "Смартфоны",
-                Slug = "smartphones",
-                Description = "Мобильные телефоны и смартфоны"
-            };
-            var catLaptops = new Category
-            {
-                Id = 2,
-                Name = "Ноутбуки",
-                Slug = "laptops",
-                Description = "Лэптопы для работы и игр"
-            };
-            var catAccessories = new Category
-            {
-                Id = 3,
-                Name = "Аксессуары",
-                Slug = "accessories",
-                Description = "Наушники, чехлы и зарядки"
-            };
-
-            modelBuilder.Entity<Category>().HasData(catSmartphones, catLaptops, catAccessories);
-
-            // 2. Товары
-            modelBuilder.Entity<Product>().HasData(
-                new Product
-                {
-                    Id = 1,
-                    Name = "iPhone 15 Pro",
-                    Description = "Флагманский смартфон Apple с титановым корпусом.",
-                    Price = 120000m,
-                    ImagePath = "/img/iphone15.jpg",
-                    CategoryId = 1
-                },
-                new Product
-                {
-                    Id = 2,
-                    Name = "MacBook Pro 16",
-                    Description = "Супермощный ноутбук на чипе M3 Max.",
-                    Price = 350000m,
-                    ImagePath = "/img/macbook.jpg", // Убедитесь, что такой файл есть или замените
-                    CategoryId = 2
-                },
-                new Product
-                {
-                    Id = 3,
-                    Name = "AirPods Pro 2",
-                    Description = "Лучшие наушники с шумоподавлением.",
-                    Price = 25000m,
-                    ImagePath = "/img/airpods.jpg",
-                    CategoryId = 3
-                }
+            // Начальные данные (Seed Data)
+            modelBuilder.Entity<Category>().HasData(
+                new Category { Id = 1, Name = "Смартфоны", Slug = "smartphones", Description = "Телефоны" },
+                new Category { Id = 2, Name = "Ноутбуки", Slug = "laptops", Description = "Ноутбуки" }
             );
         }
     }
