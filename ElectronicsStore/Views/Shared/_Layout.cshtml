@@ -35,7 +35,13 @@
         <div id="header-top">
             <a asp-controller="Home" asp-action="Index" class="logo">ElectronicsHub</a>
 
-            <div class="button-header">
+            <div class="menu-icon-3-lines" id="mobile-menu-btn">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+
+            <div class="button-header desktop-only">
                 @if (SignInManager.IsSignedIn(User))
                 {
                     <span class="button" style="color: white; margin-right: 10px;">@User.Identity?.Name</span>
@@ -51,7 +57,7 @@
             </div>
         </div>
 
-        <div id="header-bottom">
+        <div id="header-bottom" class="desktop-only">
             <div class="menu-container">
                 <nav class="menu">
                     <ul>
@@ -62,6 +68,34 @@
                     </ul>
                 </nav>
             </div>
+        </div>
+
+        <div class="mobile-menu-overlay" id="mobile-menu-container">
+            <nav class="mobile-nav-content">
+                <ul>
+                    <li><a asp-controller="Home" asp-action="Index">Главная</a></li>
+                    <li><a asp-controller="Home" asp-action="About">О нас</a></li>
+                    <li><a asp-controller="Home" asp-action="Catalog">Каталог товаров</a></li>
+                    <li><a asp-controller="Home" asp-action="Contacts">Контакты</a></li>
+
+                    <li class="menu-separator"></li>
+
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        <li class="user-greeting">Вы вошли как: @User.Identity?.Name</li>
+                        <li>
+                            <form asp-controller="Account" asp-action="Logout" method="post" style="width: 100%; display:flex; justify-content:center;">
+                                <button type="submit" class="mobile-btn logout-btn">Выйти из аккаунта</button>
+                            </form>
+                        </li>
+                    }
+                    else
+                    {
+                        <li><button id="mobile-login-trigger" class="mobile-btn login-btn">Войти</button></li>
+                        <li><button id="mobile-register-trigger" class="mobile-btn register-btn">Регистрация</button></li>
+                    }
+                </ul>
+            </nav>
         </div>
     </header>
 
