@@ -818,7 +818,11 @@ mark {
    СТИЛИ ДЛЯ МОБИЛЬНОГО МЕНЮ (АДАПТИВ)
    ========================================================================== */
 
-/* 1. Кнопка "3 полоски" */
+/* ==========================================================================
+   СТИЛИ ДЛЯ МОБИЛЬНОГО МЕНЮ (АДАПТИВ)
+   ========================================================================== */
+
+/* 1. Кнопка "3 полоски" - ЖЕСТКАЯ ПОЗИЦИЯ СПРАВА СВЕРХУ */
 .menu-icon-3-lines {
     display: none; /* Скрыта на ПК */
     flex-direction: column;
@@ -826,22 +830,26 @@ mark {
     width: 30px;
     height: 22px;
     cursor: pointer;
-    z-index: 2000; /* Поверх всего */
+    z-index: 2000;
+    /* --- НОВЫЕ СТРОКИ ДЛЯ ПОЗИЦИОНИРОВАНИЯ --- */
+    position: absolute; /* Вырываем из общего потока */
+    right: 20px; /* Отступ справа */
+    top: 25px; /* Отступ сверху (подберите под высоту вашей шапки) */
 }
 
     .menu-icon-3-lines span {
         display: block;
         height: 3px;
         width: 100%;
-        background-color: #fff; /* Белые полоски */
+        background-color: #fff;
         border-radius: 3px;
         transition: all 0.3s ease-in-out;
     }
 
-    /* Анимация: превращение в крестик при открытии */
+    /* Анимация: превращение в крестик */
     .menu-icon-3-lines.open span:nth-child(1) {
         transform: translateY(9.5px) rotate(45deg);
-        background-color: #ff6600; /* Становится оранжевым */
+        background-color: #ff6600;
     }
 
     .menu-icon-3-lines.open span:nth-child(2) {
