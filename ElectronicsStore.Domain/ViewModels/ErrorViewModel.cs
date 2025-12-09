@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 
 namespace ElectronicsStore.Domain.ViewModels
 {
-    internal class ErrorViewModel
+    public class ErrorViewModel
     {
+        public string RequestId { get; set; } = string.Empty;
+
+        public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
     }
 }

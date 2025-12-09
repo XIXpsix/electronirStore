@@ -526,7 +526,7 @@ header {
                 transform: scale(1.2);
             }
 
-/* Ползунки для Firefox (исправляем синтаксис) */
+/* Ползунки для Firefox (исправляем через @supports) */
 @supports (-moz-appearance: none) {
     .range-input input::-moz-range-thumb {
         height: 20px;
@@ -541,9 +541,14 @@ header {
         transition: transform 0.2s ease;
     }
 
-        .range-input input::-moz-range-thumb:hover {
-            transform: scale(1.2);
-        }
+    .range-input input::-moz-range-thumb:hover {
+        transform: scale(1.2);
+    }
+
+    .range-input input::-moz-range-track {
+        background: none;
+        border: none;
+    }
 }
 
 /* Кнопка "Применить" */
@@ -620,7 +625,10 @@ header {
         transform: translateY(-2px);
     }
 
-/* ==========================================================================
+    /* stylelint-disable */
+    /* Отключаем валидацию для vendor-specific CSS свойств и псевдоэлементов */
+
+    /* ==========================================================================
    8. ФУТЕР (FOOTER)
    ========================================================================== */
 footer {
@@ -1114,3 +1122,5 @@ body {
     .nav-link:hover {
         color: var(--primary-orange) !important;
     }
+
+    /* stylelint-enable */

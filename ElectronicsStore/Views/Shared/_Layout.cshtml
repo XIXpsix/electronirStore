@@ -4,50 +4,22 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - ElectronicsStore</title>
-
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/Shared.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/login_and_registration.css" asp-append-version="true" />
 </head>
 <body>
-
-    <div class="video-background-holder">
-        <div class="video-side">
-            <div class="video-background-overlay"></div>
-        </div>
-        <div class="video-center-gap"></div>
-        <div class="video-side">
-            <div class="video-background-overlay"></div>
-        </div>
-    </div>
-
-    <div class="mobile-menu-overlay" id="mobile-menu-overlay">
-        <div class="mobile-nav-content">
-            <ul>
-                <li><a asp-controller="Home" asp-action="Index">Главная</a></li>
-                <li><a asp-controller="Categories" asp-action="ListOfCategories">Каталог</a></li>
-                <li><a asp-controller="Home" asp-action="Privacy">Приватность</a></li>
-                <li class="menu-separator"></li>
-                <li><button class="mobile-btn login-btn" id="mobile-login-trigger">Войти</button></li>
-                <li><button class="mobile-btn register-btn" id="mobile-register-trigger">Регистрация</button></li>
-            </ul>
-        </div>
-    </div>
-
-    <div class="menu-icon-3-lines" id="mobile-menu-btn">
-        <span></span>
-        <span></span>
-        <span></span>
-    </div>
-
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-black box-shadow mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand text-uppercase fw-bold" asp-area="" asp-controller="Home" asp-action="Index">
+                <a class="navbar-brand text-uppercase fw-bold" asp-area="" asp-controller="Home" asp-action="Index" style="color: #ff6600;">
                     ElectronicsStore
                 </a>
-
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between desktop-only">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Главная</a>
@@ -55,24 +27,33 @@
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-controller="Categories" asp-action="ListOfCategories">Каталог</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Приватность</a>
+                        </li>
                     </ul>
                     <partial name="_LoginRegistrationPartial" />
                 </div>
             </div>
         </nav>
     </header>
-
-    <div class="container-body">
+    <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
+    <footer class="border-top footer text-muted bg-black" style="border-color: #333 !important;">
         <div class="container text-center pt-3">
             &copy; 2025 - ElectronicsStore - <a asp-area="" asp-controller="Home" asp-action="Privacy" style="color: #ff6600;">Privacy</a>
         </div>
     </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/shared_script.js" asp-append-version="true"></script>
+    <script src="~/js/login_and_registration_script.js" asp-append-version="true"></script>
+    <script src="~/js/animation.js" asp-append-version="true"></script>
+    
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
