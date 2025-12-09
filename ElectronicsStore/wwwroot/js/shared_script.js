@@ -7,8 +7,8 @@
         var header = document.getElementById('header-top');
         if (!header) return;
 
-        // ✅ ИСПРАВЛЕНИЕ: Используем window.scrollY вместо pageYOffset
-        var scrollTop = window.scrollY || 0;
+        // ✅ Используем window.scrollY (не pageYOffset)
+        var scrollTop = window.scrollY ?? 0;
         var maxScroll = 150;
 
         var opacity = 0.9 + Math.min(scrollTop / maxScroll, 0.1);
@@ -65,7 +65,7 @@
             closeMobileMenu();
 
             setTimeout(() => {
-                pcLogin.click();
+                pcLogin?.click();
             }, 300);
         });
     }
@@ -76,7 +76,7 @@
             closeMobileMenu();
 
             setTimeout(() => {
-                pcRegister.click();
+                pcRegister?.click();
             }, 300);
         });
     }

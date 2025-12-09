@@ -7,9 +7,49 @@
     "at-rule-no-unknown": [
       true,
       {
-        "ignoreAtRules": ["supports", "webkit-keyframes"]
+        "ignoreAtRules": [
+          "supports",
+          "webkit-keyframes",
+          "keyframes",
+          "moz-document"
+        ]
       }
     ],
-    "unit-allowed-list": null
+    "unit-allowed-list": null,
+    "property-allowed-list": null,
+    "selector-pseudo-element-no-unknown": [
+      true,
+      {
+        "ignorePseudoElements": [
+          "moz-range-thumb",
+          "moz-range-track",
+          "moz-color-swatch",
+          "webkit-slider-thumb",
+          "webkit-datetime-edit-day-field",
+          "webkit-datetime-edit-fields-wrapper",
+          "webkit-datetime-edit-hour-field",
+          "webkit-datetime-edit-minute",
+          "webkit-datetime-edit-month-field",
+          "webkit-datetime-edit-text",
+          "webkit-datetime-edit-year-field",
+          "webkit-date-and-time-value",
+          "webkit-outer-spin-button",
+          "webkit-inner-spin-button",
+          "webkit-calendar-picker-indicator",
+          "webkit-clear-button"
+        ]
+      }
+    ],
+    "selector-pseudo-class-no-unknown": [
+      true,
+      {
+        "ignorePseudoClasses": [
+          "moz-placeholder-shown",
+          "webkit-autofill"
+        ]
+      }
+    ],
+    "function-no-unknown": null,
+    "declaration-property-value-disallowed-list": null
   }
 }

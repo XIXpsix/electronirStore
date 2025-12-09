@@ -19,7 +19,8 @@ builder.Services.AddScoped<IBaseStorage<Product>, BaseStorage<Product>>();
 // 3. Регистрация Сервисов (BLL) - Бизнес-логика
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IProductService, ProductService>();
-
+// Регистрация универсального репозитория
+builder.Services.AddScoped(typeof(IBaseStorage<>), typeof(BaseStorage<>));
 // 4. Добавление MVC контроллеров
 builder.Services.AddControllersWithViews();
 

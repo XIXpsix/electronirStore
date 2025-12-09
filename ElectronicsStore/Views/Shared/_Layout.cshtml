@@ -10,11 +10,9 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-black box-shadow mb-3">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm box-shadow mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand text-uppercase fw-bold" asp-area="" asp-controller="Home" asp-action="Index" style="color: #ff6600;">
-                    ElectronicsStore
-                </a>
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">ElectronicsStore</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -22,29 +20,37 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Главная</a>
+                            <a class="nav-link" asp-controller="Home" asp-action="Index">Главная</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Categories" asp-action="ListOfCategories">Каталог</a>
+                            <a class="nav-link" asp-controller="Product" asp-action="Index">Каталог товаров</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Приватность</a>
+                            <a class="nav-link" asp-controller="Home" asp-action="Privacy">О нас</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Home" asp-action="Contact">Контакты</a>
                         </li>
                     </ul>
-                    <partial name="_LoginRegistrationPartial" />
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link text-warning" href="#">Вход / Регистрация</a>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </nav>
     </header>
+
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted bg-black" style="border-color: #333 !important;">
-        <div class="container text-center pt-3">
-            &copy; 2025 - ElectronicsStore - <a asp-area="" asp-controller="Home" asp-action="Privacy" style="color: #ff6600;">Privacy</a>
+    <footer class="footer text-muted">
+        <div class="container text-center py-3">
+            &copy; 2025 - ElectronicsStore - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
 
