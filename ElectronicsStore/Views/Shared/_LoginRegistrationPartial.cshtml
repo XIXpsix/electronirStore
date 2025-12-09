@@ -1,109 +1,79 @@
-﻿@model ElectronicsStore.Models.RegisterViewModel
+﻿@model RegisterViewModel
 
-<div class="modal-overlay" id="modal-overlay">
-    <div class="modal-content" id="modal-content-box">
-        <span class="modal-close" id="modal-close">&times;</span>
+<!-- ✅ МОДАЛЬНОЕ ОКНО (кастомное, БЕЗ Bootstrap Modal!) -->
+<div id="modal-overlay" class="modal-overlay">
+    <div id="modal-content" class="modal-content">
+        
+        <!-- Крестик для закрытия -->
+        <button type="button" class="modal-close">&times;</button>
 
-        <div id="registration-success-container" style="display: none; text-align: center; padding: 30px;">
-            <img src="~/img/party.gif" alt="Успешно" style="width: 100px; height: 100px; margin-bottom: 15px; object-fit: contain;" />
-            <h2 class="modal-title" style="color: #ffffff;">Регистрация успешна!</h2>
-            <p style="color: #ccc; margin-top: 10px;">Аккаунт создан. Теперь вы можете войти.</p>
-        </div>
+        <!-- Слайдер с двумя формами -->
+        <div class="modal-slider">
 
-        <div id="login-success-container" style="display: none; text-align: center; padding: 30px;">
-            <img src="~/img/party.gif" alt="Успешно" style="width: 100px; height: 100px; margin-bottom: 15px; object-fit: contain;" />
-            <h2 class="modal-title" style="color: #ffffff;">Вход выполнен!</h2>
-            <p style="color: #ccc; margin-top: 10px;">Добро пожаловать.</p>
-        </div>
-
-        <div id="confirm-email-container" style="display: none; padding: 30px 40px;">
-            <h2 class="modal-title">Подтверждение</h2>
-            <p style="color: #ccc; text-align: center; margin-bottom: 20px; font-size: 0.9rem;">
-                Мы отправили код на вашу почту.<br>Введите его ниже.
-            </p>
-
-            <form id="confirm-email-form" asp-controller="Account" asp-action="ConfirmEmail" method="post">
-                <div id="confirm-error-container" class="modal-server-error"></div>
-                <input type="hidden" name="Email" id="confirm-email-hidden-input" />
-
-                <div class="modal-form-group">
-                    <label>Код из письма</label>
-                    <input name="Code" class="modal-input" type="text" placeholder="Например: 1234" required autocomplete="off" />
-                </div>
-
-                <button type="submit" class="modal-button">Подтвердить</button>
-            </form>
-
-            <div class="modal-switcher" style="margin-top: 20px; display: flex; justify-content: space-between; font-size: 0.9rem;">
-                <a href="#" id="back-to-register-link" style="color: #aaa; text-decoration: none;">← Назад</a>
-                <a href="#" id="resend-code-link">Отправить код снова</a>
-            </div>
-            <p id="resend-message" style="display:none; color: #4caf50; text-align: center; margin-top: 10px; font-size: 0.85rem;">Код отправлен!</p>
-        </div>
-
-        <div class="modal-slider" id="modal-slider-container">
-
-            <div class="modal-form-container" id="login-form-container">
+            <!-- === ФОРМА ВХОДА === -->
+            <div class="modal-form-container">
                 <h2 class="modal-title">Вход</h2>
-                <form id="login-form" asp-controller="Account" asp-action="Login" method="post">
-                    <div id="login-error-container" class="modal-server-error"></div>
+                <form id="loginForm" method="post">
+                    
+                    <div id="loginError" class="modal-server-error"></div>
 
                     <div class="modal-form-group">
-                        <label>Email или Логин</label>
-                        <input name="LoginOrEmail" class="modal-input" type="text" placeholder="Введите Email или Логин" required />
+                        <label for="loginEmail">Email:</label>
+                        <input type="email" id="loginEmail" name="email" class="modal-input" required />
                     </div>
 
                     <div class="modal-form-group">
-                        <label>Пароль</label>
-                        <input name="Password" class="modal-input" type="password" placeholder="Введите пароль" required />
+                        <label for="loginPassword">Пароль:</label>
+                        <input type="password" id="loginPassword" name="password" class="modal-input" required />
                     </div>
 
                     <button type="submit" class="modal-button">Войти</button>
-                    <div class="form-btn-container">
-                        <a class="google-btn" href="#" id="google-login-btn">
-                            <img src="~/img/G.png" alt="Google" style="width:60px; margin-right:10px;" />
-                            Войти через Google
-                        </a>
-                    </div>
                 </form>
-                <p class="modal-switcher">Нет аккаунта? <a href="#" id="show-register-link">Регистрация</a></p>
+
+                <div class="modal-switcher">
+                    Нет аккаунта? 
+                    <a href="#" id="go-to-register">Зарегистрироваться</a>
+                </div>
             </div>
 
-
-            <div class="modal-form-container" id="register-form-container">
+            <!-- === ФОРМА РЕГИСТРАЦИИ === -->
+            <div class="modal-form-container">
                 <h2 class="modal-title">Регистрация</h2>
-                <form id="register-form" asp-controller="Account" asp-action="Register" method="post">
-                    <div id="register-error-container" class="modal-server-error"></div>
+                <form id="registerForm" method="post">
+                    
+                    <div id="registerError" class="modal-server-error"></div>
 
                     <div class="modal-form-group">
-                        <label asp-for="Email">Email</label>
-                        <input asp-for="Email" class="modal-input" type="text" placeholder="mail@example.com" />
-                        <span asp-validation-for="Email" class="modal-error-message"></span>
+                        <label for="registerEmail">Email:</label>
+                        <input type="email" id="registerEmail" name="email" class="modal-input" required />
                     </div>
 
                     <div class="modal-form-group">
-                        <label asp-for="Login">Логин</label>
-                        <input asp-for="Login" class="modal-input" type="text" placeholder="Придумайте логин" />
-                        <span asp-validation-for="Login" class="modal-error-message"></span>
+                        <label for="registerPassword">Пароль:</label>
+                        <input type="password" id="registerPassword" name="password" class="modal-input" required />
                     </div>
 
                     <div class="modal-form-group">
-                        <label asp-for="Password">Пароль</label>
-                        <input asp-for="Password" class="modal-input" type="password" placeholder="Пароль" />
-                        <span asp-validation-for="Password" class="modal-error-message"></span>
-                    </div>
-
-                    <div class="modal-form-group">
-                        <label asp-for="PasswordConfirm">Повтор пароля</label>
-                        <input asp-for="PasswordConfirm" class="modal-input" type="password" placeholder="Повторите пароль" />
-                        <span asp-validation-for="PasswordConfirm" class="modal-error-message"></span>
+                        <label for="registerConfirm">Повторите пароль:</label>
+                        <input type="password" id="registerConfirm" name="confirmPassword" class="modal-input" required />
                     </div>
 
                     <button type="submit" class="modal-button">Зарегистрироваться</button>
                 </form>
-                <p class="modal-switcher">Уже есть аккаунт? <a href="#" id="show-login-link">Войти</a></p>
+
+                <div class="modal-switcher">
+                    Уже есть аккаунт? 
+                    <a href="#" id="go-to-login">Войти</a>
+                </div>
             </div>
 
         </div>
     </div>
 </div>
+
+<style>
+    /* Дополнительный фикс для прокрутки при открытом модале */
+    body.modal-open {
+        overflow: hidden;
+    }
+</style>

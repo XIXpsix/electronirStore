@@ -1,0 +1,26 @@
+﻿@model ElectronicsStore.Models.ConfirmEmailViewModel
+@{
+    ViewData["Title"] = "Подтверждение";
+}
+
+<div class="container py-5 d-flex justify-content-center">
+    <div class="card shadow-lg" style="max-width: 400px; width: 100%;">
+        <div class="card-header bg-primary text-white text-center">
+            <h5>Введите код</h5>
+        </div>
+        <div class="card-body">
+            <p class="text-center text-muted small">Код подтверждения был "отправлен" на <b>@Model.Email</b> (ищи в Output Visual Studio).</p>
+
+            <form asp-action="ConfirmEmail" method="post">
+                <input type="hidden" asp-for="Email" />
+
+                <div class="form-group mb-3">
+                    <input asp-for="Code" class="form-control text-center fs-4" placeholder="123456" maxlength="6" />
+                    <span asp-validation-for="Code" class="text-danger small"></span>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">Подтвердить</button>
+            </form>
+        </div>
+    </div>
+</div>

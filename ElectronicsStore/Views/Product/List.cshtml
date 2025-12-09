@@ -1,48 +1,110 @@
 ﻿@model IEnumerable<ElectronicsStore.Domain.Entity.Product>
 
 @{
-    ViewData["Title"] = "Список товаров";
+    ViewData["Title"] = "Каталог";
+    int currentCategoryId = ViewBag.CategoryId ?? 0;
 }
 
-<div class="container py-5">
-    <h2 class="text-center mb-4">Наши товары</h2>
+<div class="container py-3">
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="input-group input-group-lg shadow-sm">
+                <span class="input-group-text bg-dark border-secondary text-white">🔍</span>
+                <input type="text" class="form-control bg-dark text-white border-secondary"
+                       id="nameSearch"
+                       placeholder="Найти товар (например, iPhone 15)..."
+                       aria-label="Поиск">
+                <button class="btn btn-primary px-4" type="button" onclick="applyFilters()">Найти</button>
+            </div>
+        </div>
+    </div>
 
     <div class="row">
-        @if (!Model.Any())
-        {
-            <div class="col-12">
-                <p class="text-center text-muted">Товары пока не добавлены.</p>
-            </div>
-        }
-        else
-        {
-            @foreach (var product in Model)
-            {
-                // col-12 делает блок во всю ширину (столбиком)
-                <div class="col-12 mb-4">
-                    <div class="card shadow-sm h-100">
-                        <div class="row g-0">
-                            <div class="col-md-3">
-                                <img src="@product.ImagePath" class="img-fluid rounded-start" alt="@product.Name" style="height: 200px; width: 100%; object-fit: contain; padding: 10px;">
+        <div class="col-md-3">
+            <div class="card shadow border-0 mb-4" style="background-color: #1a1a1a;">
+                <div class="card-header text-white fw-bold text-uppercase" style="background-color: #ff6600;">
+                    Фильтры
+                </div>
+                <div class="card-body">
+                    <form id="filterForm">
+                        <input type="hidden" id="categoryId" value="@currentCategoryId" />
+
+                        <div class="mb-4">
+                            <label class="form-label text-warning fw-bold">Цена (₽)</label>
+                            <div class="d-flex gap-2">
+                                <input type="number" class="form-control form-control-sm" id="minPrice" placeholder="От">
+                                <input type="number" class="form-control form-control-sm" id="maxPrice" placeholder="До">
                             </div>
+                        </div>
 
-                            <div class="col-md-9">
-                                <div class="card-body d-flex flex-column h-100">
-                                    <h4 class="card-title">@product.Name</h4>
-                                    <p class="card-text text-muted">@product.Description</p>
+                        <div class="mb-4">
+                            <label class="form-label text-warning fw-bold">Сортировка</label>
+                            <select class="form-select form-select-sm" id="sortType">
+                                <option value="price_asc">Сначала дешевые</option>
+                                <option value="price_desc">Сначала дорогие</option>
+                                <option value="name_asc">По названию (А-Я)</option>
+                            </select>
+                        </div>
 
-                                    <div class="mt-auto d-flex justify-content-between align-items-center">
-                                        <h5 class="text-primary mb-0">@product.Price ₽</h5>
-                                        <a asp-action="GetProduct" asp-controller="Product" asp-route-id="@product.Id" class="btn btn-primary">
-                                            Подробнее
-                                        </a>
+                        <button type="button" class="btn btn-outline-primary w-100" onclick="applyFilters()">Применить</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="text-white" id="catalogTitle">Результаты</h3>
+                <span class="badge bg-secondary" id="productsCount">@Model.Count() шт.</span>
+            </div>
+
+            <div class="row" id="productsContainer">
+                @if (!Model.Any())
+                {
+                    <div class="col-12 text-center py-5">
+                        <h4 class="text-muted">Товары не найдены :(</h4>
+                    </div>
+                }
+                else
+                {
+                    @foreach (var product in Model)
+                    {
+                        // col-12 делает карточку во всю ширину
+                        <div class="col-12 mb-3">
+                            <div class="card h-100 overflow-hidden">
+                                <div class="row g-0">
+                                    <div class="col-md-3 bg-white d-flex align-items-center justify-content-center p-3">
+                                        <img src="@product.ImagePath" class="img-fluid rounded" alt="@product.Name"
+                                             style="max-height: 160px; width: auto; object-fit: contain;">
+                                    </div>
+
+                                    <div class="col-md-9">
+                                        <div class="card-body d-flex flex-column h-100">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <h4 class="card-title mb-1">@product.Name</h4>
+                                                <h3 class="text-warning mb-0 fw-bold">@product.Price.ToString("N0") ₽</h3>
+                                            </div>
+
+                                            <p class="card-text text-muted mt-2 mb-3 small flex-grow-1">
+                                                @product.Description
+                                            </p>
+
+                                            <div class="mt-auto text-end">
+                                                <a href="/Product/GetProduct/@product.Id" class="btn btn-primary stretched-link">
+                                                    Смотреть товар
+                                                </a>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-            }
-        }
+                    }
+                }
+            </div>
+        </div>
     </div>
 </div>
+
+<script src="~/js/catalog_script.js"></script>

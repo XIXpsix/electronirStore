@@ -7,8 +7,8 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1000;
+    background-color: rgba(0, 0, 0, 0.7); /* ✅ Увеличили затемнение */
+    z-index: 2000; /* ✅ КРИТИЧНО: Выше чем header (100) и мобильное меню (1500) */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -29,18 +29,19 @@
 .modal-content {
     position: relative;
     width: 100%;
-    max-width: 450px; /* Можно оставить пошире */
-    overflow: hidden;
+    max-width: 450px;
+    max-height: 90vh; 
+    overflow-y: auto; 
     padding: 0;
     border-radius: 12px;
-    /* ✅ ИЗМЕНЕНИЕ: Убираем фон-картинку, ставим фон контента */
+  
     background-image: none;
-    background-color: #2a2a2a; /* Тот же, что у .container-body */
-    /* ✅ ИЗМЕНЕНИЕ: Добавляем ОРАНЖЕВУЮ рамку */
-    border: 1px solid #ff6600;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+    background-color: #2a2a2a;
+    border: 2px solid #ff6600;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
     transform: scale(0.9);
     transition: transform 0.3s ease;
+    margin: 20px; 
 }
 
 .modal-overlay.active .modal-content {
@@ -252,3 +253,201 @@
         box-shadow: 0 1px 3px rgba(0,0,0,0.2);
         color: #333;
     }
+
+document.addEventListener("DOMContentLoaded", function () {
+    // =========================================================
+    // УПРАВЛЕНИЕ МОДАЛЬНЫМ ОКНОМ (КАСТОМНОЕ)
+    // =========================================================
+
+    const modalOverlay = document.getElementById("modal-overlay");
+    const modalContent = document.getElementById("modal-content");
+    const modalClose = document.querySelector(".modal-close");
+    
+    const loginForm = document.getElementById("loginForm");
+    const registerForm = document.getElementById("registerForm");
+
+    // Кнопки открытия
+    const openLoginBtns = document.querySelectorAll("#click-to-hide-login, #mobile-login-trigger");
+    const openRegisterBtns = document.querySelectorAll("#click-to-hide-register, #mobile-register-trigger");
+
+    // Кнопки переключения форм
+    const switchToRegisterBtn = document.getElementById("go-to-register");
+    const switchToLoginBtn = document.getElementById("go-to-login");
+
+    // ✅ Функция ОТКРЫТИЯ модального окна
+    function openModal(formType = 'login') {
+        if (!modalOverlay) {
+            console.error("Элемент #modal-overlay не найден!");
+            return;
+        }
+        
+        modalOverlay.classList.add("active");
+        
+        if (formType === 'register') {
+            modalContent?.classList.add("show-register");
+        } else {
+            modalContent?.classList.remove("show-register");
+        }
+    }
+
+    // ✅ Функция ЗАКРЫТИЯ модального окна
+    function closeModal() {
+        if (modalOverlay) {
+            modalOverlay.classList.remove("active");
+        }
+    }
+
+    // ✅ Закрытие по крестику
+    if (modalClose) {
+        modalClose.addEventListener("click", closeModal);
+    }
+
+    // ✅ Закрытие по клику на оверлей (но не на содержимое окна)
+    if (modalOverlay) {
+        modalOverlay.addEventListener("click", function (e) {
+            if (e.target === modalOverlay) {
+                closeModal();
+            }
+        });
+    }
+
+    // ✅ Закрытие по Escape
+    document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") {
+            closeModal();
+        }
+    });
+
+    // ✅ Кнопки "Войти"
+    openLoginBtns.forEach(btn => {
+        if (btn) {
+            btn.addEventListener("click", (e) => {
+                e.preventDefault();
+                openModal('login');
+            });
+        }
+    });
+
+    // ✅ Кнопки "Регистрация"
+    openRegisterBtns.forEach(btn => {
+        if (btn) {
+            btn.addEventListener("click", (e) => {
+                e.preventDefault();
+                openModal('register');
+            });
+        }
+    });
+
+    // ✅ Переключение на регистрацию
+    if (switchToRegisterBtn) {
+        switchToRegisterBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            openModal('register');
+        });
+    }
+
+    // ✅ Переключение на вход
+    if (switchToLoginBtn) {
+        switchToLoginBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            openModal('login');
+        });
+    }
+
+    // =========================================================
+    // ЛОГИКА ВХОДА (LOGIN)
+    // =========================================================
+    if (loginForm) {
+        loginForm.addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            const errorSpan = document.getElementById("loginError");
+            if (errorSpan) errorSpan.innerText = "";
+
+            const formData = new FormData(loginForm);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch('/Account/Login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    closeModal();
+                    window.location.href = result.returnUrl || "/";
+                } else {
+                    if (errorSpan) {
+                        errorSpan.classList.add("show");
+                        errorSpan.innerText = result.message || "Ошибка входа";
+                    }
+                }
+            } catch (error) {
+                console.error("Ошибка:", error);
+                if (errorSpan) {
+                    errorSpan.classList.add("show");
+                    errorSpan.innerText = "Ошибка сети";
+                }
+            }
+        });
+    }
+
+    // =========================================================
+    // ЛОГИКА РЕГИСТРАЦИИ (REGISTER)
+    // =========================================================
+    if (registerForm) {
+        registerForm.addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            const errorSpan = document.getElementById("registerError");
+            if (errorSpan) errorSpan.innerText = "";
+
+            const password = document.getElementById("registerPassword")?.value;
+            const confirm = document.getElementById("registerConfirm")?.value;
+
+            if (password !== confirm) {
+                if (errorSpan) {
+                    errorSpan.classList.add("show");
+                    errorSpan.innerText = "Пароли не совпадают";
+                }
+                return;
+            }
+
+            const formData = new FormData(registerForm);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch('/Account/Register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    closeModal();
+                    if (result.redirectUrl) {
+                        window.location.href = result.redirectUrl;
+                    } else {
+                        location.reload();
+                    }
+                } else {
+                    if (errorSpan) {
+                        errorSpan.classList.add("show");
+                        errorSpan.innerText = result.message || "Ошибка регистрации";
+                    }
+                }
+            } catch (error) {
+                console.error("Ошибка:", error);
+                if (errorSpan) {
+                    errorSpan.classList.add("show");
+                    errorSpan.innerText = "Ошибка сети";
+                }
+            }
+        });
+    }
+});

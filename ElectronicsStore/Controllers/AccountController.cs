@@ -6,20 +6,15 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
+using System.Diagnostics;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Authorization;
 
 namespace ElectronicsStore.Controllers
 {
-    public class AccountController : Controller
+    // Исправлено: Используем Primary Constructor (параметры прямо в имени класса)
+    public class AccountController(ElectronicsStoreContext context, IMemoryCache memoryCache) : Controller
     {
-        private readonly ElectronicsStoreContext _context;
-
-        public AccountController(ElectronicsStoreContext context)
-        {
-            _context = context;
-        }
-
         // ===================== ВХОД (LOGIN) =====================
         [HttpGet]
         public IActionResult Login(string? returnUrl = null)
@@ -30,19 +25,17 @@ namespace ElectronicsStore.Controllers
         [HttpPost]
         public async Task<IActionResult> Login([FromBody] LoginViewModel model)
         {
-            // 1. Ищем пользователя в базе (по Email или Логину)
-            var user = await _context.Users
+            // Используем LoginOrEmail (как в исправленной модели)
+            var user = await context.Users
                 .FirstOrDefaultAsync(u => u.Email == model.LoginOrEmail || u.Login == model.LoginOrEmail);
 
-            // 2. Проверяем пароль (Внимание: тут сравнение без хеша, как у друга. Для продакшена нужен хеш!)
             if (user == null || user.Password != model.Password)
             {
                 return BadRequest(new { message = "Неверный логин или пароль" });
             }
 
-            // 3. Авторизуем (ставим куки)
             await Authenticate(user);
-
+            // Если ReturnUrl null, идем на главную ("/")
             return Ok(new { message = "Вход выполнен успешно!", returnUrl = model.ReturnUrl ?? "/" });
         }
 
@@ -53,33 +46,73 @@ namespace ElectronicsStore.Controllers
         [HttpPost]
         public async Task<IActionResult> Register([FromBody] RegisterViewModel model)
         {
-            // 1. Проверяем, есть ли такой email
-            if (await _context.Users.AnyAsync(u => u.Email == model.Email))
+            if (await context.Users.AnyAsync(u => u.Email == model.Email || u.Login == model.Login))
             {
-                return BadRequest(new { message = "Пользователь с такой почтой уже существует" });
+                return BadRequest(new { message = "Пользователь уже существует" });
             }
 
-            // 2. Создаем нового пользователя
+            // Упрощенное создание рандома (Random.Shared)
+            var code = Random.Shared.Next(100000, 999999).ToString();
+
+            // === ВЫВОД КОДА В КОНСОЛЬ (Вместо почты, чтобы не падало) ===
+            Debug.WriteLine($"*********************************************");
+            Debug.WriteLine($" КОД ДЛЯ {model.Email}: {code}");
+            Debug.WriteLine($"*********************************************");
+
+            memoryCache.Set(model.Email, new { Model = model, Code = code }, TimeSpan.FromMinutes(10));
+
+            return Ok(new { message = "Код отправлен", redirectUrl = Url.Action("ConfirmEmail", new { email = model.Email }) });
+        }
+
+        // ===================== ПОДТВЕРЖДЕНИЕ =====================
+        [HttpGet]
+        public IActionResult ConfirmEmail(string email)
+        {
+            return View(new ConfirmEmailViewModel { Email = email });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ConfirmEmail(ConfirmEmailViewModel model)
+        {
+            if (!ModelState.IsValid) return View(model);
+
+            if (!memoryCache.TryGetValue(model.Email, out object? cacheEntry) || cacheEntry == null)
+            {
+                ModelState.AddModelError("", "Время истекло.");
+                return View(model);
+            }
+
+            dynamic data = cacheEntry;
+            string storedCode = data.Code;
+            RegisterViewModel registerData = data.Model;
+
+            if (storedCode != model.Code)
+            {
+                ModelState.AddModelError("Code", "Неверный код");
+                return View(model);
+            }
+
+            // Создаем пользователя
             var user = new User
             {
                 Id = Guid.NewGuid(),
-                Login = model.Login,
-                Email = model.Email,
-                Password = model.Password, // В методичке друга сохраняют пароль. В идеале нужен HashPasswordHelper
+                Login = registerData.Login,
+                Email = registerData.Email,
+                Password = registerData.Password,
                 Role = "User",
                 CreatedAt = DateTime.UtcNow
             };
 
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
+            context.Users.Add(user);
+            await context.SaveChangesAsync();
 
-            // 3. Сразу авторизуем
+            memoryCache.Remove(model.Email);
             await Authenticate(user);
 
-            return Ok(new { message = "Регистрация успешна!" });
+            return RedirectToAction("Index", "Home");
         }
 
-        // ===================== GOOGLE AUTH =====================
+        // ===================== GOOGLE / LOGOUT =====================
         [HttpGet]
         public async Task AuthenticationGoogle(string returnUrl = "/")
         {
@@ -96,10 +129,9 @@ namespace ElectronicsStore.Controllers
             if (!result.Succeeded) return RedirectToAction("Login");
 
             var email = result.Principal.FindFirst(ClaimTypes.Email)?.Value;
-
             if (email != null)
             {
-                var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+                var user = await context.Users.FirstOrDefaultAsync(u => u.Email == email);
                 if (user == null)
                 {
                     user = new User
@@ -107,12 +139,12 @@ namespace ElectronicsStore.Controllers
                         Id = Guid.NewGuid(),
                         Email = email,
                         Login = email,
-                        Password = "", // Без пароля
+                        Password = "",
                         Role = "User",
                         CreatedAt = DateTime.UtcNow
                     };
-                    _context.Users.Add(user);
-                    await _context.SaveChangesAsync();
+                    context.Users.Add(user);
+                    await context.SaveChangesAsync();
                 }
                 await Authenticate(user);
                 return LocalRedirect(returnUrl ?? "/");
@@ -120,14 +152,12 @@ namespace ElectronicsStore.Controllers
             return RedirectToAction("Login");
         }
 
-        // ===================== ВЫХОД =====================
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Index", "Home");
         }
 
-        // Вспомогательный метод
         private async Task Authenticate(User user)
         {
             var claims = new List<Claim>

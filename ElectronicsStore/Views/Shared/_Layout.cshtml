@@ -1,145 +1,58 @@
-﻿@using ElectronicsStore.Domain.Entity
-
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - ElectronicsHub</title>
-
+    <title>@ViewData["Title"] - ElectronicsStore</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/Shared.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/login_and_registration.css" asp-append-version="true" />
 </head>
 <body>
-    <div class="video-background-holder">
-        <div class="video-background-overlay"></div>
-
-        <div class="video-side left-side">
-            <video playsinline autoplay muted loop>
-                <source src="~/img/pc.mp4" type="video/mp4">
-            </video>
-        </div>
-
-        <div class="video-center-gap"></div>
-
-        <div class="video-side right-side">
-            <video playsinline autoplay muted loop>
-                <source src="~/img/pc1.mp4" type="video/mp4">
-            </video>
-        </div>
-    </div>
     <header>
-        <div id="header-top">
-            <a asp-controller="Home" asp-action="Index" class="logo">ElectronicsHub</a>
-
-            <div class="menu-icon-3-lines" id="mobile-menu-btn">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
-
-            <div class="button-header desktop-only">
-                @if (User?.Identity?.IsAuthenticated ?? false)
-                {
-                    <span class="button" style="color: white; margin-right: 10px;">@User.Identity?.Name</span>
-                    <form class="form-inline-button d-inline" asp-controller="Account" asp-action="Logout" method="post">
-                        <button type="submit" class="button">Выход</button>
-                    </form>
-                }
-                else
-                {
-                    <button id="click-to-hide-login" class="button">Войти</button>
-                    <button id="click-to-hide-register" class="button">Регистрация</button>
-                }
-            </div>
-        </div>
-
-        <div id="header-bottom" class="desktop-only">
-            <div class="menu-container">
-                <nav class="menu">
-                    <ul>
-                        <li><a asp-controller="Home" asp-action="Index">Главная</a></li>
-                        <li><a asp-controller="Home" asp-action="About">О нас</a></li>
-                        <li><a asp-controller="Home" asp-action="Catalog">Каталог товаров</a></li>
-                        <li><a asp-controller="Home" asp-action="Contacts">Контакты</a></li>
-                    </ul>
-                </nav>
-            </div>
-        </div>
-
-        <div class="mobile-menu-overlay" id="mobile-menu-container">
-            <nav class="mobile-nav-content">
-                <ul>
-                    <li><a asp-controller="Home" asp-action="Index">Главная</a></li>
-                    <li><a asp-controller="Home" asp-action="About">О нас</a></li>
-                    <li><a asp-controller="Home" asp-action="Catalog">Каталог товаров</a></li>
-                    <li><a asp-controller="Home" asp-action="Contacts">Контакты</a></li>
-
-                    <li class="menu-separator"></li>
-
-                    @if (User?.Identity?.IsAuthenticated ?? false)
-                    {
-                        <li class="user-greeting">Вы вошли как: @User.Identity?.Name</li>
-                        <li>
-                            <form asp-controller="Account" asp-action="Logout" method="post" style="width: 100%; display:flex; justify-content:center;">
-                                <button type="submit" class="mobile-btn logout-btn">Выйти из аккаунта</button>
-                            </form>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-black box-shadow mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand text-uppercase fw-bold" asp-area="" asp-controller="Home" asp-action="Index" style="color: #ff6600;">
+                    ElectronicsStore
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Главная</a>
                         </li>
-                    }
-                    else
-                    {
-                        <li><button id="mobile-login-trigger" class="mobile-btn login-btn">Войти</button></li>
-                        <li><button id="mobile-register-trigger" class="mobile-btn register-btn">Регистрация</button></li>
-                    }
-                </ul>
-            </nav>
-        </div>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Categories" asp-action="ListOfCategories">Каталог</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Приватность</a>
+                        </li>
+                    </ul>
+                    <partial name="_LoginRegistrationPartial" />
+                </div>
+            </div>
+        </nav>
     </header>
-
-    <div class="container-body">
-        <main role="main">
+    <div class="container">
+        <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
 
-    <footer>
-        <div class="footer-content">
-            <div class="footer-left">
-                <a asp-controller="Home" asp-action="Index" class="logo">ElectronicsHub</a>
-                <p>
-                    Ваш надежный поставщик электроники и бытовой техники.
-                    Мы предлагаем только сертифицированную продукцию от ведущих мировых брендов.
-                </p>
-                <p class="footer-copy">
-                    © @DateTime.Now.Year ElectronicsHub. Все права защищены.
-                </p>
-            </div>
-
-            <div class="footer-right">
-                <h4>Навигация</h4>
-                <nav class="menu">
-                    <ul>
-                        <li><a asp-controller="Home" asp-action="Index">Главная</a></li>
-                        <li><a asp-controller="Home" asp-action="About">О нас</a></li>
-                        <li><a asp-controller="Home" asp-action="Catalog">Каталог товаров</a></li>
-                        <li><a asp-controller="Home" asp-action="Contacts">Контакты</a></li>
-                    </ul>
-                </nav>
-            </div>
+    <footer class="border-top footer text-muted bg-black" style="border-color: #333 !important;">
+        <div class="container text-center pt-3">
+            &copy; 2025 - ElectronicsStore - <a asp-area="" asp-controller="Home" asp-action="Privacy" style="color: #ff6600;">Privacy</a>
         </div>
     </footer>
 
-    @await Html.PartialAsync("_LoginRegistrationPartial", new ElectronicsStore.Models.RegisterViewModel())
-
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-
+    <script src="~/js/shared_script.js" asp-append-version="true"></script>
     <script src="~/js/login_and_registration_script.js" asp-append-version="true"></script>
     <script src="~/js/animation.js" asp-append-version="true"></script>
-
-    <script src="~/js/shared_script.js" asp-append-version="true"></script>
-
+    
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

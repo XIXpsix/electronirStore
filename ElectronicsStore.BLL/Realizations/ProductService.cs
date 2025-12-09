@@ -1,6 +1,6 @@
 using ElectronicsStore.DAL.Interfaces;
 using ElectronicsStore.Domain;
-using ElectronicsStore.Domain.Entity; // <--- ДОБАВЛЕНО
+using ElectronicsStore.Domain.Entity; // <-- Исправляет ошибку видимости Product
 using ElectronicsStore.Domain.Enum;
 using ElectronicsStore.Domain.Filters;
 using ElectronicsStore.BLL.Interfaces;
@@ -12,7 +12,6 @@ using System.Threading.Tasks;
 
 namespace ElectronicsStore.BLL.Realizations
 {
-    // Исправлено: Primary Constructor (параметры сразу в скобках класса)
     public class ProductService(
         IBaseStorage<Product> productStorage,
         IBaseStorage<ProductImage> productImageStorage) : IProductService
@@ -23,17 +22,21 @@ namespace ElectronicsStore.BLL.Realizations
             {
                 var query = productStorage.GetAll();
 
-                query = query.Where(x => x.CategoryId == filter.CategoryId);
-
-                if (filter.MinPrice > 0 || filter.MaxPrice > 0)
+                if (filter.CategoryId > 0)
                 {
-                    if (filter.MaxPrice > 0)
-                        query = query.Where(x => x.Price >= filter.MinPrice && x.Price <= filter.MaxPrice);
-                    else
-                        query = query.Where(x => x.Price >= filter.MinPrice);
+                    query = query.Where(x => x.CategoryId == filter.CategoryId);
                 }
 
-                // Исправлено: switch expression
+                // Исправлено: Простое сравнение через ToLower() (убирает warning про StringComparison)
+                if (!string.IsNullOrWhiteSpace(filter.Name))
+                {
+                    var search = filter.Name.ToLower();
+                    query = query.Where(x => x.Name.ToLower().Contains(search));
+                }
+
+                if (filter.MinPrice > 0) query = query.Where(x => x.Price >= filter.MinPrice);
+                if (filter.MaxPrice > 0) query = query.Where(x => x.Price <= filter.MaxPrice);
+
                 query = filter.SortType switch
                 {
                     "price_asc" => query.OrderBy(x => x.Price),
@@ -44,19 +47,11 @@ namespace ElectronicsStore.BLL.Realizations
 
                 var products = await query.ToListAsync();
 
-                return new BaseResponse<List<Product>>()
-                {
-                    Data = products,
-                    StatusCode = StatusCode.OK
-                };
+                return new BaseResponse<List<Product>> { Data = products, StatusCode = StatusCode.OK };
             }
             catch (Exception ex)
             {
-                return new BaseResponse<List<Product>>()
-                {
-                    Description = $"[GetProductsByFilter] : {ex.Message}",
-                    StatusCode = StatusCode.InternalServerError
-                };
+                return new BaseResponse<List<Product>> { Description = ex.Message, StatusCode = StatusCode.InternalServerError };
             }
         }
 
@@ -64,23 +59,12 @@ namespace ElectronicsStore.BLL.Realizations
         {
             try
             {
-                var products = await productStorage.GetAll()
-                    .Where(x => x.CategoryId == categoryId)
-                    .ToListAsync();
-
-                return new BaseResponse<List<Product>>()
-                {
-                    Data = products,
-                    StatusCode = StatusCode.OK
-                };
+                var products = await productStorage.GetAll().Where(x => x.CategoryId == categoryId).ToListAsync();
+                return new BaseResponse<List<Product>> { Data = products, StatusCode = StatusCode.OK };
             }
             catch (Exception ex)
             {
-                return new BaseResponse<List<Product>>()
-                {
-                    Description = $"[GetProductsByCategory] : {ex.Message}",
-                    StatusCode = StatusCode.InternalServerError
-                };
+                return new BaseResponse<List<Product>> { Description = ex.Message, StatusCode = StatusCode.InternalServerError };
             }
         }
 
@@ -89,19 +73,11 @@ namespace ElectronicsStore.BLL.Realizations
             try
             {
                 var products = await productStorage.GetAll().ToListAsync();
-                return new BaseResponse<IEnumerable<Product>>()
-                {
-                    Data = products,
-                    StatusCode = StatusCode.OK
-                };
+                return new BaseResponse<IEnumerable<Product>> { Data = products, StatusCode = StatusCode.OK };
             }
             catch (Exception ex)
             {
-                return new BaseResponse<IEnumerable<Product>>()
-                {
-                    Description = $"[GetProducts] : {ex.Message}",
-                    StatusCode = StatusCode.InternalServerError
-                };
+                return new BaseResponse<IEnumerable<Product>> { Description = ex.Message, StatusCode = StatusCode.InternalServerError };
             }
         }
 
@@ -114,27 +90,13 @@ namespace ElectronicsStore.BLL.Realizations
                     .FirstOrDefaultAsync(x => x.Id == id);
 
                 if (product == null)
-                {
-                    return new BaseResponse<Product>()
-                    {
-                        Description = "Товар не найден",
-                        StatusCode = StatusCode.ProductNotFound
-                    };
-                }
+                    return new BaseResponse<Product> { StatusCode = StatusCode.ProductNotFound, Description = "Товар не найден" };
 
-                return new BaseResponse<Product>()
-                {
-                    Data = product,
-                    StatusCode = StatusCode.OK
-                };
+                return new BaseResponse<Product> { Data = product, StatusCode = StatusCode.OK };
             }
             catch (Exception ex)
             {
-                return new BaseResponse<Product>()
-                {
-                    Description = $"[GetProduct] : {ex.Message}",
-                    StatusCode = StatusCode.InternalServerError
-                };
+                return new BaseResponse<Product> { Description = ex.Message, StatusCode = StatusCode.InternalServerError };
             }
         }
 
@@ -146,20 +108,11 @@ namespace ElectronicsStore.BLL.Realizations
                     .Where(x => x.ProductId == id)
                     .Select(x => x.ImagePath)
                     .ToListAsync();
-
-                return new BaseResponse<List<string>>()
-                {
-                    Data = images,
-                    StatusCode = StatusCode.OK
-                };
+                return new BaseResponse<List<string>> { Data = images, StatusCode = StatusCode.OK };
             }
             catch (Exception ex)
             {
-                return new BaseResponse<List<string>>()
-                {
-                    Description = $"[GetImagesByProductId] : {ex.Message}",
-                    StatusCode = StatusCode.InternalServerError
-                };
+                return new BaseResponse<List<string>> { Description = ex.Message, StatusCode = StatusCode.InternalServerError };
             }
         }
     }

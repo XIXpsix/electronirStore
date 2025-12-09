@@ -1,232 +1,81 @@
-﻿document.addEventListener("DOMContentLoaded", function () {
+﻿async function applyFilters() {
+    const data = {
+        categoryId: parseInt(document.getElementById("categoryId").value) || 0,
+        minPrice: parseFloat(document.getElementById("minPrice").value) || 0,
+        maxPrice: parseFloat(document.getElementById("maxPrice").value) || 0,
+        name: document.getElementById("nameSearch").value,
+        sortType: document.getElementById("sortType").value
+    };
 
-    // --- НАСТРОЙКИ СЛАЙДЕРА ---
-    const rangeInput = document.querySelectorAll(".range-input input"),
-        priceInput = document.querySelectorAll(".price-input input"),
-        range = document.querySelector(".slider .progress");
-
-    let priceGap = 1000;
-
-    // Обновление полоски прогресса
-    function updateProgress() {
-        let minVal = parseInt(rangeInput[0].value),
-            maxVal = parseInt(rangeInput[1].value);
-        let maxRange = parseInt(rangeInput[0].max); // Берем макс из атрибута
-
-        if (maxRange === 0) return; // Защита
-
-        range.style.left = ((minVal / maxRange) * 100) + "%";
-        range.style.right = (100 - (maxVal / maxRange) * 100) + "%";
-    }
-
-    // Ввод вручную в поля (Input numbers)
-    priceInput.forEach(input => {
-        input.addEventListener("input", e => {
-            let minPrice = parseInt(priceInput[0].value),
-                maxPrice = parseInt(priceInput[1].value);
-            let maxRange = parseInt(rangeInput[0].max);
-
-            if ((maxPrice - minPrice >= priceGap) && maxPrice <= maxRange) {
-                if (e.target.className.includes("input-min")) {
-                    rangeInput[0].value = minPrice;
-                    range.style.left = ((minPrice / maxRange) * 100) + "%";
-                } else {
-                    rangeInput[1].value = maxPrice;
-                    range.style.right = (100 - (maxPrice / maxRange) * 100) + "%";
-                }
-            }
+    try {
+        const response = await fetch('/Product/Filter', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
         });
-    });
 
-    // Движение ползунков (Range sliders)
-    rangeInput.forEach(input => {
-        input.addEventListener("input", e => {
-            let minVal = parseInt(rangeInput[0].value),
-                maxVal = parseInt(rangeInput[1].value);
+        if (!response.ok) throw new Error('Ошибка сети');
 
-            if ((maxVal - minVal) < priceGap) {
-                if (e.target.className.includes("range-min")) {
-                    rangeInput[0].value = maxVal - priceGap;
-                } else {
-                    rangeInput[1].value = minVal + priceGap;
-                }
-            } else {
-                priceInput[0].value = minVal;
-                priceInput[1].value = maxVal;
-                updateProgress();
-            }
-        });
-    });
+        const result = await response.json();
+        const container = document.getElementById("productsContainer");
+        const countLabel = document.getElementById("productsCount");
 
-    // Инициализация при загрузке
-    updateProgress();
+        container.innerHTML = "";
 
+        if (result.data && result.data.length > 0) {
+            countLabel.textContent = `${result.data.length} шт.`;
 
-    // --- ЛОГИКА AJAX (Сортировка и Фильтрация) ---
-
-    const productsContainer = document.getElementById('productsContainer');
-    const categoryId = document.getElementById('categoryId')?.value || 0;
-
-    async function fetchProducts() {
-        // Собираем данные
-        const minPrice = parseInt(priceInput[0].value) || 0;
-        const maxPrice = parseInt(priceInput[1].value) || 300000;
-        const sortType = document.getElementById('sortSelect').value;
-
-        // Показываем загрузку (опционально)
-        productsContainer.style.opacity = '0.5';
-
-        const filterData = {
-            CategoryId: parseInt(categoryId),
-            MinPrice: minPrice,
-            MaxPrice: maxPrice,
-            SortType: sortType // "price_asc", "name_asc", etc.
-        };
-
-        try {
-            const response = await fetch('/Product/Filter', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(filterData)
-            });
-
-            if (response.ok) {
-                const result = await response.json();
-                const products = result.data ? result.data : result;
-                renderProducts(products);
-            } else {
-                console.error("Ошибка сервера: " + response.status);
-            }
-        } catch (error) {
-            console.error("Ошибка сети:", error);
-        } finally {
-            productsContainer.style.opacity = '1';
-        }
-    }
-
-    function renderProducts(products) {
-        productsContainer.innerHTML = '';
-
-        if (!products || products.length === 0) {
-            productsContainer.innerHTML = '<div class="col-12"><div class="alert alert-dark text-center">Товары не найдены</div></div>';
-            return;
-        }
-
-        products.forEach(product => {
-            const imagePath = product.imagePath ? product.imagePath : "https://dummyimage.com/300x300/dee2e6/6c757d.jpg&text=No+Image";
-            const formattedPrice = new Intl.NumberFormat('ru-RU').format(product.price);
-
-            const html = `
-                <div class="col product-card">
-                    <div class="card h-100 shadow border-0 bg-dark overflow-hidden">
-                        <div class="d-flex align-items-center justify-content-center bg-white p-2" style="height: 160px;">
-                            <img src="${imagePath}" class="img-fluid" alt="${product.name}" style="max-height: 100%; max-width: 100%; object-fit: contain;">
-                        </div>
-
-                        <div class="card-body d-flex flex-column p-3">
-                            <h5 class="card-title font-weight-bold mb-1" style="color: #ff9900; font-size: 1.1rem;">${product.name}</h5>
-                            <p class="card-text text-white small mb-3" style="opacity: 0.8;">${product.description}</p>
-                            
-                            <div class="mt-auto">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="font-weight-bold text-white fs-5">${formattedPrice} ₽</span>
-                                    <button class="btn btn-sm btn-warning fw-bold">В корзину</button>
+            result.data.forEach(product => {
+                // ВАЖНО: Этот HTML полностью совпадает с новым дизайном в List.cshtml
+                const productHtml = `
+                    <div class="col-12 mb-3">
+                        <div class="card h-100 overflow-hidden">
+                            <div class="row g-0">
+                                <div class="col-md-3 bg-white d-flex align-items-center justify-content-center p-3">
+                                    <img src="${product.imagePath}" class="img-fluid rounded" alt="${product.name}" 
+                                         style="max-height: 160px; width: auto; object-fit: contain;">
+                                </div>
+                                <div class="col-md-9">
+                                    <div class="card-body d-flex flex-column h-100">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <h4 class="card-title mb-1 text-white">${product.name}</h4>
+                                            <h3 class="text-warning mb-0 fw-bold">${product.price.toLocaleString()} ₽</h3>
+                                        </div>
+                                        <p class="card-text text-muted mt-2 mb-3 small flex-grow-1">
+                                            ${product.description}
+                                        </p>
+                                        <div class="mt-auto text-end">
+                                            <a href="/Product/GetProduct/${product.id}" class="btn btn-primary stretched-link">
+                                                Смотреть товар
+                                            </a>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="card-footer bg-transparent border-top-0 p-2">
-                            <a href="/Product/GetProduct?id=${product.id}" class="btn btn-outline-light w-100 btn-sm">Подробнее</a>
-                        </div>
                     </div>
+                `;
+                container.insertAdjacentHTML('beforeend', productHtml);
+            });
+        } else {
+            countLabel.textContent = "0 шт.";
+            container.innerHTML = `
+                <div class="col-12 text-center py-5">
+                    <h4 class="text-muted">Ничего не найдено :(</h4>
+                    <p class="text-muted">Попробуйте изменить запрос</p>
                 </div>
             `;
-            productsContainer.insertAdjacentHTML('beforeend', html);
-        });
-    }
-
-    // --- ПРИВЯЗКА СОБЫТИЙ ---
-
-    // 1. Кнопка "Применить" (фильтр цены)
-    const applyBtn = document.getElementById('applyFiltersBtn');
-    if (applyBtn) {
-        applyBtn.addEventListener('click', fetchProducts);
-    }
-
-    // 2. Выпадающий список сортировки (СРАЗУ ПРИ ИЗМЕНЕНИИ)
-    const sortSelect = document.getElementById('sortSelect');
-    if (sortSelect) {
-        sortSelect.addEventListener('change', fetchProducts);
-    }
-    // --- ЖИВОЙ ПОИСК (Глава 25) ---
-
-    const searchInput = document.getElementById('elasticSearch');
-    const clearBtn = document.querySelector('.clear-search');
-
-    // Функция поиска
-    function triggerSearch() {
-        const val = searchInput.value.trim().toLowerCase();
-        const products = document.querySelectorAll('.product-card');
-        const noResultsMsg = document.getElementById('noResults'); // Получаем наш блок сообщения
-        let visibleCount = 0; // Счетчик видимых товаров
-
-        // Управление крестиком очистки
-        if (clearBtn) {
-            clearBtn.style.display = val.length > 0 ? 'block' : 'none';
         }
 
-        if (products.length > 0) {
-            products.forEach(function (elem) {
-                const titleElem = elem.querySelector('.card-title');
-
-                if (titleElem) {
-                    const textOriginal = titleElem.innerText;
-
-                    // Если текст не содержит искомую фразу
-                    if (val !== '' && textOriginal.toLowerCase().search(val) === -1) {
-                        elem.classList.add('hide'); // Скрываем
-                        titleElem.innerHTML = textOriginal;
-                    } else {
-                        elem.classList.remove('hide'); // Показываем
-                        visibleCount++; // Увеличиваем счетчик видимых
-
-                        // Подсветка текста
-                        if (val !== '') {
-                            const regex = new RegExp(`(${val})`, 'gi');
-                            titleElem.innerHTML = textOriginal.replace(regex, '<mark>$1</mark>');
-                        } else {
-                            titleElem.innerHTML = textOriginal;
-                        }
-                    }
-                }
-            });
-        }
-
-        // --- ЛОГИКА ОТОБРАЖЕНИЯ "НИЧЕГО НЕ НАЙДЕНО" ---
-        if (noResultsMsg) {
-            // Если видимых товаров 0, но на странице вообще были товары (products.length > 0)
-            if (visibleCount === 0 && products.length > 0) {
-                noResultsMsg.style.display = 'block';
-            } else {
-                noResultsMsg.style.display = 'none';
-            }
-        }
+    } catch (error) {
+        console.error('Ошибка:', error);
     }
-    
+}
 
-    // Слушатель ввода текста
-    if (searchInput) {
-        searchInput.addEventListener('input', triggerSearch);
-    }
-
-    // Слушатель кнопки очистки (крестик)
-    if (clearBtn) {
-        clearBtn.addEventListener('click', function () {
-            if (searchInput) {
-                searchInput.value = ''; // Очищаем поле
-                triggerSearch(); // Запускаем поиск (чтобы вернуть все товары)
-            }
-        });
+// Поиск по Enter
+document.getElementById("nameSearch").addEventListener("keypress", function (event) {
+    if (event.key === "Enter") {
+        event.preventDefault();
+        applyFilters();
     }
 });
