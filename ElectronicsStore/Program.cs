@@ -1,36 +1,29 @@
 ﻿using ElectronicsStore.DAL;
-using ElectronicsStore.DAL.Interfaces;   // <-- Добавлено
-using ElectronicsStore.DAL.Repositories; // <-- Добавлено
-using ElectronicsStore.BLL.Interfaces;   // <-- Добавлено
-using ElectronicsStore.BLL.Realizations; // <-- Добавлено
+using ElectronicsStore.DAL.Interfaces;
+using ElectronicsStore.DAL.Repositories;
+using ElectronicsStore.BLL.Interfaces;
+using ElectronicsStore.BLL.Realizations;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.EntityFrameworkCore;
 
+// 1. СНАЧАЛА СОЗДАЕМ BUILDER (Это самое важное, ошибка была здесь)
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Подключение БД
+// 2. Подключение к Базе Данных
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ElectronicsStoreContext>(options =>
     options.UseNpgsql(connectionString));
 
-// ==============================================================
-// 2. РЕГИСТРАЦИЯ СЕРВИСОВ И РЕПОЗИТОРИЕВ (ЭТОГО НЕ ХВАТАЛО)
-// ==============================================================
-
-// Регистрируем Базовый Репозиторий (для базы данных)
+// 3. Регистрация сервисов и репозиториев
+// Базовый репозиторий
 builder.Services.AddScoped(typeof(IBaseStorage<>), typeof(BaseStorage<>));
 
-// Регистрируем твои Сервисы (Товары, Категории)
+// Твои сервисы (Товары, Категории)
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 
-// Если у тебя есть AccountService, раскомментируй строку ниже:
-// builder.Services.AddScoped<IAccountService, AccountService>(); 
-
-// ==============================================================
-
-// 3. Настройка Аутентификации (Куки + Google)
+// 4. Настройка Аутентификации (Вход через Google и Куки)
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -44,7 +37,6 @@ builder.Services.AddAuthentication(options =>
 .AddGoogle(options =>
 {
     IConfigurationSection googleAuthNSection = builder.Configuration.GetSection("Authentication:Google");
-    // Проверка, чтобы не падало, если ключей нет в конфиге
     if (googleAuthNSection.Exists())
     {
         options.ClientId = googleAuthNSection["ClientId"];
@@ -52,13 +44,16 @@ builder.Services.AddAuthentication(options =>
     }
 });
 
-// 4. Сервисы для MVC (Контроллеры и Представления)
+// 5. Добавляем поддержку контроллеров и представлений (MVC)
 builder.Services.AddControllersWithViews();
 builder.Services.AddMemoryCache();
 
+// ==========================================
+// СБОРКА ПРИЛОЖЕНИЯ
 var app = builder.Build();
+// ==========================================
 
-// Настройка конвейера (Pipeline)
+// Настройка конвейера обработки запросов (Pipeline)
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -70,8 +65,9 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseAuthentication(); // Кто ты? (Логин)
-app.UseAuthorization();  // Можно ли тебе сюда? (Роль)
+// Порядок важен: Сначала Аутентификация (Кто ты?), потом Авторизация (Можно ли тебе?)
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
