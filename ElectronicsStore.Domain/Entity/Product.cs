@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
-namespace ElectronicsStore.Domain
+namespace ElectronicsStore.Domain.Entity
 {
     public class Product
     {
@@ -8,10 +8,7 @@ namespace ElectronicsStore.Domain
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public decimal Price { get; set; }
-
-        // --- ВОТ ЭТОГО НЕ ХВАТАЛО ---
         public string ImagePath { get; set; } = string.Empty;
-        // ----------------------------
 
         public int CategoryId { get; set; }
         public Category Category { get; set; } = null!;

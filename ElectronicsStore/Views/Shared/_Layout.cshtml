@@ -1,6 +1,4 @@
 ﻿@using ElectronicsStore.Domain.Entity
-@using Microsoft.AspNetCore.Identity
-@inject SignInManager<ApplicationUser> SignInManager
 
 <!DOCTYPE html>
 <html lang="ru">
@@ -42,7 +40,7 @@
             </div>
 
             <div class="button-header desktop-only">
-                @if (SignInManager.IsSignedIn(User))
+                @if (User?.Identity?.IsAuthenticated ?? false)
                 {
                     <span class="button" style="color: white; margin-right: 10px;">@User.Identity?.Name</span>
                     <form class="form-inline-button d-inline" asp-controller="Account" asp-action="Logout" method="post">
@@ -80,7 +78,7 @@
 
                     <li class="menu-separator"></li>
 
-                    @if (SignInManager.IsSignedIn(User))
+                    @if (User?.Identity?.IsAuthenticated ?? false)
                     {
                         <li class="user-greeting">Вы вошли как: @User.Identity?.Name</li>
                         <li>

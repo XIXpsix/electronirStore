@@ -1,5 +1,4 @@
-﻿using ElectronicsStore.Domain;
-using ElectronicsStore.Domain.Entity;
+﻿using ElectronicsStore.Domain.Entity;
 using Microsoft.EntityFrameworkCore;
 
 namespace ElectronicsStore.DAL

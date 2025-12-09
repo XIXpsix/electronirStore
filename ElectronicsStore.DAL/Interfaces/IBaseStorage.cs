@@ -1,5 +1,4 @@
-﻿using ElectronicsStore.Domain.Response;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 
 namespace ElectronicsStore.DAL.Interfaces
@@ -11,4 +10,4 @@ namespace ElectronicsStore.DAL.Interfaces
         Task<T> Update(T entity);
         IQueryable<T> GetAll();
     }
-}
+}   
