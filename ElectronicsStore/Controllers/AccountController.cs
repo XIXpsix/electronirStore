@@ -1,5 +1,5 @@
 ﻿using ElectronicsStore.BLL.Interfaces;
-using ElectronicsStore.Domain.ViewModels; // <-- Правильный namespace
+using ElectronicsStore.Domain.ViewModels;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
@@ -26,7 +26,8 @@ namespace ElectronicsStore.Controllers
             if (ModelState.IsValid)
             {
                 var response = await _accountService.Register(model);
-                if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK && response.Data != null)
+                // Добавляем проверку response.Data != null, чтобы убрать предупреждение
+                if (response.StatusCode == Domain.Enum.StatusCode.OK && response.Data != null)
                 {
                     await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(response.Data));
                     return RedirectToAction("Index", "Home");
@@ -36,18 +37,22 @@ namespace ElectronicsStore.Controllers
             return View(model);
         }
 
+        [HttpGet] // <-- Был пропущен метод для отображения страницы входа
+        public IActionResult Login() => View();
+
         [HttpPost]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
             if (ModelState.IsValid)
             {
-                // Логика входа: ищем пользователя по Email, а не по Name
                 var response = await _accountService.Login(model);
-                if (response.StatusCode == Domain.Enum.StatusCode.OK)
+
+                // Добавляем проверку response.Data != null
+                if (response.StatusCode == Domain.Enum.StatusCode.OK && response.Data != null)
                 {
-                    await _accountService.Login(model); // Если у вас аутентификация внутри сервиса
-                                                        // ИЛИ
-                                                        // await HttpContext.SignInAsync(...) // Если аутентификация здесь
+                    // ИСПРАВЛЕНИЕ: Здесь нужно создать куки, а не вызывать сервис снова
+                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(response.Data));
+
                     return RedirectToAction("Index", "Home");
                 }
                 ModelState.AddModelError("", response.Description);

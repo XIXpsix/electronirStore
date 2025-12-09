@@ -9,6 +9,25 @@
     <link rel="stylesheet" href="~/css/login_and_registration.css" asp-append-version="true" />
 </head>
 <body>
+        <video autoplay muted loop id="bg-video">
+            <source src="" type="video/mp4">
+            Ваш браузер не поддерживает видео.
+        </video>
+
+        <script>
+            // Список твоих видео
+            var videos = [
+                '/video/pc.mp4',
+                '/video/pc1.mp4'
+            ];
+
+            // Выбираем случайное видео
+            var randomVideo = videos[Math.floor(Math.random() * videos.length)];
+
+            // Устанавливаем его как источник
+            document.getElementById('bg-video').querySelector('source').src = randomVideo;
+            document.getElementById('bg-video').load(); // Перезагружаем плеер
+        </script>
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark border-bottom box-shadow mb-3">
             <div class="container-fluid">

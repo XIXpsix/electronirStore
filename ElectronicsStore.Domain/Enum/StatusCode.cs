@@ -8,11 +8,13 @@ namespace ElectronicsStore.Domain.Enum
 {
     public enum StatusCode
     {
+        // Добавляем недостающий статус
+        UserNotFound = 0,
+
         ProductNotFound = 1,
         ProductIsExists = 2,
 
-        // Общие статусы
         OK = 200,
-        InternalServerError = 500,
+        InternalServerError = 500
     }
 }

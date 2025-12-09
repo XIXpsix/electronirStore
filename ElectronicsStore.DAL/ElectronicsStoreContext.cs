@@ -64,17 +64,14 @@ namespace ElectronicsStore.DAL
                 );
             }
 
-            private static Product NewMethod()
-            {
-                return new Product
-                {
-                    Id = 1,
-                    Name = "iPhone 15",
-                    Description = "Мощный смартфон",
-                    Price = 100000,
-                    CategoryId = 1,
-                    ImagePath = "/img/iphone15.jpg"
-                };
-            }
+        private static Product NewMethod() => new Product
+        {
+            Id = 1,
+            Name = "iPhone 15",
+            Description = "Мощный смартфон",
+            Price = 100000,
+            CategoryId = 1,
+            ImagePath = "/img/iphone15.jpg"
+        };
     }
 }

@@ -3,11 +3,13 @@ using ElectronicsStore.DAL.Interfaces;
 using ElectronicsStore.Domain.Entity;
 using ElectronicsStore.Domain.Enum;
 using ElectronicsStore.Domain.Response;
-using ElectronicsStore.Domain.ViewModels; // <--- Важный using
+using ElectronicsStore.Domain.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
+using System.Security.Cryptography; // Добавлено для хеширования
+using System.Text; // Добавлено для кодировки
 using System.Threading.Tasks;
 
 namespace ElectronicsStore.BLL.Realizations
@@ -21,12 +23,20 @@ namespace ElectronicsStore.BLL.Realizations
             _userRepository = userRepository;
         }
 
-        // Метод Регистрации
+        // --- Вспомогательный метод для хеширования пароля ---
+        private string HashPassword(string password)
+        {
+            using (var sha256 = SHA256.Create())
+            {
+                var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+                return BitConverter.ToString(hashedBytes).Replace("-", "").ToLower();
+            }
+        }
+
         public async Task<BaseResponse<ClaimsIdentity>> Register(RegisterViewModel model)
         {
             try
             {
-                // Ищем по Name
                 var user = await _userRepository.GetAll().FirstOrDefaultAsync(x => x.Name == model.Name);
                 if (user != null)
                 {
@@ -38,15 +48,15 @@ namespace ElectronicsStore.BLL.Realizations
 
                 user = new User()
                 {
-                    Name = model.Name, // Используем Name
-                    Role = Role.User,  // Присваиваем Enum (0 - User)
+                    Name = model.Name,
+                    Role = Role.User,
                     Email = model.Email,
-                    Password = model.Password, // В реальном проекте здесь нужен хеш!
+                    // ИЗМЕНЕНИЕ: Хешируем пароль перед сохранением
+                    Password = HashPassword(model.Password),
                     CreatedAt = DateTime.UtcNow
                 };
 
                 await _userRepository.Add(user);
-
                 var result = Authenticate(user);
 
                 return new BaseResponse<ClaimsIdentity>()
@@ -66,29 +76,27 @@ namespace ElectronicsStore.BLL.Realizations
             }
         }
 
-        // Метод Входа (Login)
         public async Task<BaseResponse<ClaimsIdentity>> Login(LoginViewModel model)
         {
             try
             {
-                // Ищем по Name
-                // Ищем пользователя по Email, так как в модели теперь Email
-                // Исправленная строка: ищем по Email
-                // Исправленная строка: ищем по Email
                 var user = await _userRepository.GetAll().FirstOrDefaultAsync(x => x.Email == model.Email);
+                if (user == null)
                 {
                     return new BaseResponse<ClaimsIdentity>()
                     {
-                        Description = "Пользователь не найден"
+                        Description = "Пользователь не найден",
+                        StatusCode = StatusCode.UserNotFound
                     };
                 }
 
-                // Проверка пароля (в реальном проекте сверять хеши)
-                if (user.Password != model.Password)
+                // ИЗМЕНЕНИЕ: Сравниваем хеш введенного пароля с хешем в базе
+                if (user.Password != HashPassword(model.Password))
                 {
                     return new BaseResponse<ClaimsIdentity>()
                     {
-                        Description = "Неверный пароль"
+                        Description = "Неверный пароль",
+                        StatusCode = StatusCode.InternalServerError
                     };
                 }
 
@@ -97,7 +105,8 @@ namespace ElectronicsStore.BLL.Realizations
                 return new BaseResponse<ClaimsIdentity>()
                 {
                     Data = result,
-                    StatusCode = StatusCode.OK
+                    StatusCode = StatusCode.OK,
+                    Description = "Успешный вход"
                 };
             }
             catch (Exception ex)
@@ -110,17 +119,13 @@ namespace ElectronicsStore.BLL.Realizations
             }
         }
 
-
-        // Вспомогательный метод для создания Claims
         private ClaimsIdentity Authenticate(User user)
         {
             var claims = new List<Claim>
             {
                 new Claim(ClaimsIdentity.DefaultNameClaimType, user.Name),
-                // Преобразуем Enum Role в строку для Claims
                 new Claim(ClaimsIdentity.DefaultRoleClaimType, user.Role.ToString())
             };
-
             return new ClaimsIdentity(claims, "ApplicationCookie",
                 ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
         }

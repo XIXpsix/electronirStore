@@ -23,5 +23,6 @@ namespace ElectronicsStore.Domain.Entity
 
         // Добавляем список отзывов, которого не хватало
         public List<Review> Reviews { get; set; } = new List<Review>();
+        public string ImagePath { get; set; }
     }
 }
