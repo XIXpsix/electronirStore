@@ -72,8 +72,10 @@ namespace ElectronicsStore.BLL.Realizations
             try
             {
                 // Ищем по Name
-                var user = await _userRepository.GetAll().FirstOrDefaultAsync(x => x.Name == model.Name);
-                if (user == null)
+                // Ищем пользователя по Email, так как в модели теперь Email
+                // Исправленная строка: ищем по Email
+                // Исправленная строка: ищем по Email
+                var user = await _userRepository.GetAll().FirstOrDefaultAsync(x => x.Email == model.Email);
                 {
                     return new BaseResponse<ClaimsIdentity>()
                     {
@@ -106,6 +108,11 @@ namespace ElectronicsStore.BLL.Realizations
                     StatusCode = StatusCode.InternalServerError
                 };
             }
+        }
+
+        private static object GetName(LoginViewModel model)
+        {
+            return model.Name;
         }
 
         // Вспомогательный метод для создания Claims

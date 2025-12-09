@@ -105,3 +105,66 @@ h2, h1, h4 {
     .table td, .table th {
         border-top: 1px solid #444;
     }
+/* --- Стили для Главной страницы (Hero Section) --- */
+.hero-section {
+    position: relative;
+    height: 85vh; /* Высота почти на весь экран */
+    /* Путь к картинке должен быть от корня wwwroot */
+    background: url('/img/pc.jpg') no-repeat center center;
+    background-size: cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0 0 20px 20px;
+    overflow: hidden;
+    /* Здесь @keyframes работает корректно, так как это CSS файл */
+    animation: changeBg 20s infinite alternate;
+}
+
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.65);
+    z-index: 1;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+}
+
+/* Анимация смены фона */
+@keyframes changeBg {
+    0% {
+        background-image: url('/img/pc.jpg');
+    }
+
+    45% {
+        background-image: url('/img/pc.jpg');
+    }
+
+    55% {
+        background-image: url('/img/pc1.jpg');
+    }
+
+    100% {
+        background-image: url('/img/pc1.jpg');
+    }
+}
+
+/* Анимация появления текста */
+.slide-in-bottom {
+    animation: slideUp 0.8s ease-out forwards;
+    opacity: 0;
+    transform: translateY(30px);
+}
+
+@keyframes slideUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

@@ -1,13 +1,27 @@
 ﻿@{
     ViewData["Title"] = "Главная";
-    Layout = "_Layout";
 }
 
-<div class="container-section">
-    <h2 class="info-sections">Добро пожаловать в ElectronicHub!</h2>
-    <p class="text" style="text-align: center;">
-        Ваш надежный поставщик электроники и бытовой техники.
-        <br />
-        Используйте меню навигации, чтобы узнать больше о нас, посмотреть каталог или связаться с нами.
-    </p>
+<div class="hero-section">
+    <div class="hero-overlay"></div>
+    <div class="container text-center hero-content">
+        <h1 class="display-3 fw-bold text-uppercase mb-3 slide-in-bottom">
+            <span class="text-white">Electronics</span><span class="text-warning">Store</span>
+        </h1>
+        <p class="lead text-white-50 mb-5 slide-in-bottom" style="animation-delay: 0.2s;">
+            Твой путеводитель в мир высоких технологий
+        </p>
+
+        <div class="d-flex justify-content-center gap-3 slide-in-bottom" style="animation-delay: 0.4s;">
+            <a asp-controller="Product" asp-action="List" class="btn btn-warning btn-lg px-5 fw-bold rounded-pill">
+                Каталог
+            </a>
+            @if (!User.Identity.IsAuthenticated)
+            {
+                <a asp-controller="Account" asp-action="Register" class="btn btn-outline-light btn-lg px-5 fw-bold rounded-pill">
+                    Регистрация
+                </a>
+            }
+        </div>
+    </div>
 </div>

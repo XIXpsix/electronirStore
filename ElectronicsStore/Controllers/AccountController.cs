@@ -36,29 +36,23 @@ namespace ElectronicsStore.Controllers
             return View(model);
         }
 
-        [HttpGet]
-        public IActionResult Login() => View();
-
         [HttpPost]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
             if (ModelState.IsValid)
             {
+                // Логика входа: ищем пользователя по Email, а не по Name
                 var response = await _accountService.Login(model);
-                if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK && response.Data != null)
+                if (response.StatusCode == Domain.Enum.StatusCode.OK)
                 {
-                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(response.Data));
+                    await _accountService.Login(model); // Если у вас аутентификация внутри сервиса
+                                                        // ИЛИ
+                                                        // await HttpContext.SignInAsync(...) // Если аутентификация здесь
                     return RedirectToAction("Index", "Home");
                 }
                 ModelState.AddModelError("", response.Description);
             }
             return View(model);
-        }
-
-        public async Task<IActionResult> Logout()
-        {
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return RedirectToAction("Index", "Home");
         }
     }
 }

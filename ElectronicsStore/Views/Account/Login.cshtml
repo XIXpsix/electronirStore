@@ -4,22 +4,30 @@
     ViewData["Title"] = "Вход";
 }
 
-<div style="padding: 20px;">
-    <h2>Вход</h2>
-    <form asp-action="Login" asp-controller="Account" method="post">
-        <div class="form-group">
-            <label asp-for="Name">Имя</label>
-            <input type="text" asp-for="Name" class="form-control" />
-            <span asp-validation-for="Name" class="text-danger"></span>
+<div class="auth-container">
+    <div class="auth-card slide-in-bottom">
+        <h2 class="auth-title">Вход в систему</h2>
+
+        <form asp-action="Login" asp-controller="Account" asp-anti-forgery="true">
+            <div class="validation" asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="form-floating mb-3">
+                <input asp-for="Email" class="form-control" placeholder="name@example.com" />
+                <label asp-for="Email">Email адрес</label>
+                <span asp-validation-for="Email" class="text-danger small"></span>
+            </div>
+
+            <div class="form-floating mb-3">
+                <input asp-for="Password" type="password" class="form-control" placeholder="Пароль" />
+                <label asp-for="Password">Пароль</label>
+                <span asp-validation-for="Password" class="text-danger small"></span>
+            </div>
+
+            <button type="submit" class="btn btn-auth">ВОЙТИ</button>
+        </form>
+
+        <div class="auth-footer">
+            <p class="text-muted">Нет аккаунта? <a asp-action="Register">Зарегистрироваться</a></p>
         </div>
-        <div class="form-group">
-            <label asp-for="Password">Пароль</label>
-            <input asp-for="Password" class="form-control" />
-            <span asp-validation-for="Password" class="text-danger"></span>
-        </div>
-        <div style="color: red;">
-            @Html.ValidationSummary(true)
-        </div>
-        <button class="btn btn-primary" type="submit">Войти</button>
-    </form>
+    </div>
 </div>
