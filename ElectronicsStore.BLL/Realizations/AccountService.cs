@@ -110,10 +110,6 @@ namespace ElectronicsStore.BLL.Realizations
             }
         }
 
-        private static object GetName(LoginViewModel model)
-        {
-            return model.Name;
-        }
 
         // Вспомогательный метод для создания Claims
         private ClaimsIdentity Authenticate(User user)

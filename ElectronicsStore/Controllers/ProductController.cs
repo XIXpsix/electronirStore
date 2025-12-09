@@ -36,26 +36,16 @@ namespace ElectronicsStore.Controllers
         public async Task<IActionResult> GetProduct(int id)
         {
             var productResponse = await _productService.GetProduct(id);
-            var imagesResponse = await _productService.GetImagesByProductId(id);
 
-            if (productResponse.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK && productResponse.Data != null)
+            // Проверяем статус И наличие данных
+            if (productResponse.StatusCode == Domain.Enum.StatusCode.OK && productResponse.Data != null)
             {
-                var product = productResponse.Data;
-
-                var model = new GetProductViewModel
-                {
-                    Id = product.Id,
-                    Name = product.Name,
-                    Description = product.Description,
-                    Price = product.Price,
-                    ImagePath = product.ImagePath,
-                    CategoryName = product.Category?.Name ?? "Без категории",
-                    GalleryImages = imagesResponse.Data ?? new List<string>()
-                };
-
-                return View(model);
+                // ВАЖНО: Мы передаем в View сам объект Product (productResponse.Data),
+                // так как в GetProduct.cshtml указано @model ElectronicsStore.Domain.Entity.Product
+                return View(productResponse.Data);
             }
 
+            // Если товар не найден
             return RedirectToAction("Error");
         }
 
