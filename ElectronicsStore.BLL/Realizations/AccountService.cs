@@ -3,7 +3,6 @@ using ElectronicsStore.DAL.Interfaces;
 using ElectronicsStore.Domain.Entity;
 using ElectronicsStore.Domain.Enum;
 using ElectronicsStore.Domain.Response;
-using ElectronicsStore.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;

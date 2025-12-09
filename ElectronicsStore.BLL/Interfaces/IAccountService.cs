@@ -1,5 +1,4 @@
 ﻿using ElectronicsStore.Domain.Response;
-using ElectronicsStore.Models; // Тут лежат LoginViewModel и RegisterViewModel
 using System.Security.Claims;
 using System.Threading.Tasks;
 
