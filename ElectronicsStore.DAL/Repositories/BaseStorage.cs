@@ -1,4 +1,5 @@
 ﻿using ElectronicsStore.DAL.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -23,6 +24,11 @@ namespace ElectronicsStore.DAL.Repositories
         {
             _db.Set<T>().Remove(entity);
             await _db.SaveChangesAsync();
+        }
+
+        public async Task<T> Get(int id)
+        {
+            return await _db.Set<T>().FindAsync(id);
         }
 
         public IQueryable<T> GetAll()

@@ -1,8 +1,12 @@
-﻿using ElectronicsStore.DAL;
+﻿using ElectronicsStore.DAL; // или BLL, если используешь сервисы
+using ElectronicsStore.Domain.Entity;
 using ElectronicsStore.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore; // Нужно для .Include и .ToListAsync
 using System.Diagnostics;
+using System.Linq;
+
+
 
 namespace ElectronicsStore.Controllers
 {

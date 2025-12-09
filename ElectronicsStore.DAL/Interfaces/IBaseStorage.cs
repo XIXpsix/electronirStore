@@ -7,7 +7,8 @@ namespace ElectronicsStore.DAL.Interfaces
     {
         Task Add(T entity);
         Task Delete(T entity);
-        Task<T> Update(T entity);
+        Task<T> Get(int id);
         IQueryable<T> GetAll();
+        Task<T> Update(T entity);
     }
-}   
+}

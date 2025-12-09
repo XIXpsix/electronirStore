@@ -20,15 +20,16 @@ namespace ElectronicsStore.Controllers
         [HttpGet]
         public async Task<IActionResult> List(int categoryId)
         {
-            ViewBag.CategoryId = categoryId;
             var response = await _productService.GetProductsByCategory(categoryId);
 
-            if (response.StatusCode != ElectronicsStore.Domain.Enum.StatusCode.OK)
+            // Проверяем статус И наличие данных
+            if (response.StatusCode == Domain.Enum.StatusCode.OK && response.Data != null)
             {
-                return Content($"Ошибка: {response.Description}");
+                return View(response.Data);
             }
 
-            return View(response.Data);
+            // Если данных нет или ошибка
+            return RedirectToAction("Error");
         }
 
         [HttpGet]
