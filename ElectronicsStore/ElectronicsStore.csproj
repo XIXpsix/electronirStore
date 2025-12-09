@@ -32,8 +32,4 @@
 		<ProjectReference Include="..\ElectronicsStore.Domain\ElectronicsStore.Domain.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <Folder Include="Views\Catalog\" />
-	</ItemGroup>
-
 </Project>
