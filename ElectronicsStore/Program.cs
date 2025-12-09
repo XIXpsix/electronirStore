@@ -5,6 +5,7 @@ using ElectronicsStore.BLL.Interfaces;
 using ElectronicsStore.BLL.Realizations;
 using ElectronicsStore.Domain.Entity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.Cookies; // Обязательно для работы входа
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,21 +13,29 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<ElectronicsStoreContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// 2. Регистрация Репозиториев (DAL) - Универсальный доступ к данным
+// 2. Регистрация Репозиториев (DAL)
 builder.Services.AddScoped<IBaseStorage<Category>, BaseStorage<Category>>();
 builder.Services.AddScoped<IBaseStorage<Product>, BaseStorage<Product>>();
+builder.Services.AddScoped(typeof(IBaseStorage<>), typeof(BaseStorage<>)); // Универсальный репозиторий
 
-// 3. Регистрация Сервисов (BLL) - Бизнес-логика
+// 3. Регистрация Сервисов (BLL)
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IProductService, ProductService>();
-// Регистрация универсального репозитория
-builder.Services.AddScoped(typeof(IBaseStorage<>), typeof(BaseStorage<>));
-// 4. Добавление MVC контроллеров
+// ВАЖНО: Добавляем AccountService, иначе контроллер аккаунта не запустится
+builder.Services.AddScoped<IAccountService, AccountService>();
+
+// 4. Настройка аутентификации (Cookie) - чтобы работал вход
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = new Microsoft.AspNetCore.Http.PathString("/Account/Login");
+        options.AccessDeniedPath = new Microsoft.AspNetCore.Http.PathString("/Account/Login");
+    });
+
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
-// Настройка конвейера запросов
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -38,6 +47,8 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+// ВАЖНО: UseAuthentication должен быть ПЕРЕД UseAuthorization
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(

@@ -1,18 +1,28 @@
-using System.Collections.Generic;
+using System.Collections.Generic; // Нужно для List
+using System.ComponentModel.DataAnnotations;
 
 namespace ElectronicsStore.Domain.Entity
 {
     public class Product
     {
         public int Id { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public string Description { get; set; } = string.Empty;
+
+        [Required]
+        public string Name { get; set; } = string.Empty; // Исправляем предупреждение NULL
+
+        [Required]
+        public string Description { get; set; } = string.Empty; // Исправляем предупреждение NULL
+
         public decimal Price { get; set; }
-        public string ImagePath { get; set; } = string.Empty;
+
+        // Вместо ImagePath мы используем Avatar (картинка в байтах), как договаривались ранее
+        public byte[]? Avatar { get; set; }
 
         public int CategoryId { get; set; }
-        public Category Category { get; set; } = null!;
+        public Category Category { get; set; } = null!; // Исправляем предупреждение NULL
 
-        public ICollection<Review> Reviews { get; set; } = [];
+        // Добавляем список отзывов, которого не хватало
+        public List<Review> Reviews { get; set; } = new List<Review>();
+        public string ImagePath { get; set; }
     }
 }

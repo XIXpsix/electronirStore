@@ -13,19 +13,17 @@
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark border-bottom box-shadow mb-3">
             <div class="container-fluid">
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">ElectronicsStore</a>
-
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
                             <a class="nav-link" asp-controller="Home" asp-action="Index">Главная</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" asp-controller="Product" asp-action="Index">Каталог товаров</a>
+                            <a class="nav-link" asp-controller="Product" asp-action="List">Каталог товаров</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" asp-controller="Home" asp-action="Privacy">О нас</a>
@@ -58,9 +56,10 @@
     <script src="~/js/shared_script.js" asp-append-version="true"></script>
     <script src="~/js/login_and_registration_script.js" asp-append-version="true"></script>
     <script src="~/js/animation.js" asp-append-version="true"></script>
-    <partial name="Register" />
 
-    <partial name="Register" model="new ElectronicsStore.Domain.ViewModels.RegisterViewModel()" />
+    @* Если вы хотите, чтобы форма регистрации была в модалке на каждой странице, раскомментируйте строку ниже: *@
+    @* <partial name="Register" model="new ElectronicsStore.Domain.ViewModels.RegisterViewModel()" /> *@
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

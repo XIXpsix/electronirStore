@@ -25,7 +25,14 @@
 
                         <div class="d-flex align-items-center justify-content-center bg-white p-2"
                              style="height: 160px;">
-                            <img src="@(string.IsNullOrEmpty(product.ImagePath) ? "https://dummyimage.com/300x300/dee2e6/6c757d.jpg&text=No+Image" : product.ImagePath)"
+                            @if (Model.Avatar != null && Model.Avatar.Length > 0)
+                            {
+                                <img src="data:image/jpeg;base64,@Convert.ToBase64String(Model.Avatar)" alt="@Model.Name" class="img-fluid" />
+                            }
+                            else
+                            {
+                                <img src="~/img/iphone15.jpg" alt="Нет фото" class="img-fluid" />
+                            }
                                  class="img-fluid"
                                  alt="@product.Name"
                                  style="max-height: 100%; max-width: 100%; object-fit: contain;">
