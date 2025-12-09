@@ -1,4 +1,5 @@
 ﻿using ElectronicsStore.Domain.Response;
+using ElectronicsStore.Domain.ViewModels; // <--- ОБЯЗАТЕЛЬНО ЭТОТ USING
 using System.Security.Claims;
 using System.Threading.Tasks;
 

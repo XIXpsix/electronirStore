@@ -4,23 +4,24 @@ namespace ElectronicsStore.Domain.ViewModels
 {
     public class RegisterViewModel
     {
-        [Required(ErrorMessage = "Укажите логин")]
-        [MaxLength(20, ErrorMessage = "Логин должен иметь длину меньше 20 символов")]
-        [MinLength(3, ErrorMessage = "Логин должен иметь длину больше 3 символов")]
-        public string Login { get; set; } = null!;
+        [Required(ErrorMessage = "Укажите имя")]
+        [MaxLength(20, ErrorMessage = "Имя слишком длинное")]
+        [MinLength(3, ErrorMessage = "Имя слишком короткое")]
+        public string Name { get; set; } = string.Empty; // Инициализация
 
+        [DataType(DataType.EmailAddress)]
         [Required(ErrorMessage = "Укажите почту")]
-        [EmailAddress(ErrorMessage = "Некорректный адрес")]
-        public string Email { get; set; } = null!;
+        public string Email { get; set; } = string.Empty;
 
         [DataType(DataType.Password)]
         [Required(ErrorMessage = "Укажите пароль")]
-        [MinLength(6, ErrorMessage = "Пароль должен иметь длину больше 6 символов")]
-        public string Password { get; set; } = null!;
+        [MinLength(6, ErrorMessage = "Пароль слишком короткий")]
+        public string Password { get; set; } = string.Empty;
 
         [DataType(DataType.Password)]
         [Required(ErrorMessage = "Подтвердите пароль")]
         [Compare("Password", ErrorMessage = "Пароли не совпадают")]
-        public string PasswordConfirm { get; set; } = null!;
+        public string PasswordConfirm { get; set; } = string.Empty;
+
     }
 }

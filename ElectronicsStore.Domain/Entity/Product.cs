@@ -11,11 +11,8 @@ namespace ElectronicsStore.Domain.Entity
         public string ImagePath { get; set; } = string.Empty;
 
         public int CategoryId { get; set; }
-        // Можно сделать nullable (?), если категория может быть не задана временно
-        public Category? Category { get; set; }
+        public Category Category { get; set; } = null!;
 
-        // Добавил Reviews, так как ошибка говорила, что его нет
-        // Предполагается, что у тебя есть класс Review
-        public List<Review> Reviews { get; set; } = new List<Review>();
+        public ICollection<Review> Reviews { get; set; } = [];
     }
 }

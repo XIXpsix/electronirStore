@@ -1,172 +1,64 @@
-﻿using ElectronicsStore.DAL;
-using ElectronicsStore.Domain.Entity;
-using ElectronicsStore.Models;
+﻿using ElectronicsStore.BLL.Interfaces;
+using ElectronicsStore.Domain.ViewModels; // <-- Правильный namespace
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
-using System.Diagnostics;
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace ElectronicsStore.Controllers
 {
-    // Исправлено: Используем Primary Constructor (параметры прямо в имени класса)
-    public class AccountController(ElectronicsStoreContext context, IMemoryCache memoryCache) : Controller
+    public class AccountController : Controller
     {
-        // ===================== ВХОД (LOGIN) =====================
-        [HttpGet]
-        public IActionResult Login(string? returnUrl = null)
+        private readonly IAccountService _accountService;
+
+        public AccountController(IAccountService accountService)
         {
-            return View(new LoginViewModel { ReturnUrl = returnUrl });
+            _accountService = accountService;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Login([FromBody] LoginViewModel model)
-        {
-            // Используем LoginOrEmail (как в исправленной модели)
-            var user = await context.Users
-                .FirstOrDefaultAsync(u => u.Email == model.LoginOrEmail || u.Login == model.LoginOrEmail);
-
-            if (user == null || user.Password != model.Password)
-            {
-                return BadRequest(new { message = "Неверный логин или пароль" });
-            }
-
-            await Authenticate(user);
-            // Если ReturnUrl null, идем на главную ("/")
-            return Ok(new { message = "Вход выполнен успешно!", returnUrl = model.ReturnUrl ?? "/" });
-        }
-
-        // ===================== РЕГИСТРАЦИЯ =====================
         [HttpGet]
         public IActionResult Register() => View();
 
         [HttpPost]
-        public async Task<IActionResult> Register([FromBody] RegisterViewModel model)
+        public async Task<IActionResult> Register(RegisterViewModel model)
         {
-            if (await context.Users.AnyAsync(u => u.Email == model.Email || u.Login == model.Login))
+            if (ModelState.IsValid)
             {
-                return BadRequest(new { message = "Пользователь уже существует" });
+                var response = await _accountService.Register(model);
+                if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK && response.Data != null)
+                {
+                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(response.Data));
+                    return RedirectToAction("Index", "Home");
+                }
+                ModelState.AddModelError("", response.Description);
             }
-
-            // Упрощенное создание рандома (Random.Shared)
-            var code = Random.Shared.Next(100000, 999999).ToString();
-
-            // === ВЫВОД КОДА В КОНСОЛЬ (Вместо почты, чтобы не падало) ===
-            Debug.WriteLine($"*********************************************");
-            Debug.WriteLine($" КОД ДЛЯ {model.Email}: {code}");
-            Debug.WriteLine($"*********************************************");
-
-            memoryCache.Set(model.Email, new { Model = model, Code = code }, TimeSpan.FromMinutes(10));
-
-            return Ok(new { message = "Код отправлен", redirectUrl = Url.Action("ConfirmEmail", new { email = model.Email }) });
+            return View(model);
         }
 
-        // ===================== ПОДТВЕРЖДЕНИЕ =====================
         [HttpGet]
-        public IActionResult ConfirmEmail(string email)
-        {
-            return View(new ConfirmEmailViewModel { Email = email });
-        }
+        public IActionResult Login() => View();
 
         [HttpPost]
-        public async Task<IActionResult> ConfirmEmail(ConfirmEmailViewModel model)
+        public async Task<IActionResult> Login(LoginViewModel model)
         {
-            if (!ModelState.IsValid) return View(model);
-
-            if (!memoryCache.TryGetValue(model.Email, out object? cacheEntry) || cacheEntry == null)
+            if (ModelState.IsValid)
             {
-                ModelState.AddModelError("", "Время истекло.");
-                return View(model);
-            }
-
-            dynamic data = cacheEntry;
-            string storedCode = data.Code;
-            RegisterViewModel registerData = data.Model;
-
-            if (storedCode != model.Code)
-            {
-                ModelState.AddModelError("Code", "Неверный код");
-                return View(model);
-            }
-
-            // Создаем пользователя
-            var user = new User
-            {
-                Id = Guid.NewGuid(),
-                Login = registerData.Login,
-                Email = registerData.Email,
-                Password = registerData.Password,
-                Role = "User",
-                CreatedAt = DateTime.UtcNow
-            };
-
-            context.Users.Add(user);
-            await context.SaveChangesAsync();
-
-            memoryCache.Remove(model.Email);
-            await Authenticate(user);
-
-            return RedirectToAction("Index", "Home");
-        }
-
-        // ===================== GOOGLE / LOGOUT =====================
-        [HttpGet]
-        public async Task AuthenticationGoogle(string returnUrl = "/")
-        {
-            await HttpContext.ChallengeAsync(GoogleDefaults.AuthenticationScheme, new AuthenticationProperties
-            {
-                RedirectUri = Url.Action("GoogleResponse", new { returnUrl })
-            });
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> GoogleResponse(string returnUrl = "/")
-        {
-            var result = await HttpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
-            if (!result.Succeeded) return RedirectToAction("Login");
-
-            var email = result.Principal.FindFirst(ClaimTypes.Email)?.Value;
-            if (email != null)
-            {
-                var user = await context.Users.FirstOrDefaultAsync(u => u.Email == email);
-                if (user == null)
+                var response = await _accountService.Login(model);
+                if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK && response.Data != null)
                 {
-                    user = new User
-                    {
-                        Id = Guid.NewGuid(),
-                        Email = email,
-                        Login = email,
-                        Password = "",
-                        Role = "User",
-                        CreatedAt = DateTime.UtcNow
-                    };
-                    context.Users.Add(user);
-                    await context.SaveChangesAsync();
+                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(response.Data));
+                    return RedirectToAction("Index", "Home");
                 }
-                await Authenticate(user);
-                return LocalRedirect(returnUrl ?? "/");
+                ModelState.AddModelError("", response.Description);
             }
-            return RedirectToAction("Login");
+            return View(model);
         }
 
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Index", "Home");
-        }
-
-        private async Task Authenticate(User user)
-        {
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimsIdentity.DefaultNameClaimType, user.Login),
-                new Claim(ClaimsIdentity.DefaultRoleClaimType, user.Role)
-            };
-            var id = new ClaimsIdentity(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(id));
         }
     }
 }
