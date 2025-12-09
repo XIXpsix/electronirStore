@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 
+// ВАЖНО: Пространство имен должно заканчиваться на .Entity
 namespace ElectronicsStore.Domain.Entity
 {
     public class Product
@@ -13,7 +14,7 @@ namespace ElectronicsStore.Domain.Entity
         public int CategoryId { get; set; }
         public Category Category { get; set; } = null!;
 
-        // Исправлено: упрощенная инициализация (C# 12)
+        // Упрощенная инициализация (убирает предупреждение)
         public ICollection<Review> Reviews { get; set; } = [];
     }
 }

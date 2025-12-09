@@ -1,4 +1,4 @@
-﻿@model List<ElectronicsStore.Domain.Category>
+﻿@model List<ElectronicsStore.Domain.Entity.Category>
 
 @{
     ViewData["Title"] = "Каталог";
@@ -70,12 +70,12 @@
         .card-img-wrapper img {
             width: 100%;
             height: 100%;
-            object-fit: cover; /* Картинка заполнит блок, обрезая лишнее */
+            object-fit: cover;
             transition: transform 0.5s ease;
         }
 
     .category-card:hover .card-img-wrapper img {
-        transform: scale(1.05); /* Легкое увеличение картинки при наведении */
+        transform: scale(1.05);
     }
 
     .card-body {

@@ -1,7 +1,8 @@
 ﻿using ElectronicsStore.Domain;
+using ElectronicsStore.Domain.Entity;
 using Microsoft.AspNetCore.Mvc;
-// ВАЖНО: Используем BLL, а не Service
 using ElectronicsStore.BLL.Interfaces;
+using System.Threading.Tasks;
 
 namespace ElectronicsStore.Controllers
 {

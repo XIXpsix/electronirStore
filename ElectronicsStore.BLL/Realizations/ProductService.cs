@@ -1,6 +1,6 @@
 using ElectronicsStore.DAL.Interfaces;
 using ElectronicsStore.Domain;
-using ElectronicsStore.Domain.Entity; // <-- ВАЖНО: Добавлена ссылка на Entity
+using ElectronicsStore.Domain.Entity; // <--- ДОБАВЛЕНО
 using ElectronicsStore.Domain.Enum;
 using ElectronicsStore.Domain.Filters;
 using ElectronicsStore.BLL.Interfaces;
@@ -12,26 +12,20 @@ using System.Threading.Tasks;
 
 namespace ElectronicsStore.BLL.Realizations
 {
-    // Исправлено: Используем Primary Constructor (параметры сразу в имени класса)
+    // Исправлено: Primary Constructor (параметры сразу в скобках класса)
     public class ProductService(
         IBaseStorage<Product> productStorage,
         IBaseStorage<ProductImage> productImageStorage) : IProductService
     {
-        // Привязываем параметры основного конструктора к приватным полям
-        private readonly IBaseStorage<Product> _productStorage = productStorage;
-        private readonly IBaseStorage<ProductImage> _productImageStorage = productImageStorage;
-
-        // СТАРЫЙ КОНСТРУКТОР УДАЛЕН, ЧТОБЫ НЕ БЫЛО КОНФЛИКТА
-
         public async Task<IBaseResponse<List<Product>>> GetProductsByFilter(ProductFilter filter)
         {
             try
             {
-                var query = _productStorage.GetAll(); // Используем поле с подчеркиванием
+                var query = productStorage.GetAll();
 
                 query = query.Where(x => x.CategoryId == filter.CategoryId);
 
-                if (filter.MinPrice > 0 || filter.MaxPrice > 0) // Чуть улучшил логику проверки цены
+                if (filter.MinPrice > 0 || filter.MaxPrice > 0)
                 {
                     if (filter.MaxPrice > 0)
                         query = query.Where(x => x.Price >= filter.MinPrice && x.Price <= filter.MaxPrice);
@@ -39,21 +33,14 @@ namespace ElectronicsStore.BLL.Realizations
                         query = query.Where(x => x.Price >= filter.MinPrice);
                 }
 
-                switch (filter.SortType)
+                // Исправлено: switch expression
+                query = filter.SortType switch
                 {
-                    case "price_asc":
-                        query = query.OrderBy(x => x.Price);
-                        break;
-                    case "price_desc":
-                        query = query.OrderByDescending(x => x.Price);
-                        break;
-                    case "name_asc":
-                        query = query.OrderBy(x => x.Name);
-                        break;
-                    default:
-                        query = query.OrderBy(x => x.Id);
-                        break;
-                }
+                    "price_asc" => query.OrderBy(x => x.Price),
+                    "price_desc" => query.OrderByDescending(x => x.Price),
+                    "name_asc" => query.OrderBy(x => x.Name),
+                    _ => query.OrderBy(x => x.Id)
+                };
 
                 var products = await query.ToListAsync();
 
@@ -77,19 +64,9 @@ namespace ElectronicsStore.BLL.Realizations
         {
             try
             {
-                var products = await _productStorage.GetAll()
+                var products = await productStorage.GetAll()
                     .Where(x => x.CategoryId == categoryId)
                     .ToListAsync();
-
-                if (products.Count == 0)
-                {
-                    return new BaseResponse<List<Product>>()
-                    {
-                        Description = "Товары не найдены",
-                        StatusCode = StatusCode.OK,
-                        Data = []
-                    };
-                }
 
                 return new BaseResponse<List<Product>>()
                 {
@@ -111,7 +88,7 @@ namespace ElectronicsStore.BLL.Realizations
         {
             try
             {
-                var products = await _productStorage.GetAll().ToListAsync();
+                var products = await productStorage.GetAll().ToListAsync();
                 return new BaseResponse<IEnumerable<Product>>()
                 {
                     Data = products,
@@ -132,7 +109,7 @@ namespace ElectronicsStore.BLL.Realizations
         {
             try
             {
-                var product = await _productStorage.GetAll()
+                var product = await productStorage.GetAll()
                     .Include(x => x.Category)
                     .FirstOrDefaultAsync(x => x.Id == id);
 
@@ -165,7 +142,7 @@ namespace ElectronicsStore.BLL.Realizations
         {
             try
             {
-                var images = await _productImageStorage.GetAll()
+                var images = await productImageStorage.GetAll()
                     .Where(x => x.ProductId == id)
                     .Select(x => x.ImagePath)
                     .ToListAsync();

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
+// ВАЖНО: Должно быть .Entity на конце
 namespace ElectronicsStore.Domain.Entity
 {
     public class User
@@ -12,7 +13,6 @@ namespace ElectronicsStore.Domain.Entity
         public string Role { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        // Исправлено: namespace и инициализация
         public ICollection<Review> Reviews { get; set; } = [];
     }
 }

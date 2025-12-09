@@ -1,16 +1,12 @@
 ﻿using ElectronicsStore.Domain;
-using ElectronicsStore.Domain.Entity; // <-- Вот этой строки, скорее всего, не хватает или она конфликтует
+using ElectronicsStore.Domain.Entity; // <--- ОБЯЗАТЕЛЬНО
 using Microsoft.EntityFrameworkCore;
 
 namespace ElectronicsStore.DAL
 {
-    public class ElectronicsStoreContext : DbContext
+    // Используем основной конструктор (Primary Constructor)
+    public class ElectronicsStoreContext(DbContextOptions<ElectronicsStoreContext> options) : DbContext(options)
     {
-        public ElectronicsStoreContext(DbContextOptions<ElectronicsStoreContext> options)
-            : base(options)
-        {
-        }
-
         public DbSet<User> Users { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<Category> Categories { get; set; }
@@ -19,7 +15,6 @@ namespace ElectronicsStore.DAL
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Настройка связей
             modelBuilder.Entity<Review>()
                 .HasOne(r => r.User)
                 .WithMany(u => u.Reviews)
@@ -32,7 +27,6 @@ namespace ElectronicsStore.DAL
                 .HasForeignKey(r => r.ProductId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Начальные данные (Seed Data)
             modelBuilder.Entity<Category>().HasData(
                 new Category { Id = 1, Name = "Смартфоны", Slug = "smartphones", Description = "Телефоны" },
                 new Category { Id = 2, Name = "Ноутбуки", Slug = "laptops", Description = "Ноутбуки" }
