@@ -10,6 +10,7 @@ namespace ElectronicsStore.Domain.Entity
         public string ImagePath { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
 
-        public ICollection<Product> Products { get; set; } = new List<Product>();
+        // Исправлено: namespace и инициализация
+        public ICollection<Product> Products { get; set; } = [];
     }
 }

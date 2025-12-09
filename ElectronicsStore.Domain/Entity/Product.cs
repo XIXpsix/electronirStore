@@ -13,6 +13,7 @@ namespace ElectronicsStore.Domain.Entity
         public int CategoryId { get; set; }
         public Category Category { get; set; } = null!;
 
-        public ICollection<Review> Reviews { get; set; } = new List<Review>();
+        // Исправлено: упрощенная инициализация (C# 12)
+        public ICollection<Review> Reviews { get; set; } = [];
     }
 }

@@ -1,8 +1,9 @@
 using ElectronicsStore.DAL.Interfaces;
-using ElectronicsStore.Domain.Entity; // <-- ВАЖНО: Добавили ссылку на Entity
+using ElectronicsStore.Domain;
+using ElectronicsStore.Domain.Entity; // <-- ВАЖНО: Добавлена ссылка на Entity
+using ElectronicsStore.Domain.Enum;
 using ElectronicsStore.Domain.Filters;
 using ElectronicsStore.BLL.Interfaces;
-using ElectronicsStore.Domain.Enum; // Проверь, есть ли у тебя Enum в Domain
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -11,37 +12,48 @@ using System.Threading.Tasks;
 
 namespace ElectronicsStore.BLL.Realizations
 {
-    // Используем основной конструктор (Primary Constructor)
+    // Исправлено: Используем Primary Constructor (параметры сразу в имени класса)
     public class ProductService(
         IBaseStorage<Product> productStorage,
         IBaseStorage<ProductImage> productImageStorage) : IProductService
     {
+        // Привязываем параметры основного конструктора к приватным полям
         private readonly IBaseStorage<Product> _productStorage = productStorage;
         private readonly IBaseStorage<ProductImage> _productImageStorage = productImageStorage;
+
+        // СТАРЫЙ КОНСТРУКТОР УДАЛЕН, ЧТОБЫ НЕ БЫЛО КОНФЛИКТА
 
         public async Task<IBaseResponse<List<Product>>> GetProductsByFilter(ProductFilter filter)
         {
             try
             {
-                var query = _productStorage.GetAll();
+                var query = _productStorage.GetAll(); // Используем поле с подчеркиванием
 
-                if (filter.CategoryId != 0)
+                query = query.Where(x => x.CategoryId == filter.CategoryId);
+
+                if (filter.MinPrice > 0 || filter.MaxPrice > 0) // Чуть улучшил логику проверки цены
                 {
-                    query = query.Where(x => x.CategoryId == filter.CategoryId);
+                    if (filter.MaxPrice > 0)
+                        query = query.Where(x => x.Price >= filter.MinPrice && x.Price <= filter.MaxPrice);
+                    else
+                        query = query.Where(x => x.Price >= filter.MinPrice);
                 }
 
-                if (filter.MaxPrice > 0)
+                switch (filter.SortType)
                 {
-                    query = query.Where(x => x.Price >= filter.MinPrice && x.Price <= filter.MaxPrice);
+                    case "price_asc":
+                        query = query.OrderBy(x => x.Price);
+                        break;
+                    case "price_desc":
+                        query = query.OrderByDescending(x => x.Price);
+                        break;
+                    case "name_asc":
+                        query = query.OrderBy(x => x.Name);
+                        break;
+                    default:
+                        query = query.OrderBy(x => x.Id);
+                        break;
                 }
-
-                query = filter.SortType switch
-                {
-                    "price_asc" => query.OrderBy(x => x.Price),
-                    "price_desc" => query.OrderByDescending(x => x.Price),
-                    "name_asc" => query.OrderBy(x => x.Name),
-                    _ => query.OrderBy(x => x.Id)
-                };
 
                 var products = await query.ToListAsync();
 
@@ -75,7 +87,7 @@ namespace ElectronicsStore.BLL.Realizations
                     {
                         Description = "Товары не найдены",
                         StatusCode = StatusCode.OK,
-                        Data = new List<Product>()
+                        Data = []
                     };
                 }
 
