@@ -15,13 +15,12 @@ html {
     box-sizing: inherit;
 }
 
-/* ГЛАВНЫЙ ФИКС: Body полностью прозрачный, чтобы было видно видео */
 body {
     width: 100%;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    background: transparent !important;
+    background-color: #121212 !important; /* ЧЕРНЫЙ ФОН ПРИНУДИТЕЛЬНО */
     color: #e0e0e0;
 }
 
