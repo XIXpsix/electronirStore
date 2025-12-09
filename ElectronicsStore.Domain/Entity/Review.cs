@@ -1,21 +1,21 @@
-﻿using System;
+﻿using ElectronicsStore.Domain.Entity;
+using System;
 
-namespace ElectronicsStore.Domain.Entity
+// БЫЛО: namespace ElectronicsStore.Domain.Entity (или другое)
+// СТАЛО:
+namespace ElectronicsStore.Domain
 {
     public class Review
     {
         public int Id { get; set; }
 
-        public string Text { get; set; } = string.Empty;
-        public int Rating { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-        // Связь с товаром
         public int ProductId { get; set; }
         public Product Product { get; set; } = null!;
 
-        // Связь с пользователем
-        public string UserId { get; set; } = string.Empty;
+        public Guid UserId { get; set; }
         public User User { get; set; } = null!;
+
+        public string Text { get; set; } = string.Empty;
+        public int Rating { get; set; }
     }
 }

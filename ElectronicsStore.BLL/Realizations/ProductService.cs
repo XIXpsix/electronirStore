@@ -1,9 +1,8 @@
 using ElectronicsStore.DAL.Interfaces;
-using ElectronicsStore.Domain;
-using ElectronicsStore.Domain.Entity;
-using ElectronicsStore.Domain.Enum;
+using ElectronicsStore.Domain.Entity; // <-- ВАЖНО: Добавили ссылку на Entity
 using ElectronicsStore.Domain.Filters;
 using ElectronicsStore.BLL.Interfaces;
+using ElectronicsStore.Domain.Enum; // Проверь, есть ли у тебя Enum в Domain
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -12,47 +11,37 @@ using System.Threading.Tasks;
 
 namespace ElectronicsStore.BLL.Realizations
 {
+    // Используем основной конструктор (Primary Constructor)
     public class ProductService(
         IBaseStorage<Product> productStorage,
         IBaseStorage<ProductImage> productImageStorage) : IProductService
     {
-        private readonly IBaseStorage<Product> _productStorage;
-        private readonly IBaseStorage<ProductImage> _productImageStorage;
-
-        public ProductService(IBaseStorage<Product> productStorage, IBaseStorage<ProductImage> productImageStorage)
-        {
-            _productStorage = productStorage;
-            _productImageStorage = productImageStorage;
-        }
+        private readonly IBaseStorage<Product> _productStorage = productStorage;
+        private readonly IBaseStorage<ProductImage> _productImageStorage = productImageStorage;
 
         public async Task<IBaseResponse<List<Product>>> GetProductsByFilter(ProductFilter filter)
         {
             try
             {
-                var query = productStorage  .GetAll();
+                var query = _productStorage.GetAll();
 
-                query = query.Where(x => x.CategoryId == filter.CategoryId);
+                if (filter.CategoryId != 0)
+                {
+                    query = query.Where(x => x.CategoryId == filter.CategoryId);
+                }
 
                 if (filter.MaxPrice > 0)
                 {
                     query = query.Where(x => x.Price >= filter.MinPrice && x.Price <= filter.MaxPrice);
                 }
 
-                switch (filter.SortType)
+                query = filter.SortType switch
                 {
-                    case "price_asc":
-                        query = query.OrderBy(x => x.Price);
-                        break;
-                    case "price_desc":
-                        query = query.OrderByDescending(x => x.Price);
-                        break;
-                    case "name_asc":
-                        query = query.OrderBy(x => x.Name);
-                        break;
-                    default:
-                        query = query.OrderBy(x => x.Id);
-                        break;
-                }
+                    "price_asc" => query.OrderBy(x => x.Price),
+                    "price_desc" => query.OrderByDescending(x => x.Price),
+                    "name_asc" => query.OrderBy(x => x.Name),
+                    _ => query.OrderBy(x => x.Id)
+                };
 
                 var products = await query.ToListAsync();
 
@@ -80,7 +69,7 @@ namespace ElectronicsStore.BLL.Realizations
                     .Where(x => x.CategoryId == categoryId)
                     .ToListAsync();
 
-                if (!products.Any())
+                if (products.Count == 0)
                 {
                     return new BaseResponse<List<Product>>()
                     {

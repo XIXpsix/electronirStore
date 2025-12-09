@@ -1,5 +1,6 @@
 ﻿using ElectronicsStore.Domain.Enum;
 
+
 namespace ElectronicsStore.BLL
 {
     public class BaseResponse<T> : IBaseResponse<T>

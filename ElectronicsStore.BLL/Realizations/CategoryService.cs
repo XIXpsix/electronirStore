@@ -3,9 +3,6 @@ using ElectronicsStore.Domain.Entity;
 using ElectronicsStore.Domain.Enum;
 using ElectronicsStore.BLL.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace ElectronicsStore.BLL.Realizations
 {
