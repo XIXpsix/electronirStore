@@ -541,9 +541,9 @@ header {
         transition: transform 0.2s ease;
     }
 
-    .range-input input::-moz-range-thumb:hover {
-        transform: scale(1.2);
-    }
+        .range-input input::-moz-range-thumb:hover {
+            transform: scale(1.2);
+        }
 }
 
 /* Кнопка "Применить" */
@@ -1010,6 +1010,7 @@ mark {
         justify-content: space-between;
     }
 }
+
 :root {
     --primary-orange: #ff6600; /* Яркий оранжевый */
     --hover-orange: #e65c00;

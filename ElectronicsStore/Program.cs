@@ -7,19 +7,20 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.EntityFrameworkCore;
 
+// 1. Самая первая важная строка - создание builder
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Подключение БД
+// 2. Подключение к базе данных
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ElectronicsStoreContext>(options =>
     options.UseNpgsql(connectionString));
 
-// 2. Регистрация сервисов
+// 3. Регистрация сервисов
 builder.Services.AddScoped(typeof(IBaseStorage<>), typeof(BaseStorage<>));
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 
-// 3. Аутентификация
+// 4. Аутентификация
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -40,12 +41,14 @@ builder.Services.AddAuthentication(options =>
     }
 });
 
-// 4. MVC
+// 5. MVC и прочее
 builder.Services.AddControllersWithViews();
+builder.Services.AddMemoryCache();
 
+// 6. Сборка приложения
 var app = builder.Build();
 
-// 5. Обработка ошибок
+// 7. Настройка работы приложения (Pipeline)
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -53,8 +56,6 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-// !!! ВОТ ЭТА СТРОКА ВКЛЮЧАЕТ СТИЛИ И КАРТИНКИ !!!
 app.UseStaticFiles();
 
 app.UseRouting();

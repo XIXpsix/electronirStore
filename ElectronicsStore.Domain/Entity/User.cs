@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-// ВАЖНО: Должно быть .Entity на конце
+
 namespace ElectronicsStore.Domain.Entity
 {
     public class User
