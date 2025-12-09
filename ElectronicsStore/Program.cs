@@ -7,23 +7,20 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.EntityFrameworkCore;
 
-// 1. СНАЧАЛА СОЗДАЕМ BUILDER (Это самое важное, ошибка была здесь)
+// 1. Самая первая важная строка - создание builder
 var builder = WebApplication.CreateBuilder(args);
 
-// 2. Подключение к Базе Данных
+// 2. Подключение к базе данных
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ElectronicsStoreContext>(options =>
     options.UseNpgsql(connectionString));
 
-// 3. Регистрация сервисов и репозиториев
-// Базовый репозиторий
+// 3. Регистрация сервисов
 builder.Services.AddScoped(typeof(IBaseStorage<>), typeof(BaseStorage<>));
-
-// Твои сервисы (Товары, Категории)
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 
-// 4. Настройка Аутентификации (Вход через Google и Куки)
+// 4. Аутентификация
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -44,16 +41,14 @@ builder.Services.AddAuthentication(options =>
     }
 });
 
-// 5. Добавляем поддержку контроллеров и представлений (MVC)
+// 5. MVC и прочее
 builder.Services.AddControllersWithViews();
 builder.Services.AddMemoryCache();
 
-// ==========================================
-// СБОРКА ПРИЛОЖЕНИЯ
+// 6. Сборка приложения
 var app = builder.Build();
-// ==========================================
 
-// Настройка конвейера обработки запросов (Pipeline)
+// 7. Настройка работы приложения (Pipeline)
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -65,7 +60,6 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-// Порядок важен: Сначала Аутентификация (Кто ты?), потом Авторизация (Можно ли тебе?)
 app.UseAuthentication();
 app.UseAuthorization();
 
