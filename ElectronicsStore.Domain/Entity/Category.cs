@@ -10,7 +10,7 @@ namespace ElectronicsStore.Domain.Entity
         // или оставл€ем инициализацию = string.Empty;
         public required string Name { get; set; }
         public required string Slug { get; set; }
-        public string ImagePath { get; set; } = string.Empty; // ћожно оставить так
+        public required string ImagePath { get; set; }
         public string Description { get; set; } = string.Empty;
 
         public ICollection<Product> Products { get; set; } = new List<Product>();

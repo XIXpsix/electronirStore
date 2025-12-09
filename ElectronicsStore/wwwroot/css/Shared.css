@@ -1,71 +1,83 @@
-﻿/* --- Глобальные переменные цветов --- */
+﻿/* --- 1. Настройки цветов (Черный и Оранжевый) --- */
 :root {
-    --main-orange: #ff6600; /* Яркий оранжевый */
+    --main-orange: #ff6600; /* Основной оранжевый */
     --hover-orange: #e65c00; /* Оранжевый при наведении */
-    --bg-dark: #121212; /* Очень темный серый (почти черный) для фона */
-    --bg-panel: #1e1e1e; /* Темный серый для панелей */
+    --bg-dark: #121212; /* Черный фон сайта */
+    --bg-panel: #1e1e1e; /* Темно-серый для панелей (навигация, футер) */
     --text-main: #ffffff; /* Белый текст */
     --text-muted: #b0b0b0; /* Серый текст */
 }
 
+/* Настройка всего документа */
 html, body {
     height: 100%;
     margin: 0;
-    background-color: #000; /* Фон под видео */
+    padding: 0;
+    background-color: #000000; /* Черный фон за видео */
     color: var(--text-main);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* --- Боковые панели с видео --- */
+/* --- 2. Боковые Видео (Слева и Справа) --- */
 .side-video {
-    position: fixed;
+    position: fixed; /* Фиксируем видео, чтобы оно не прокручивалось */
     top: 0;
     bottom: 0;
-    width: 20%;
-    z-index: -1;
+    width: 20%; /* Ширина боковых полос */
+    z-index: -1; /* Убираем НА ЗАДНИЙ план */
     overflow: hidden;
     background: #000;
 }
 
 .left-side {
     left: 0;
-    border-right: 2px solid var(--main-orange); /* Оранжевая полоса справа */
+    border-right: 2px solid var(--main-orange); /* Оранжевая граница справа */
 }
 
 .right-side {
     right: 0;
-    border-left: 2px solid var(--main-orange); /* Оранжевая полоса слева */
+    border-left: 2px solid var(--main-orange); /* Оранжевая граница слева */
 }
 
 .side-video video {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: cover; /* Растягиваем видео на всю высоту/ширину */
+    opacity: 0.7; /* Прозрачность видео (чтобы не отвлекало) */
 }
 
-/* Затемнение видео, чтобы не отвлекало */
+/* Затемнение поверх видео (для стиля) */
 .video-overlay {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(0, 0, 0, 0.3);
 }
 
-/* --- Центральная часть (Main Wrapper) --- */
+/* --- 3. Центральная часть (Основной контент) --- */
 .main-wrapper {
     position: relative;
-    width: 60%;
-    margin: 0 auto;
-    background-color: rgba(18, 18, 18, 0.96); /* Почти непрозрачный черный фон */
-    min-height: 100vh;
-    box-shadow: 0 0 50px rgba(255, 102, 0, 0.1); /* Легкое оранжевое свечение */
+    width: 60%; /* Контент занимает 60% центра */
+    margin: 0 auto; /* Центрируем блок */
+    background-color: rgba(18, 18, 18, 0.98); /* Почти черный непрозрачный фон */
+    min-height: 100vh; /* Растягиваем на всю высоту экрана */
+    box-shadow: 0 0 50px rgba(255, 102, 0, 0.15); /* Легкое оранжевое свечение по краям */
     display: flex;
     flex-direction: column;
 }
 
-/* --- Навигация (Navbar) --- */
+.container {
+    max-width: 100%; /* Убедимся, что контейнер не вылезает */
+}
+
+.content-container {
+    flex: 1; /* Растягиваем контент, чтобы прижать футер к низу */
+    padding: 20px;
+}
+
+/* --- 4. Навигация (Меню) --- */
 .custom-navbar {
     background-color: var(--bg-panel) !important;
     border-bottom: 2px solid var(--main-orange);
@@ -88,13 +100,7 @@ html, body {
         color: var(--main-orange) !important;
     }
 
-/* --- Контент --- */
-.content-container {
-    flex: 1; /* Растягиваем контент, чтобы футер был внизу */
-    padding-top: 20px;
-}
-
-/* Ссылки внутри текста */
+/* --- 5. Ссылки и Кнопки --- */
 a {
     color: var(--main-orange);
     text-decoration: none;
@@ -105,7 +111,19 @@ a {
         text-decoration: underline;
     }
 
-/* --- Футер --- */
+/* Переопределение кнопок Bootstrap */
+.btn-primary {
+    background-color: var(--main-orange);
+    border-color: var(--main-orange);
+    color: #fff;
+}
+
+    .btn-primary:hover, .btn-primary:focus, .btn-primary:active {
+        background-color: var(--hover-orange) !important;
+        border-color: var(--hover-orange) !important;
+    }
+
+/* --- 6. Футер (Подвал) --- */
 .footer-custom {
     background-color: var(--bg-panel);
     border-top: 1px solid #333;
@@ -126,24 +144,14 @@ a {
         color: var(--main-orange);
     }
 
-/* --- Кнопки (Bootstrap override) --- */
-.btn-primary {
-    background-color: var(--main-orange);
-    border-color: var(--main-orange);
-    color: #fff;
-}
-
-    .btn-primary:hover {
-        background-color: var(--hover-orange);
-        border-color: var(--hover-orange);
-    }
-
-/* --- Адаптивность (Мобильные устройства) --- */
+/* --- 7. Адаптивность (Мобильные телефоны) --- */
 @media (max-width: 992px) {
+    /* На телефонах скрываем боковые видео */
     .side-video {
-        display: none; /* Скрываем видео на телефонах */
+        display: none;
     }
 
+    /* Растягиваем сайт на весь экран */
     .main-wrapper {
         width: 100%;
         box-shadow: none;

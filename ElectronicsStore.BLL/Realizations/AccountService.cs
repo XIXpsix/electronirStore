@@ -8,8 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
-using System.Security.Cryptography; // Добавлено для хеширования
-using System.Text; // Добавлено для кодировки
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace ElectronicsStore.BLL.Realizations
@@ -23,7 +23,7 @@ namespace ElectronicsStore.BLL.Realizations
             _userRepository = userRepository;
         }
 
-        // --- Вспомогательный метод для хеширования пароля ---
+        // Хеширование (как мы делали раньше)
         private string HashPassword(string password)
         {
             using (var sha256 = SHA256.Create())
@@ -51,7 +51,6 @@ namespace ElectronicsStore.BLL.Realizations
                     Name = model.Name,
                     Role = Role.User,
                     Email = model.Email,
-                    // ИЗМЕНЕНИЕ: Хешируем пароль перед сохранением
                     Password = HashPassword(model.Password),
                     CreatedAt = DateTime.UtcNow
                 };
@@ -81,6 +80,8 @@ namespace ElectronicsStore.BLL.Realizations
             try
             {
                 var user = await _userRepository.GetAll().FirstOrDefaultAsync(x => x.Email == model.Email);
+                
+                // ИСПРАВЛЕНИЕ: Сначала проверяем на NULL
                 if (user == null)
                 {
                     return new BaseResponse<ClaimsIdentity>()
@@ -90,7 +91,7 @@ namespace ElectronicsStore.BLL.Realizations
                     };
                 }
 
-                // ИЗМЕНЕНИЕ: Сравниваем хеш введенного пароля с хешем в базе
+                // Теперь безопасно проверяем пароль
                 if (user.Password != HashPassword(model.Password))
                 {
                     return new BaseResponse<ClaimsIdentity>()

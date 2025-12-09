@@ -11,14 +11,14 @@
 <body>
     <div class="side-video left-side">
         <video autoplay muted loop>
-            <source src="~/video/pc.mp4" type="video/mp4">
+            <source src="/img/pc.mp4" type="video/mp4">
         </video>
         <div class="video-overlay"></div>
     </div>
 
     <div class="side-video right-side">
         <video autoplay muted loop>
-            <source src="~/video/pc1.mp4" type="video/mp4">
+            <source src="/img/pc1.mp4" type="video/mp4">
         </video>
         <div class="video-overlay"></div>
     </div>
@@ -49,9 +49,7 @@
                             </li>
                         </ul>
 
-                        <ul class="navbar-nav">
-                            @await Html.PartialAsync("_LoginPartial")
-                        </ul>
+                        @await Html.PartialAsync("_LoginPartial")
                     </div>
                 </div>
             </nav>
@@ -69,14 +67,6 @@
             </div>
         </footer>
     </div>
-
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/shared_script.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
-</body>
-</html>
-
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/shared_script.js" asp-append-version="true"></script>
