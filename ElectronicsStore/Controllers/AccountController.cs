@@ -88,7 +88,14 @@ namespace ElectronicsStore.Controllers
             return View(model);
         }
 
-        [HttpPost]
+        // --- ДОБАВИТЬ ЭТОТ МЕТОД ---
+        [HttpGet]
+        public IActionResult Login()
+        {
+            return View();
+        }
+        
+            [HttpPost]
         public async Task<IActionResult> Logout()
         {
             // Удаляем куки авторизации

@@ -1,4 +1,5 @@
 ﻿using ElectronicsStore.Domain.ViewModels;
+using ElectronicsStore.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
@@ -6,35 +7,46 @@ namespace ElectronicsStore.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly ILogger<HomeController> _logger;
+
         public HomeController(ILogger<HomeController> logger)
         {
+            _logger = logger;
         }
 
-        public IActionResult Index() => View();
-        public IActionResult About() => View();
-
-        [HttpGet]
-        public IActionResult Contacts() => View();
-
-        [HttpPost]
-        public IActionResult Contacts(string name, string email, string message)
+        public IActionResult Index()
         {
-            ViewBag.Message = "Спасибо за ваше сообщение!";
             return View();
         }
 
-        public IActionResult Privacy() => View();
+        public IActionResult Privacy()
+        {
+            return View();
+        }
+
+        // --- ДОБАВЛЕНО ---
+        public IActionResult About()
+        {
+            return View();
+        }
+
+        public IActionResult Contacts()
+        {
+            return View();
+        }
+
+        public IActionResult Catalog()
+        {
+            // Если у вас есть контроллер Product, можно сделать return RedirectToAction("List", "Product");
+            // Но пока просто вернем представление
+            return View();
+        }
+        // -----------------
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
-            // ✅ ИСПРАВЛЕНИЕ: Инициализация с пустой строкой вместо null
-            var requestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
-
-            return View(new ErrorViewModel
-            {
-                RequestId = requestId ?? string.Empty
-            });
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
     }
 }

@@ -168,13 +168,12 @@ namespace ElectronicsStore.BLL.Realizations
                     };
                 }
 
-                // --- Проверка, подтверждена ли почта ---
                 if (!user.IsEmailConfirmed)
                 {
                     return new BaseResponse<ClaimsIdentity>()
                     {
                         Description = "Ваша почта не подтверждена. Проверьте входящие.",
-                        StatusCode = StatusCode.InternalServerError // Или можно создать отдельный статус
+                        StatusCode = StatusCode.InternalServerError
                     };
                 }
 
