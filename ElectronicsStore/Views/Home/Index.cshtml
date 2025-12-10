@@ -2,15 +2,99 @@
     ViewData["Title"] = "Главная";
 }
 
-<div class="text-center py-5">
-    <h1 class="display-4 fw-bold">Добро пожаловать в ElectronicsHub!</h1>
-    <p class="lead text-muted">Лучшая электроника по доступным ценам.</p>
-
-    <div class="mt-5">
-        <img src="/img/iphone15.jpg" class="img-fluid rounded shadow-lg" alt="iPhone 15" style="max-height: 400px;">
+<section class="py-5 text-center container">
+    <div class="row py-lg-5">
+        <div class="col-lg-8 col-md-10 mx-auto">
+            <h1 class="fw-bold display-4 text-white">Добро пожаловать в <span class="text-warning">ElectronicsHub</span>!</h1>
+            <p class="lead text-muted mt-3 mb-5">
+                Ваш надежный проводник в мир современных технологий.
+                Лучшие гаджеты по отличным ценам.
+            </p>
+            <p>
+                <a asp-controller="Home" asp-action="Catalog" class="btn btn-warning btn-lg px-5 shadow-sm">Смотреть каталог</a>
+            </p>
+        </div>
     </div>
+</section>
 
-    <div class="mt-5">
-        <a asp-controller="Home" asp-action="Catalog" class="btn btn-warning btn-lg fw-bold px-5">Перейти в каталог</a>
+<section class="py-5" style="background-color: #0a0a0a;">
+    <div class="container px-4 px-lg-5">
+        <h2 class="fw-bold text-center text-white mb-5">Категории</h2>
+        <div class="row gx-4 gx-lg-5 row-cols-1 row-cols-md-2 row-cols-xl-4 justify-content-center">
+
+            <div class="col mb-5">
+                <a asp-controller="Home" asp-action="Catalog" asp-route-category="smartphones" class="text-decoration-none card-hover-effect">
+                    <div class="card h-100 border-0 shadow-sm" style="background-color: #1a1a1a;">
+                        <div class="card-body p-4 text-center">
+                            <div class="fs-1 text-warning mb-3">📱</div>
+                            <h5 class="card-title fw-bold text-white">Смартфоны</h5>
+                            <p class="card-text text-muted small">Новейшие модели.</p>
+                        </div>
+                        <div class="card-footer p-4 pt-0 border-top-0 bg-transparent text-center">
+                            <span class="text-warning fw-bold small">Перейти →</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col mb-5">
+                <a asp-controller="Home" asp-action="Catalog" asp-route-category="tvs" class="text-decoration-none card-hover-effect">
+                    <div class="card h-100 border-0 shadow-sm" style="background-color: #1a1a1a;">
+                        <div class="card-body p-4 text-center">
+                            <div class="fs-1 text-warning mb-3">📺</div>
+                            <h5 class="card-title fw-bold text-white">ТВ и Мониторы</h5>
+                            <p class="card-text text-muted small">Яркие краски.</p>
+                        </div>
+                        <div class="card-footer p-4 pt-0 border-top-0 bg-transparent text-center">
+                            <span class="text-warning fw-bold small">Перейти →</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col mb-5">
+                <a asp-controller="Home" asp-action="Catalog" asp-route-category="pc" class="text-decoration-none card-hover-effect">
+                    <div class="card h-100 border-0 shadow-sm" style="background-color: #1a1a1a;">
+                        <div class="card-body p-4 text-center">
+                            <div class="fs-1 text-warning mb-3">💻</div>
+                            <h5 class="card-title fw-bold text-white">Компьютеры</h5>
+                            <p class="card-text text-muted small">Для работы и игр.</p>
+                        </div>
+                        <div class="card-footer p-4 pt-0 border-top-0 bg-transparent text-center">
+                            <span class="text-warning fw-bold small">Перейти →</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col mb-5">
+                <a asp-controller="Home" asp-action="Catalog" class="text-decoration-none card-hover-effect">
+                    <div class="card h-100 border-0 shadow-sm" style="background-color: #1a1a1a;">
+                        <div class="card-body p-4 text-center">
+                            <div class="fs-1 text-warning mb-3">🎧</div>
+                            <h5 class="card-title fw-bold text-white">Аксессуары</h5>
+                            <p class="card-text text-muted small">Все необходимое.</p>
+                        </div>
+                        <div class="card-footer p-4 pt-0 border-top-0 bg-transparent text-center">
+                            <span class="text-warning fw-bold small">Перейти →</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
     </div>
-</div>
+</section>
+
+<style>
+    .card-hover-effect .card {
+        transition: transform 0.3s ease, border-color 0.3s ease;
+        border: 1px solid #333;
+    }
+
+    .card-hover-effect:hover .card {
+        transform: translateY(-5px);
+        /* ИСПРАВЛЕНО: Теперь рамка оранжевая (#ff6600), а не желтая */
+        border-color: #ff6600 !important;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+</style>

@@ -1,120 +1,122 @@
-﻿/* Основные стили (для ПК и планшетов) */
+﻿/* --- СТРОГИЙ ЧЕРНО-ОРАНЖЕВЫЙ СТИЛЬ --- */
+
 .auth-container {
     min-height: 80vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 20px; /* Добавили внешний отступ, чтобы не прилипало к краям */
+    padding: 20px;
 }
 
 .auth-card {
-    background-color: #1e1e1e;
+    background-color: #121212;
     border: 1px solid #333;
-    border-radius: 15px;
+    border-radius: 8px;
     padding: 40px;
     width: 100%;
     max-width: 450px;
-    box-shadow: 0 10px 30px rgba(0,0,0, 0.5);
+    box-shadow: 0 10px 40px rgba(0,0,0, 0.9);
 }
 
 .auth-title {
-    color: var(--main-orange);
+    color: #ff6600; /* Оранжевый */
     text-align: center;
     margin-bottom: 30px;
     text-transform: uppercase;
-    font-weight: bold;
+    font-weight: 800;
     letter-spacing: 1px;
 }
 
-.form-floating input {
-    background-color: #2c2c2c;
-    border: 1px solid #444;
+/* Поля ввода */
+.form-floating > .form-control {
+    background-color: #080808;
+    border: 1px solid #333;
     color: #fff;
-    border-radius: 8px; /* Чуть скруглим поля */
+    border-radius: 4px;
 }
 
-    .form-floating input:focus {
-        background-color: #333;
+    .form-floating > .form-control:focus {
+        background-color: #080808;
+        border-color: #ff6600; /* Оранжевая рамка при фокусе */
         color: #fff;
-        border-color: var(--main-orange);
-        box-shadow: none;
+        box-shadow: 0 0 0 0.25rem rgba(255, 102, 0, 0.15);
     }
 
-.form-floating label {
-    color: #aaa;
+.form-floating > label {
+    color: #666;
 }
 
+.form-floating > .form-control:focus ~ label {
+    color: #ff6600; /* Оранжевый текст подсказки */
+}
+
+/* Кнопки */
 .btn-auth {
-    background: var(--main-orange);
-    color: #000;
+    background-color: #ff6600;
+    color: #fff;
     font-weight: bold;
     width: 100%;
     padding: 12px;
-    border-radius: 8px;
+    border-radius: 4px;
+    border: none;
     margin-top: 20px;
+    text-transform: uppercase;
     transition: 0.3s;
-    font-size: 1.1rem; /* Чуть крупнее текст кнопки */
 }
 
     .btn-auth:hover {
-        background: #e65c00;
+        background-color: #e65c00; /* Темнее при наведении */
         color: #fff;
+        box-shadow: 0 0 15px rgba(255, 102, 0, 0.3);
     }
 
 .auth-footer {
-    margin-top: 20px;
+    margin-top: 25px;
     text-align: center;
     font-size: 0.9rem;
+    color: #666;
 }
 
     .auth-footer a {
-        color: var(--main-orange);
+        color: #ff6600;
         text-decoration: none;
+        font-weight: 600;
     }
 
-/* -------------------------------------------------- */
-/* АДАПТИВ ДЛЯ ТЕЛЕФОНОВ (Экраны меньше 576 пикселей) */
-/* -------------------------------------------------- */
+        .auth-footer a:hover {
+            color: #fff;
+            text-decoration: underline;
+        }
+
+/* Табы (Вкладки) */
+.nav-pills {
+    background-color: #080808;
+    padding: 5px;
+    border-radius: 30px;
+    border: 1px solid #333;
+}
+
+    .nav-pills .nav-link {
+        color: #666;
+        border-radius: 25px;
+        transition: 0.3s;
+    }
+
+        .nav-pills .nav-link.active {
+            background-color: #ff6600 !important;
+            color: #fff !important;
+        }
+
 @media (max-width: 576px) {
     .auth-container {
-        /* На телефоне центруем не по середине, а чуть выше, 
-           чтобы клавиатура не перекрывала ввод */
+        padding-top: 40px;
         align-items: flex-start;
-        padding-top: 60px;
-        min-height: 100vh;
     }
 
     .auth-card {
-        padding: 20px; /* Уменьшаем внутренние отступы в 2 раза */
-        border: none; /* Убираем рамку, чтобы было чище */
-        box-shadow: none; /* Убираем тень на мобильном */
-        background-color: transparent; /* Или оставляем темный фон, но проще */
-    }
-
-    /* Если хотите оставить темную карточку на телефоне, раскомментируйте строчки ниже, а блок выше закомментируйте */
-    /*
-    .auth-card {
-        padding: 25px;
-        margin: 0 10px;
-    }
-    */
-
-    .auth-title {
-        font-size: 1.5rem; /* Уменьшаем размер заголовка */
-        margin-bottom: 20px;
-    }
-
-    .form-floating input {
-        font-size: 16px; /* Оптимальный размер шрифта для iPhone (чтобы не зумил) */
-        height: 55px;
-    }
-
-    .form-floating label {
-        font-size: 0.9rem; /* Чуть меньше текст подсказки */
-    }
-
-    .btn-auth {
-        margin-top: 15px;
-        padding: 14px; /* Кнопку делаем выше, чтобы удобнее нажимать пальцем */
+        border: none;
+        background-color: transparent;
+        box-shadow: none;
+        padding: 10px;
     }
 }

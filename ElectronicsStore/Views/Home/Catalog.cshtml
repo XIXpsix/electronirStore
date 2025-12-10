@@ -6,22 +6,32 @@
 
 <div class="container mt-4">
     <div class="row">
-        <div class="col-md-3">
-            <div class="list-group">
-                <h4 class="mb-3 text-warning">Категории</h4>
-                <a asp-action="Catalog" asp-route-category="" class="list-group-item list-group-item-action bg-dark text-light border-secondary">
-                    Все товары
+        <div class="col-md-3 mb-4">
+            <div class="list-group shadow-sm sticky-top" style="top: 20px;">
+                <h4 class="mb-3 text-warning text-uppercase fw-bold px-2">Категории</h4>
+
+                <a asp-action="Catalog" asp-route-category=""
+                   class="list-group-item list-group-item-action bg-dark text-light border-secondary">
+                    📦 Все товары
                 </a>
-                <a asp-action="Catalog" asp-route-category="Телевизоры и мониторы" class="list-group-item list-group-item-action bg-dark text-light border-secondary">
+
+                <a asp-action="Catalog" asp-route-category="tvs"
+                   class="list-group-item list-group-item-action bg-dark text-light border-secondary">
                     📺 Телевизоры и мониторы
                 </a>
-                <a asp-action="Catalog" asp-route-category="ПК и ноутбуки" class="list-group-item list-group-item-action bg-dark text-light border-secondary">
+
+                <a asp-action="Catalog" asp-route-category="pc"
+                   class="list-group-item list-group-item-action bg-dark text-light border-secondary">
                     💻 ПК и ноутбуки
                 </a>
-                <a asp-action="Catalog" asp-route-category="Телефоны" class="list-group-item list-group-item-action bg-dark text-light border-secondary">
+
+                <a asp-action="Catalog" asp-route-category="Телефоны"
+                   class="list-group-item list-group-item-action bg-dark text-light border-secondary">
                     📱 Телефоны
                 </a>
-                <a asp-action="Catalog" asp-route-category="Аксессуары и периферия" class="list-group-item list-group-item-action bg-dark text-light border-secondary">
+
+                <a asp-action="Catalog" asp-route-category="Аксессуары"
+                   class="list-group-item list-group-item-action bg-dark text-light border-secondary">
                     🎧 Аксессуары
                 </a>
             </div>
@@ -29,29 +39,41 @@
 
         <div class="col-md-9">
             <form asp-action="Catalog" method="get" class="d-flex mb-4">
-                <input name="searchString" class="form-control me-2 bg-dark text-white border-secondary" type="search" placeholder="Поиск товаров..." aria-label="Search">
-                <button class="btn btn-warning" type="submit">Найти</button>
+                <input name="searchString" class="form-control me-2 bg-dark text-white border-secondary"
+                       type="search" placeholder="Поиск товаров..." aria-label="Search"
+                       style="box-shadow: none;">
+                <button class="btn btn-warning px-4" type="submit">Найти</button>
             </form>
 
-            <div class="row row-cols-1 row-cols-md-3 g-4">
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
                 @if (Model != null && Model.Any())
                 {
-                    // ЦИКЛ НАЧИНАЕТСЯ ЗДЕСЬ
                     @foreach (var product in Model)
                     {
                         <div class="col">
-                            <div class="card h-100 bg-dark border-secondary">
-                                <img src="@(product.Images != null && product.Images.Any() ? product.Images.First().ImagePath : "/img/w.png")"
-                                     class="card-img-top p-3" alt="@product.Name" style="height: 200px; object-fit: contain;">
+                            <div class="card h-100 shadow border-secondary card-hover-effect" style="background-color: #1e1e1e;">
 
-                                <div class="card-body text-center">
-                                    <h5 class="card-title text-white">@product.Name</h5>
-                                    <p class="card-text text-warning fw-bold">@product.Price.ToString("C")</p>
+                                <a asp-controller="Product" asp-action="GetProduct" asp-route-id="@product.Id" class="text-decoration-none">
+                                    <div class="position-relative" style="background-color: #fff; border-radius: 4px 4px 0 0;">
+                                        <img src="@(product.Images != null && product.Images.Any() ? product.Images.First().ImagePath : "/img/iphone15.jpg")"
+                                             class="card-img-top p-3" alt="@product.Name"
+                                             style="height: 200px; object-fit: contain;">
+                                    </div>
+                                </a>
 
-                                    <div class="btn-group w-100">
-                                        <a asp-controller="Product" asp-action="GetProduct" asp-route-id="@product.Id" class="btn btn-outline-light">Подробнее</a>
+                                <div class="card-body text-center d-flex flex-column">
+                                    <a asp-controller="Product" asp-action="GetProduct" asp-route-id="@product.Id" class="text-decoration-none text-white link-warning">
+                                        <h5 class="card-title text-truncate" title="@product.Name">@product.Name</h5>
+                                    </a>
 
-                                        <a asp-controller="Cart" asp-action="Add" asp-route-id="@product.Id" class="btn btn-warning">В корзину</a>
+                                    <div class="mt-auto pt-3">
+                                        <p class="card-text text-warning fw-bold fs-4 mb-3">@product.Price.ToString("C")</p>
+
+                                        <div class="d-grid gap-2">
+                                            <a asp-controller="Cart" asp-action="Add" asp-route-id="@product.Id" class="btn btn-outline-warning fw-bold">
+                                                В КОРЗИНУ 🛒
+                                            </a>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -60,11 +82,36 @@
                 }
                 else
                 {
-                    <div class="col-12 text-center text-muted">
+                    <div class="col-12 text-center text-muted py-5">
                         <h3>Товары не найдены 😕</h3>
+                        <p>Попробуйте изменить категорию или параметры поиска.</p>
                     </div>
                 }
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    /* Эффект наведения для карточки */
+    .card-hover-effect {
+        transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    }
+
+        .card-hover-effect:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(255, 102, 0, 0.2) !important;
+            border-color: #ff6600 !important;
+        }
+
+    /* Ссылки в меню категорий */
+    .list-group-item {
+        transition: 0.3s;
+    }
+
+        .list-group-item:hover {
+            background-color: #ff6600 !important;
+            color: #000 !important;
+            border-color: #ff6600 !important;
+        }
+</style>
