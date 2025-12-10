@@ -25,14 +25,20 @@ namespace ElectronicsStore.Controllers
                 var response = await accountService.Register(model);
                 if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK)
                 {
-                    // ИСПРАВЛЕНИЕ: Перенаправляем на страницу ввода кода
-                    // Передаем email, чтобы пользователю не вводить его заново
-                    return RedirectToAction("ConfirmEmail", "Account", new { email = model.Email });
+                    // УСПЕХ: Возвращаем JSON с адресом для перехода (на ввод кода)
+                    return Json(new
+                    {
+                        isValid = true,
+                        redirectUrl = Url.Action("ConfirmEmail", "Account", new { email = model.Email })
+                    });
                 }
-                // Ошибка
-                ModelState.AddModelError("", response.Description);
+                // ОШИБКА СЕРВИСА (например, почта занята)
+                return Json(new { isValid = false, description = response.Description });
             }
-            return View(model);
+
+            // ОШИБКА ВАЛИДАЦИИ (пустые поля и т.д.)
+            var errorMsg = string.Join("\n", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+            return Json(new { isValid = false, description = errorMsg });
         }
 
         // --- ВХОД ---
@@ -48,16 +54,16 @@ namespace ElectronicsStore.Controllers
                 if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK)
                 {
                     await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(response.Data));
-                    return RedirectToAction("Index", "Home");
+                    // УСПЕХ: Возвращаем JSON с адресом главной страницы
+                    return Json(new { isValid = true, redirectUrl = Url.Action("Index", "Home") });
                 }
-                ModelState.AddModelError("", response.Description);
+                return Json(new { isValid = false, description = response.Description });
             }
-            return View(model);
+            var errorMsg = string.Join("\n", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+            return Json(new { isValid = false, description = errorMsg });
         }
 
         // --- ПОДТВЕРЖДЕНИЕ ПОЧТЫ ---
-
-        // Добавил этот метод, чтобы страница открывалась
         [HttpGet]
         public IActionResult ConfirmEmail(string email)
         {
@@ -72,7 +78,6 @@ namespace ElectronicsStore.Controllers
                 var response = await accountService.ConfirmEmail(model.Email, model.Code);
                 if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK)
                 {
-                    // После успешного кода сразу входим
                     await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(response.Data));
                     return RedirectToAction("Index", "Home");
                 }
@@ -88,7 +93,7 @@ namespace ElectronicsStore.Controllers
             return RedirectToAction("Index", "Home");
         }
 
-        // --- GOOGLE ВХОД ---
+        // --- GOOGLE ---
         [HttpGet]
         public IActionResult AuthenticationGoogle()
         {
@@ -100,22 +105,14 @@ namespace ElectronicsStore.Controllers
         public async Task<IActionResult> GoogleResponse()
         {
             var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-
             if (result?.Principal == null) return RedirectToAction("Login");
 
             var claims = result.Principal.Identities.FirstOrDefault()?.Claims;
             var name = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
             var email = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-            var avatar = claims?.FirstOrDefault(c => c.Type == "picture")?.Value ??
-                         claims?.FirstOrDefault(c => c.Type == "image")?.Value;
+            var avatar = claims?.FirstOrDefault(c => c.Type == "picture")?.Value ?? claims?.FirstOrDefault(c => c.Type == "image")?.Value;
 
-            var userModel = new User()
-            {
-                Name = name ?? "GoogleUser",
-                Email = email,
-                AvatarPath = avatar
-            };
-
+            var userModel = new User() { Name = name ?? "GoogleUser", Email = email, AvatarPath = avatar };
             var response = await accountService.IsCreatedAccount(userModel);
 
             if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK && response.Data != null)
@@ -123,7 +120,6 @@ namespace ElectronicsStore.Controllers
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(response.Data));
                 return RedirectToAction("Index", "Home");
             }
-
             return RedirectToAction("Login");
         }
     }
