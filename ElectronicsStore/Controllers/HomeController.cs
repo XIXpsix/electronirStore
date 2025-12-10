@@ -1,19 +1,19 @@
 ﻿using ElectronicsStore.BLL.Interfaces;
 using ElectronicsStore.Domain.Entity;
-using ElectronicsStore.Domain.ViewModels; // Теперь это пространство имен существует
+using ElectronicsStore.Domain.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace ElectronicsStore.Controllers
 {
     public class HomeController : Controller
     {
         private readonly IProductService _productService;
-        private readonly ICategoryService _categoryService; // Добавляем сервис категорий
+        private readonly ICategoryService _categoryService;
 
-        // Обновляем конструктор
         public HomeController(IProductService productService, ICategoryService categoryService)
         {
             _productService = productService;
@@ -36,9 +36,11 @@ namespace ElectronicsStore.Controllers
             // Инициализируем пустым списком, если пришел null
             IEnumerable<Product> products = response.Data ?? new List<Product>();
 
-            if (response.StatusCode == Domain.Enum.StatusCode.OK)
+            // ИСПРАВЛЕНИЕ: Используем полный путь ElectronicsStore.Domain.Enum.StatusCode
+            // чтобы избежать конфликта с методом ControllerBase.StatusCode()
+            if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK)
             {
-                // 1. Фильтрация по Категории (добавили проверку на null для Category)
+                // 1. Фильтрация по Категории
                 if (!string.IsNullOrEmpty(category))
                 {
                     if (category == "tvs")
@@ -52,7 +54,7 @@ namespace ElectronicsStore.Controllers
                 // 2. Поиск
                 if (!string.IsNullOrEmpty(searchString))
                 {
-                    products = products.Where(p => p.Name.ToLower().Contains(searchString.ToLower()));
+                    products = products.Where(p => p.Name != null && p.Name.ToLower().Contains(searchString.ToLower()));
                 }
 
                 return View(products.ToList());
