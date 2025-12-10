@@ -20,7 +20,7 @@ namespace ElectronicsStore.BLL.Realizations
         {
             try
             {
-                // Явно указываем IQueryable<Product> для корректной работы фильтров
+                // Явно указываем тип IQueryable<Product>
                 IQueryable<Product> query = productStorage.GetAll().Include(x => x.Category);
 
                 if (filter.CategoryId > 0)
@@ -63,6 +63,7 @@ namespace ElectronicsStore.BLL.Realizations
                     .Include(x => x.Category)
                     .Where(x => x.CategoryId == categoryId)
                     .ToListAsync();
+
                 return new BaseResponse<List<Product>> { Data = products, StatusCode = StatusCode.OK };
             }
             catch (Exception ex)
@@ -78,6 +79,7 @@ namespace ElectronicsStore.BLL.Realizations
                 var products = await productStorage.GetAll()
                     .Include(x => x.Category)
                     .ToListAsync();
+
                 return new BaseResponse<IEnumerable<Product>> { Data = products, StatusCode = StatusCode.OK };
             }
             catch (Exception ex)
@@ -109,11 +111,14 @@ namespace ElectronicsStore.BLL.Realizations
         {
             try
             {
-                // ИСПРАВЛЕНИЕ: Добавлен восклицательный знак (!) после ImagePath
+                // ИСПРАВЛЕНИЕ ЗДЕСЬ:
+                // 1. Проверяем, что картинка не null (Where)
+                // 2. Используем ! (null-forgiving operator), чтобы успокоить компилятор
                 var images = await productImageStorage.GetAll()
                     .Where(x => x.ProductId == id && x.ImagePath != null)
                     .Select(x => x.ImagePath!)
                     .ToListAsync();
+
                 return new BaseResponse<List<string>> { Data = images, StatusCode = StatusCode.OK };
             }
             catch (Exception ex)
