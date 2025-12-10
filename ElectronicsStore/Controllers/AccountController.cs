@@ -25,13 +25,13 @@ namespace ElectronicsStore.Controllers
                 var response = await accountService.Register(model);
                 if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK)
                 {
-                    // После успешной регистрации перенаправляем на Вход
+                    // Успех! Перенаправляем на страницу Входа
                     return RedirectToAction("Login", "Account");
                 }
-                // Если ошибка (напр. такой email есть), добавляем её на форму
+                // Ошибка (например, такая почта занята): показываем её на той же странице
                 ModelState.AddModelError("", response.Description);
             }
-            // Возвращаем ту же страницу с ошибками
+            // Если что-то не так, возвращаем ту же страницу, чтобы пользователь исправил данные
             return View(model);
         }
 
@@ -47,52 +47,24 @@ namespace ElectronicsStore.Controllers
                 var response = await accountService.Login(model);
                 if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK)
                 {
+                    // Вход успешен, создаем куки
                     await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(response.Data));
                     return RedirectToAction("Index", "Home");
                 }
-                // ОШИБКА: Добавляем описание ошибки (Неверный пароль) в модель, чтобы показать на странице
+                // Ошибка (неверный пароль): показываем её прямо на форме входа
                 ModelState.AddModelError("", response.Description);
             }
             return View(model);
         }
 
-        // --- ПОДТВЕРЖДЕНИЕ ПОЧТЫ (Если используется) ---
-        [HttpPost]
-        public async Task<IActionResult> ConfirmEmail(ConfirmEmailViewModel model)
-        {
-            if (ModelState.IsValid)
-            {
-                var response = await accountService.ConfirmEmail(model.Email, model.Code);
-                if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK)
-                {
-                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(response.Data));
-                    return RedirectToAction("Index", "Home");
-                }
-                ModelState.AddModelError("", response.Description);
-            }
-            // Если была ошибка, лучше вернуть View, но так как это обычно AJAX или отдельная форма,
-            // оставим Redirect или View по твоей логике. Для простоты вернем на главную с ошибкой.
-            return RedirectToAction("Index", "Home");
-        }
-
         // --- ВЫХОД ---
-        [HttpPost] // Лучше использовать HttpPost для выхода ради безопасности
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Index", "Home");
         }
 
-        // Для удобства можно добавить и GET версию, если ссылка в меню обычная
-        [HttpGet]
-        public async Task<IActionResult> LogoutGet()
-        {
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return RedirectToAction("Index", "Home");
-        }
-
-        // --- GOOGLE AUTHENTICATION ---
-
+        // --- GOOGLE ВХОД ---
         [HttpGet]
         public IActionResult AuthenticationGoogle()
         {
@@ -105,13 +77,12 @@ namespace ElectronicsStore.Controllers
         {
             var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
-            // Если результат пустой (ошибка со стороны гугл или отмена), возвращаем на логин
             if (result?.Principal == null) return RedirectToAction("Login");
 
             var claims = result.Principal.Identities.FirstOrDefault()?.Claims;
             var name = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
             var email = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-            // Иногда картинка приходит как "picture", иногда как URI claim. Пробуем найти.
+            // Пытаемся найти картинку профиля
             var avatar = claims?.FirstOrDefault(c => c.Type == "picture")?.Value ??
                          claims?.FirstOrDefault(c => c.Type == "image")?.Value;
 
@@ -131,6 +102,23 @@ namespace ElectronicsStore.Controllers
             }
 
             return RedirectToAction("Login");
+        }
+
+        // Метод подтверждения почты (если нужен)
+        [HttpPost]
+        public async Task<IActionResult> ConfirmEmail(ConfirmEmailViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var response = await accountService.ConfirmEmail(model.Email, model.Code);
+                if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK)
+                {
+                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(response.Data));
+                    return RedirectToAction("Index", "Home");
+                }
+                ModelState.AddModelError("", response.Description);
+            }
+            return RedirectToAction("Index", "Home");
         }
     }
 }
