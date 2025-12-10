@@ -6,8 +6,15 @@ using System.Diagnostics;
 
 namespace ElectronicsStore.Controllers
 {
-    public class HomeController(IProductService productService) : Controller
+    public class HomeController : Controller
     {
+        private readonly IProductService _productService;
+
+        public HomeController(IProductService productService)
+        {
+            _productService = productService;
+        }
+
         public IActionResult Index() => View();
         public IActionResult Privacy() => View();
         public IActionResult About() => View();
@@ -16,9 +23,7 @@ namespace ElectronicsStore.Controllers
         [HttpGet]
         public async Task<IActionResult> Catalog(string category, string searchString)
         {
-            var response = await productService.GetProducts();
-
-            // Защита от null списка
+            var response = await _productService.GetProducts();
             IEnumerable<Product> products = response.Data ?? [];
 
             if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK)

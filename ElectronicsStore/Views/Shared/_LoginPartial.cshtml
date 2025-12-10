@@ -1,19 +1,25 @@
-﻿@using Microsoft.AspNetCore.Identity
-@using ElectronicsStore.Domain.Entity
-@inject UserManager<User> UserManager
+﻿@* Убираем эти строки, так как они вызывают ошибку *@
+@* @using Microsoft.AspNetCore.Identity *@
+@* @using ElectronicsStore.Domain.Entity *@
+@* @inject UserManager<User> UserManager *@
 
-@if (User.Identity.IsAuthenticated)
+@if (User.Identity != null && User.Identity.IsAuthenticated)
 {
+    // Получаем путь к аватарке из Claims, которые мы записали при входе.
+    // Если его нет, ставим картинку по умолчанию.
+    var avatarPath = User.FindFirst("AvatarPath")?.Value ?? "/img/w.png";
+
     <div class="dropdown text-end">
         <a href="#" class="d-block link-light text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
-            <img src="/img/user_placeholder.png" alt="mdo" width="32" height="32" class="rounded-circle">
+            @* Используем переменную avatarPath *@
+            <img src="@avatarPath" alt="User" width="32" height="32" class="rounded-circle">
             <span class="text-white ms-2">@User.Identity.Name</span>
         </a>
         <ul class="dropdown-menu text-small" aria-labelledby="dropdownUser1">
             <li><a class="dropdown-item" asp-controller="User" asp-action="Profile">👤 Профиль</a></li>
-
             <li><a class="dropdown-item" asp-controller="Cart" asp-action="Index">🛒 Корзина</a></li>
 
+            @* Проверка роли работает через стандартный механизм Claims *@
             @if (User.IsInRole("Admin"))
             {
                 <li><hr class="dropdown-divider"></li>

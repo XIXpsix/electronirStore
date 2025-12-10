@@ -11,7 +11,8 @@ using System.Text;
 
 namespace ElectronicsStore.BLL.Realizations
 {
-    public class AccountService(IBaseStorage<User> userRepository, EmailService emailService) : IAccountService
+    // Исправлено: IEmailService (интерфейс)
+    public class AccountService(IBaseStorage<User> userRepository, IEmailService emailService) : IAccountService
     {
         private static string HashPassword(string password)
         {
