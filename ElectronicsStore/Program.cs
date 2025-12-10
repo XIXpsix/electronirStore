@@ -6,7 +6,6 @@ using ElectronicsStore.BLL.Realizations;
 using ElectronicsStore.Domain.Entity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using ElectronicsStore.BLL.Realizations;
 
 var builder = WebApplication.CreateBuilder(args);
 
