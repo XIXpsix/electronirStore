@@ -1,35 +1,44 @@
 ﻿@model ElectronicsStore.Domain.ViewModels.CatalogViewModel
 @{
-    ViewData["Title"] = "Каталог";
+    ViewData["Title"] = "Каталог товаров";
 }
 
 <div class="container-fluid mt-4">
     <div class="row">
         <div class="col-md-3 col-lg-2 mb-4">
-            <div class="p-3 border border-secondary rounded" style="background-color: #1e1e1e;">
-                <h5 class="text-warning mb-3">Поиск и фильтры</h5>
+            <div class="p-3 border border-secondary rounded sticky-top" style="background-color: #1e1e1e; top: 20px; z-index: 100;">
 
-                <div class="mb-3">
-                    <label class="form-label text-light small">Название</label>
-                    <input type="text" id="nameSearch" class="form-control form-control-sm bg-dark text-white border-secondary" placeholder="Введите название...">
+                <div class="mb-4">
+                    <label class="form-label text-warning small fw-bold">ПОИСК</label>
+                    <input type="text" id="nameSearch" class="form-control form-control-sm bg-dark text-white border-secondary" placeholder="Найти товар...">
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label text-light small">Категория</label>
-                    <select id="categoryId" class="form-select form-select-sm bg-dark text-white border-secondary">
-                        <option value="0">Все категории</option>
+                <div class="mb-4">
+                    <label class="form-label text-warning small fw-bold">КАТЕГОРИИ</label>
+                    <div class="list-group" id="categoryList">
+                        <button type="button"
+                                class="list-group-item list-group-item-action active bg-dark text-white border-secondary"
+                                onclick="selectCategory(0, this)">
+                            Все товары
+                        </button>
+
                         @if (Model.Categories != null)
                         {
                             foreach (var cat in Model.Categories)
                             {
-                                <option value="@cat.Id">@cat.Name</option>
+                                <button type="button"
+                                        class="list-group-item list-group-item-action bg-dark text-white border-secondary"
+                                        onclick="selectCategory(@cat.Id, this)">
+                                    @cat.Name
+                                </button>
                             }
                         }
-                    </select>
+                    </div>
+                    <input type="hidden" id="categoryId" value="0">
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label text-light small">Цена (₽)</label>
+                <div class="mb-4">
+                    <label class="form-label text-warning small fw-bold">ЦЕНА (₽)</label>
                     <div class="d-flex gap-2">
                         <input type="number" id="minPrice" class="form-control form-control-sm bg-dark text-white border-secondary" placeholder="От">
                         <input type="number" id="maxPrice" class="form-control form-control-sm bg-dark text-white border-secondary" placeholder="До">
@@ -37,14 +46,14 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label text-light small">Сортировка</label>
+                    <label class="form-label text-warning small fw-bold">СОРТИРОВКА</label>
                     <select id="sortType" class="form-select form-select-sm bg-dark text-white border-secondary">
                         <option value="default">По умолчанию</option>
                         <option value="price_asc">Сначала дешевые</option>
                         <option value="price_desc">Сначала дорогие</option>
+                        <option value="name_asc">По названию</option>
                     </select>
                 </div>
-
             </div>
         </div>
 
@@ -55,5 +64,24 @@
         </div>
     </div>
 </div>
+
+<style>
+    .list-group-item {
+        transition: 0.2s;
+        cursor: pointer;
+    }
+        /* Стиль для выбранной категории */
+        .list-group-item.active {
+            background-color: #ff6600 !important; /* Оранжевый фон */
+            border-color: #ff6600 !important;
+            color: #000 !important;
+            font-weight: bold;
+        }
+
+        .list-group-item:hover:not(.active) {
+            background-color: #333 !important;
+            color: #ff6600 !important;
+        }
+</style>
 
 <script src="~/js/catalog_script.js"></script>

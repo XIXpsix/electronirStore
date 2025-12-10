@@ -17,19 +17,19 @@ builder.Services.AddDbContext<ElectronicsStoreContext>(options =>
 builder.Services.AddScoped<IBaseStorage<Category>, BaseStorage<Category>>();
 builder.Services.AddScoped<IBaseStorage<Product>, BaseStorage<Product>>();
 builder.Services.AddScoped<IBaseStorage<User>, BaseStorage<User>>();
-builder.Services.AddScoped<IBaseStorage<CartItem>, BaseStorage<CartItem>>(); // <-- КОРЗИНА
+builder.Services.AddScoped<IBaseStorage<CartItem>, BaseStorage<CartItem>>(); // Сервис корзины
 builder.Services.AddScoped(typeof(IBaseStorage<>), typeof(BaseStorage<>)); // Универсальный репозиторий
 
-// Где-то в блоке регистрации сервисов (BLL)
+// Регистрация доп. сервисов
 builder.Services.AddScoped<EmailService>();
 
 // 3. Регистрация Сервисов (BLL)
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
-builder.Services.AddScoped<ICartService, CartService>(); // <-- СЕРВИС КОРЗИНЫ
+builder.Services.AddScoped<ICartService, CartService>();
 
-// 4. Настройка аутентификации (Cookie) - чтобы работал вход
+// 4. Настройка аутентификации (Cookie)
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
@@ -40,6 +40,45 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
+
+// --- АВТОМАТИЧЕСКОЕ ДОБАВЛЕНИЕ КАТЕГОРИЙ ---
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<ElectronicsStoreContext>();
+
+    // Если категорий нет, создаем их с обязательными полями (Slug, ImagePath)
+    if (!context.Categories.Any())
+    {
+        context.Categories.AddRange(
+            new Category
+            {
+                Name = "Компьютеры и ноутбуки",
+                Slug = "computers",       // Обязательное поле
+                ImagePath = "/img/cat_pc.jpg" // Обязательное поле (заглушка)
+            },
+            new Category
+            {
+                Name = "Телефоны и планшеты",
+                Slug = "phones",
+                ImagePath = "/img/cat_phones.jpg"
+            },
+            new Category
+            {
+                Name = "Телевизоры и мониторы",
+                Slug = "tv",
+                ImagePath = "/img/cat_tv.jpg"
+            },
+            new Category
+            {
+                Name = "Периферия и аксессуары",
+                Slug = "accessories",
+                ImagePath = "/img/cat_acc.jpg"
+            }
+        );
+        context.SaveChanges();
+    }
+}
+// -------------------------------------------
 
 if (!app.Environment.IsDevelopment())
 {
@@ -52,7 +91,6 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-// ВАЖНО: UseAuthentication должен быть ПЕРЕД UseAuthorization
 app.UseAuthentication();
 app.UseAuthorization();
 
