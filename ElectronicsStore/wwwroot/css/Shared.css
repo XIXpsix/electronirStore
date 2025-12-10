@@ -31,7 +31,7 @@ html, body {
 .left-side {
     left: 0;
     border-right: 2px solid var(--main-orange);
-    /* Указываем путь к картинке pc.jpg */
+    /* ИСПРАВЛЕНО: Убедитесь, что pc.jpg лежит в папке wwwroot/img/ */
     background-image: url('/img/pc.jpg');
     background-size: cover; /* Растянуть на весь блок */
     background-position: center; /* Центрировать */
@@ -42,7 +42,7 @@ html, body {
 .right-side {
     right: 0;
     border-left: 2px solid var(--main-orange);
-    /* Указываем путь к картинке pc1.jpg */
+    /* ИСПРАВЛЕНО: Убедитесь, что pc1.jpg лежит в папке wwwroot/img/ */
     background-image: url('/img/pc1.jpg');
     background-size: cover;
     background-position: center;
@@ -50,7 +50,6 @@ html, body {
 }
 
 .video-overlay {
-    /* Можно убрать, если не нужно затемнение */
     display: none;
 }
 
@@ -139,12 +138,10 @@ html, body {
 
 /* --- 5. Элементы Главной Страницы --- */
 
-/* Hero Section (ИЗМЕНЕНО: Без картинки) */
+/* Hero Section */
 .hero-section {
     position: relative;
-    /* Убрали картинку */
     background-image: none !important;
-    /* Поставили темный фон */
     background-color: var(--bg-panel);
     height: 500px;
     width: 100%;
@@ -156,7 +153,6 @@ html, body {
 }
 
 .hero-overlay {
-    /* Скрыли затемнение, так как картинки нет */
     display: none !important;
 }
 
