@@ -25,13 +25,13 @@ namespace ElectronicsStore.Controllers
                 var response = await accountService.Register(model);
                 if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK)
                 {
-                    // Успех! Перенаправляем на страницу Входа
-                    return RedirectToAction("Login", "Account");
+                    // ИСПРАВЛЕНИЕ: Сразу входим в систему, используя полученные данные
+                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(response.Data));
+                    return RedirectToAction("Index", "Home");
                 }
-                // Ошибка (например, такая почта занята): показываем её на той же странице
+                // Ошибка (например, почта занята)
                 ModelState.AddModelError("", response.Description);
             }
-            // Если что-то не так, возвращаем ту же страницу, чтобы пользователь исправил данные
             return View(model);
         }
 
@@ -47,11 +47,9 @@ namespace ElectronicsStore.Controllers
                 var response = await accountService.Login(model);
                 if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK)
                 {
-                    // Вход успешен, создаем куки
                     await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(response.Data));
                     return RedirectToAction("Index", "Home");
                 }
-                // Ошибка (неверный пароль): показываем её прямо на форме входа
                 ModelState.AddModelError("", response.Description);
             }
             return View(model);
@@ -82,7 +80,6 @@ namespace ElectronicsStore.Controllers
             var claims = result.Principal.Identities.FirstOrDefault()?.Claims;
             var name = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
             var email = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-            // Пытаемся найти картинку профиля
             var avatar = claims?.FirstOrDefault(c => c.Type == "picture")?.Value ??
                          claims?.FirstOrDefault(c => c.Type == "image")?.Value;
 
@@ -104,7 +101,6 @@ namespace ElectronicsStore.Controllers
             return RedirectToAction("Login");
         }
 
-        // Метод подтверждения почты (если нужен)
         [HttpPost]
         public async Task<IActionResult> ConfirmEmail(ConfirmEmailViewModel model)
         {

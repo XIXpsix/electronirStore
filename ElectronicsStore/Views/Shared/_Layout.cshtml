@@ -66,90 +66,13 @@
         </footer>
     </div>
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/shared_script.js"></script>
-    <script src="~/js/animation.js"></script>
-
-    @await RenderSectionAsync("Scripts", required: false)
-    <div class="modal fade" id="authModal" tabindex="-1" aria-labelledby="authModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content" style="background-color: #1e1e1e; border: 1px solid #ff6600; color: #fff;">
-
-                <div class="modal-header border-bottom border-secondary">
-                    <h5 class="modal-title text-warning text-uppercase fw-bold" id="authModalLabel">Личный кабинет</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-
-                <div class="modal-body p-4">
-                    <ul class="nav nav-pills nav-fill mb-4" id="authTabs" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active fw-bold" id="login-tab" data-bs-toggle="tab" data-bs-target="#login-panel" type="button" role="tab">ВХОД</button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link fw-bold" id="register-tab" data-bs-toggle="tab" data-bs-target="#register-panel" type="button" role="tab">РЕГИСТРАЦИЯ</button>
-                        </li>
-                    </ul>
-
-                    <div class="tab-content" id="authTabsContent">
-
-                        <div class="tab-pane fade show active" id="login-panel" role="tabpanel">
-                            <form asp-controller="Account" asp-action="Login" method="post">
-                                <div class="form-floating mb-3">
-                                    <input name="Email" type="email" class="form-control bg-dark text-white border-secondary" placeholder="Email" required />
-                                    <label class="text-muted">Email адрес</label>
-                                </div>
-                                <div class="form-floating mb-3">
-                                    <input name="Password" type="password" class="form-control bg-dark text-white border-secondary" placeholder="Пароль" required />
-                                    <label class="text-muted">Пароль</label>
-                                </div>
-                                <button type="submit" class="btn btn-warning w-100 fw-bold py-2">ВОЙТИ</button>
-                            </form>
-                        </div>
-
-                        <div class="tab-pane fade" id="register-panel" role="tabpanel">
-                            <form asp-controller="Account" asp-action="Register" method="post">
-                                <div class="form-floating mb-3">
-                                    <input name="Name" class="form-control bg-dark text-white border-secondary" placeholder="Имя" required />
-                                    <label class="text-muted">Ваше Имя</label>
-                                </div>
-                                <div class="form-floating mb-3">
-                                    <input name="Email" type="email" class="form-control bg-dark text-white border-secondary" placeholder="Email" required />
-                                    <label class="text-muted">Email</label>
-                                </div>
-                                <div class="form-floating mb-3">
-                                    <input name="Password" type="password" class="form-control bg-dark text-white border-secondary" placeholder="Пароль" required />
-                                    <label class="text-muted">Пароль</label>
-                                </div>
-                                <div class="form-floating mb-3">
-                                    <input name="PasswordConfirm" type="password" class="form-control bg-dark text-white border-secondary" placeholder="Подтверждение" required />
-                                    <label class="text-muted">Повторите пароль</label>
-                                </div>
-                                <button type="submit" class="btn btn-outline-warning w-100 fw-bold py-2">ЗАРЕГИСТРИРОВАТЬСЯ</button>
-                            </form>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        function selectAuthTab(tabId) {
-            const triggerEl = document.querySelector(`#${tabId}`);
-            if(triggerEl) {
-                const tab = new bootstrap.Tab(triggerEl);
-                tab.show();
-            }
-        }
-    </script>
     <partial name="_LoginRegistrationPartial" />
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-
+    <script src="~/js/shared_script.js"></script>
+    <script src="~/js/animation.js"></script>
     <script src="~/js/login_and_registration_script.js"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
