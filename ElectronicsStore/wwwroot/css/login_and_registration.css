@@ -1,81 +1,166 @@
-﻿/* --- ТЕМНЫЕ ПОЛЯ ВВОДА --- */
-.dark-input {
-    background-color: #080808 !important;
-    border: 1px solid #333 !important;
-    color: #fff !important;
-    border-radius: 0 !important; /* Квадратные углы для брутальности */
+﻿/* --- 1. ФОН И ПОДЛОЖКА --- */
+.modal-overlay {
+    display: none; /* Скрыто по умолчанию */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85); /* Затемнение фона */
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(5px); /* Размытие фона */
 }
 
-    .dark-input:focus {
-        border-color: #ff6600 !important;
-        box-shadow: 0 0 15px rgba(255, 102, 0, 0.2) !important;
-        background-color: #000 !important;
+    /* Класс для отображения окна (добавляется JS) */
+    .modal-overlay.active {
+        display: flex;
+        animation: fadeIn 0.3s ease-in-out;
     }
 
-    .dark-input ~ label {
-        color: #666;
-    }
+/* --- 2. САМО ОКНО --- */
+.modal-content {
+    background-color: #121212; /* Черный фон окна */
+    border: 2px solid #ff6600; /* Оранжевая рамка */
+    border-radius: 12px;
+    width: 400px;
+    padding: 30px;
+    position: relative;
+    box-shadow: 0 0 40px rgba(255, 102, 0, 0.2); /* Оранжевое свечение */
+    color: #fff;
+    overflow: hidden;
+}
 
-    .dark-input:focus ~ label {
-        color: #ff6600;
-    }
-
-/* --- КНОПКИ --- */
-.btn-orange {
-    background: #ff6600;
+/* Крестик закрытия */
+.modal-close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    background: none;
     border: none;
-    color: #000;
-    border-radius: 0;
+    font-size: 2rem;
+    color: #666;
+    cursor: pointer;
+    line-height: 1;
+    z-index: 10;
     transition: 0.3s;
 }
 
-    .btn-orange:hover {
-        background: #fff;
+    .modal-close:hover {
         color: #ff6600;
-        box-shadow: 0 0 20px #ff6600;
     }
 
-.btn-outline-orange {
-    background: transparent;
-    border: 1px solid #ff6600;
-    color: #ff6600;
-    border-radius: 0;
+/* --- 3. ТИПОГРАФИКА --- */
+.modal-title {
+    text-align: center;
+    color: #ff6600; /* Оранжевый заголовок */
+    text-transform: uppercase;
+    font-weight: 800;
+    margin-bottom: 25px;
+    letter-spacing: 1px;
+}
+
+/* --- 4. ПОЛЯ ВВОДА --- */
+.modal-form-group {
+    margin-bottom: 20px;
+}
+
+    .modal-form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: #aaa;
+        font-size: 0.9rem;
+    }
+
+.modal-input {
+    width: 100%;
+    padding: 12px 15px;
+    background-color: #1e1e1e; /* Темный фон поля */
+    border: 1px solid #333;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 1rem;
+    outline: none;
     transition: 0.3s;
 }
 
-    .btn-outline-orange:hover {
-        background: #ff6600;
-        color: #000;
+    .modal-input:focus {
+        border-color: #ff6600; /* Оранжевая рамка при фокусе */
+        box-shadow: 0 0 10px rgba(255, 102, 0, 0.2);
+        background-color: #000;
     }
 
-/* --- АНИМАЦИЯ СЛАЙДЕРА --- */
-.auth-slider {
+/* --- 5. КНОПКА --- */
+.modal-button {
+    width: 100%;
+    padding: 14px;
+    background-color: #ff6600; /* Оранжевая кнопка */
+    color: #000; /* Черный текст */
+    font-weight: 800;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-top: 10px;
+    transition: 0.3s;
+}
+
+    .modal-button:hover {
+        background-color: #fff; /* Белая при наведении */
+        color: #ff6600;
+        box-shadow: 0 0 15px rgba(255, 102, 0, 0.5);
+    }
+
+/* --- 6. ПЕРЕКЛЮЧАТЕЛЬ (Вход <-> Регистрация) --- */
+.modal-switcher {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 0.9rem;
+    color: #888;
+}
+
+    .modal-switcher a {
+        color: #ff6600; /* Оранжевая ссылка */
+        text-decoration: none;
+        font-weight: bold;
+        margin-left: 5px;
+    }
+
+        .modal-switcher a:hover {
+            text-decoration: underline;
+            color: #fff;
+        }
+
+/* --- 7. СЛАЙДЕР И АНИМАЦИИ --- */
+.modal-slider {
     display: flex;
-    width: 200%; /* Два слайда по 100% */
-    transition: transform 0.6s cubic-bezier(0.77, 0, 0.175, 1); /* Плавная кривая */
+    transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    width: 200%; /* Два слайда */
 }
 
-.auth-view {
-    width: 50%;
-    padding-right: 20px;
-    padding-left: 20px;
-    opacity: 0;
-    transition: opacity 0.4s ease;
-    /* Скрываем контент, пока он не активен, чтобы таб не прыгал */
-    pointer-events: none;
+.modal-form-container {
+    width: 50%; /* Каждый слайд занимает 100% ширины окна */
+    padding: 0 5px;
+    flex-shrink: 0;
 }
 
-    /* Когда активен - показываем */
-    .auth-view.active {
-        opacity: 1;
-        pointer-events: auto;
+/* Ошибки */
+.modal-server-error {
+    color: #ff4444;
+    text-align: center;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+    min-height: 20px;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
     }
 
-/* Позиции слайдера */
-.auth-slider.mode-login {
-    transform: translateX(0%);
-}
-
-.auth-slider.mode-register {
-    transform: translateX(-50%);
+    to {
+        opacity: 1;
+    }
 }
