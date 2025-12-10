@@ -10,20 +10,24 @@ using System.Threading.Tasks;
 
 namespace ElectronicsStore.BLL.Realizations
 {
-    public class CategoryService : ICategoryService
+    // Использовать основной конструктор: categoryRepository теперь поле класса.
+    public class CategoryService(IBaseStorage<Category> categoryRepository) : ICategoryService
     {
-        private readonly IBaseStorage<Category> _categoryRepository;
-
-        public CategoryService(IBaseStorage<Category> categoryRepository)
+        public Task GetAllCategories()
         {
-            _categoryRepository = categoryRepository;
+            throw new NotImplementedException();
         }
+
+        // Убран приватный _categoryRepository и явный конструктор.
+        // categoryRepository доступен напрямую в методах.
 
         public async Task<IBaseResponse<IEnumerable<Category>>> GetCategories()
         {
             try
             {
-                var categories = await _categoryRepository.GetAll().ToListAsync();
+                var categories = await categoryRepository.GetAll().ToListAsync();
+
+                // выражение new можно упростить (использован BaseResponse, как ваш конкретный тип)
                 return new BaseResponse<IEnumerable<Category>>
                 {
                     Data = categories,
@@ -32,6 +36,7 @@ namespace ElectronicsStore.BLL.Realizations
             }
             catch (Exception ex)
             {
+                // выражение new можно упростить
                 return new BaseResponse<IEnumerable<Category>>
                 {
                     Description = $"[GetCategories]: {ex.Message}",

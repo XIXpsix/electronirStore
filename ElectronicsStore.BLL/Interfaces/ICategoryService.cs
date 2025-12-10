@@ -7,6 +7,8 @@ namespace ElectronicsStore.BLL.Interfaces
 {
     public interface ICategoryService
     {
+        Task GetAllCategories();
+
         // FIX: Корректное имя метода, используемое в рабочем коде
         Task<IBaseResponse<IEnumerable<Category>>> GetCategories();
 

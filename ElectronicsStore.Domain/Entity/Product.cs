@@ -18,7 +18,9 @@ namespace ElectronicsStore.Domain.Entity
         public int CategoryId { get; set; }
         public Category? Category { get; set; }
 
-        public List<ProductImage> Images { get; set; } = new List<ProductImage>();
-        public List<Review> Reviews { get; set; } = new List<Review>();
+        // Инициализацию коллекции можно упростить.
+        public List<ProductImage> Images { get; set; } = new(); // Изменено
+        public List<Review> Reviews { get; set; } = new();      // Изменено
+        public string ImagePath { get; set; }
     }
 }
