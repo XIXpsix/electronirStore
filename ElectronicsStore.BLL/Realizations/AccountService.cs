@@ -17,13 +17,15 @@ namespace ElectronicsStore.BLL.Realizations
     public class AccountService : IAccountService
     {
         private readonly IBaseStorage<User> _userRepository;
+        private readonly EmailService _emailService; // Добавляем сервис для отправки писем
 
-        public AccountService(IBaseStorage<User> userRepository)
+        public AccountService(IBaseStorage<User> userRepository, EmailService emailService)
         {
             _userRepository = userRepository;
+            _emailService = emailService;
         }
 
-        // Хеширование (как мы делали раньше)
+        // Хеширование
         private string HashPassword(string password)
         {
             using (var sha256 = SHA256.Create())
@@ -37,31 +39,97 @@ namespace ElectronicsStore.BLL.Realizations
         {
             try
             {
-                var user = await _userRepository.GetAll().FirstOrDefaultAsync(x => x.Name == model.Name);
+                // Проверяем, есть ли уже такой пользователь (по имени или email)
+                var user = await _userRepository.GetAll()
+                    .FirstOrDefaultAsync(x => x.Name == model.Name || x.Email == model.Email);
+
                 if (user != null)
                 {
                     return new BaseResponse<ClaimsIdentity>()
                     {
-                        Description = "Пользователь с таким именем уже есть",
+                        Description = "Пользователь с таким именем или email уже есть",
                     };
                 }
+
+                // Генерируем случайный 6-значный код
+                var random = new Random();
+                var code = random.Next(100000, 999999).ToString();
 
                 user = new User()
                 {
                     Name = model.Name,
                     Role = Role.User,
                     Email = model.Email,
-                    Password = HashPassword(model.Password),
-                    CreatedAt = DateTime.UtcNow
+                    Password = HashPassword(model.Password), // Хешируем пароль
+                    CreatedAt = DateTime.UtcNow,
+
+                    // Сохраняем код и ставим статус "Не подтвержден"
+                    ConfirmationCode = code,
+                    IsEmailConfirmed = false
                 };
 
                 await _userRepository.Add(user);
+
+                // Отправляем письмо с кодом
+                await _emailService.SendEmailAsync(user.Email, "Код подтверждения регистрации",
+                    $"<h3>Добро пожаловать в ElectronicsHub!</h3><p>Ваш код подтверждения: <b>{code}</b></p>");
+
+                // Возвращаем ответ. Обрати внимание, Data = null, так как мы еще не входим в систему
+                return new BaseResponse<ClaimsIdentity>()
+                {
+                    Description = "На вашу почту отправлен код подтверждения",
+                    StatusCode = StatusCode.OK
+                };
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponse<ClaimsIdentity>()
+                {
+                    Description = ex.Message,
+                    StatusCode = StatusCode.InternalServerError
+                };
+            }
+        }
+
+        // Новый метод для подтверждения почты
+        public async Task<BaseResponse<ClaimsIdentity>> ConfirmEmail(string email, string code)
+        {
+            try
+            {
+                var user = await _userRepository.GetAll().FirstOrDefaultAsync(x => x.Email == email);
+
+                if (user == null)
+                {
+                    return new BaseResponse<ClaimsIdentity>()
+                    {
+                        Description = "Пользователь не найден",
+                        StatusCode = StatusCode.UserNotFound
+                    };
+                }
+
+                // Проверяем код
+                if (user.ConfirmationCode != code)
+                {
+                    return new BaseResponse<ClaimsIdentity>()
+                    {
+                        Description = "Неверный код подтверждения",
+                        StatusCode = StatusCode.InternalServerError
+                    };
+                }
+
+                // Активируем аккаунт
+                user.IsEmailConfirmed = true;
+                user.ConfirmationCode = ""; // Сбрасываем код
+
+                await _userRepository.Update(user);
+
+                // Сразу авторизуем пользователя
                 var result = Authenticate(user);
 
                 return new BaseResponse<ClaimsIdentity>()
                 {
                     Data = result,
-                    Description = "Пользователь успешно зарегистрирован",
+                    Description = "Почта успешно подтверждена!",
                     StatusCode = StatusCode.OK
                 };
             }
@@ -80,8 +148,7 @@ namespace ElectronicsStore.BLL.Realizations
             try
             {
                 var user = await _userRepository.GetAll().FirstOrDefaultAsync(x => x.Email == model.Email);
-                
-                // ИСПРАВЛЕНИЕ: Сначала проверяем на NULL
+
                 if (user == null)
                 {
                     return new BaseResponse<ClaimsIdentity>()
@@ -91,13 +158,23 @@ namespace ElectronicsStore.BLL.Realizations
                     };
                 }
 
-                // Теперь безопасно проверяем пароль
+                // --- ВАЖНО: Проверка хеша пароля (а не простого текста) ---
                 if (user.Password != HashPassword(model.Password))
                 {
                     return new BaseResponse<ClaimsIdentity>()
                     {
                         Description = "Неверный пароль",
                         StatusCode = StatusCode.InternalServerError
+                    };
+                }
+
+                // --- Проверка, подтверждена ли почта ---
+                if (!user.IsEmailConfirmed)
+                {
+                    return new BaseResponse<ClaimsIdentity>()
+                    {
+                        Description = "Ваша почта не подтверждена. Проверьте входящие.",
+                        StatusCode = StatusCode.InternalServerError // Или можно создать отдельный статус
                     };
                 }
 

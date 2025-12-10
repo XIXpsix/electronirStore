@@ -41,9 +41,6 @@ namespace ElectronicsStore.Controllers
             return View(model);
         }
 
-        [HttpGet]
-        public IActionResult Login() => View();
-
         [HttpPost]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
@@ -51,22 +48,18 @@ namespace ElectronicsStore.Controllers
             {
                 var response = await _accountService.Login(model);
 
-                // ИСПРАВЛЕНИЕ: Используем EnumStatusCode
-                if (response.StatusCode == EnumStatusCode.OK && response.Data != null)
+                // Если сервис ответил ОК
+                if (response.StatusCode == Domain.Enum.StatusCode.OK && response.Data != null)
                 {
-                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(response.Data!));
+                    // --- ИСПРАВЛЕНИЕ: Создаем куки авторизации ---
+                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(response.Data));
+                    // ---------------------------------------------
+
                     return RedirectToAction("Index", "Home");
                 }
                 ModelState.AddModelError("", response.Description);
             }
             return View(model);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Logout()
-        {
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return RedirectToAction("Index", "Home");
         }
     }
 }

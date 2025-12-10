@@ -5,7 +5,8 @@ using ElectronicsStore.BLL.Interfaces;
 using ElectronicsStore.BLL.Realizations;
 using ElectronicsStore.Domain.Entity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authentication.Cookies; // Обязательно для работы входа
+using Microsoft.AspNetCore.Authentication.Cookies;
+using ElectronicsStore.BLL.Realizations;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +18,9 @@ builder.Services.AddDbContext<ElectronicsStoreContext>(options =>
 builder.Services.AddScoped<IBaseStorage<Category>, BaseStorage<Category>>();
 builder.Services.AddScoped<IBaseStorage<Product>, BaseStorage<Product>>();
 builder.Services.AddScoped(typeof(IBaseStorage<>), typeof(BaseStorage<>)); // Универсальный репозиторий
+
+// Где-то в блоке регистрации сервисов (BLL)
+builder.Services.AddScoped<EmailService>();
 
 // 3. Регистрация Сервисов (BLL)
 builder.Services.AddScoped<ICategoryService, CategoryService>();

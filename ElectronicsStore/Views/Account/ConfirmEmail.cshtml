@@ -1,26 +1,26 @@
-﻿@model ElectronicsStore.Models.ConfirmEmailViewModel
+﻿@model ElectronicsStore.Domain.ViewModels.ConfirmEmailViewModel
+
 @{
-    ViewData["Title"] = "Подтверждение";
+    ViewData["Title"] = "Подтверждение почты";
 }
 
-<div class="container py-5 d-flex justify-content-center">
-    <div class="card shadow-lg" style="max-width: 400px; width: 100%;">
-        <div class="card-header bg-primary text-white text-center">
-            <h5>Введите код</h5>
-        </div>
-        <div class="card-body">
-            <p class="text-center text-muted small">Код подтверждения был "отправлен" на <b>@Model.Email</b> (ищи в Output Visual Studio).</p>
+<div class="row justify-content-center">
+    <div class="col-md-4" style="background: #1e1e1e; padding: 20px; border-radius: 10px; border: 1px solid #ff6600;">
+        <h2 class="text-center" style="color: #ff6600;">Введите код</h2>
+        <p class="text-muted text-center">Мы отправили код на @Model.Email</p>
 
-            <form asp-action="ConfirmEmail" method="post">
-                <input type="hidden" asp-for="Email" />
+        <form asp-action="ConfirmEmail" method="post">
+            <input type="hidden" asp-for="Email" />
 
-                <div class="form-group mb-3">
-                    <input asp-for="Code" class="form-control text-center fs-4" placeholder="123456" maxlength="6" />
-                    <span asp-validation-for="Code" class="text-danger small"></span>
-                </div>
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-                <button type="submit" class="btn btn-primary w-100">Подтвердить</button>
-            </form>
-        </div>
+            <div class="form-group mb-3">
+                <label style="color: white;">Код из письма</label>
+                <input asp-for="Code" class="form-control" style="background: #333; color: white; border: 1px solid #555;" />
+                <span asp-validation-for="Code" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100" style="background-color: #ff6600; border: none;">Подтвердить</button>
+        </form>
     </div>
 </div>

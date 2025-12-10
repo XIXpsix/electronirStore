@@ -13,6 +13,11 @@ namespace ElectronicsStore.Domain.Entity
         public Role Role { get; set; } = Role.User;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+        // --- НОВЫЕ ПОЛЯ ---
+        public string ConfirmationCode { get; set; } = string.Empty; // Код из письма
+        public bool IsEmailConfirmed { get; set; } = false;          // Подтвержден ли
+        // -------------------
+
         public ICollection<Review> Reviews { get; set; } = new List<Review>();
     }
 }
