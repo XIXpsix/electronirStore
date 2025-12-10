@@ -6,10 +6,10 @@
 
             <div class="modal-body p-0">
                 <div class="row g-0">
-
                     <div class="col-md-5 d-none d-md-block position-relative"
                          style="background: url('/img/pc.jpg') center/cover; filter: grayscale(100%);">
-                        <div style="position: absolute; inset: 0; background: rgba(255, 102, 0, 0.3);"></div> <div class="d-flex align-items-center justify-content-center h-100 text-center p-4" style="position: relative; z-index: 2;">
+                        <div style="position: absolute; inset: 0; background: rgba(255, 102, 0, 0.3);"></div>
+                        <div class="d-flex align-items-center justify-content-center h-100 text-center p-4" style="position: relative; z-index: 2;">
                             <div>
                                 <h3 class="fw-bold text-white text-uppercase" style="text-shadow: 0 0 20px #000;">Electronics<br><span style="color: #ff6600;">Hub</span></h3>
                                 <p class="text-white small mt-3">Твой путь в мир технологий начинается здесь.</p>
@@ -39,7 +39,7 @@
                                     <div class="text-center mt-3">
                                         <p class="text-muted small mb-2">или через</p>
                                         <a href="@Url.Action("AuthenticationGoogle", "Account")" class="btn btn-outline-light w-100 d-flex align-items-center justify-content-center py-2" style="border-color: #333;">
-                                            <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google" width="20" height="20" class="me-2">
+                                            <img src="~/img/G.png" alt="G" width="20" height="20" class="me-2" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg'">
                                             <span class="fw-bold">Google</span>
                                         </a>
                                     </div>
@@ -71,6 +71,15 @@
                                         </div>
                                         <button type="submit" class="btn btn-orange w-100 py-3 fw-bold">ЗАРЕГИСТРИРОВАТЬСЯ</button>
                                     </form>
+
+                                    <div class="text-center mt-3">
+                                        <p class="text-muted small mb-2">или регистрация через</p>
+                                        <a href="@Url.Action("AuthenticationGoogle", "Account")" class="btn btn-outline-light w-100 d-flex align-items-center justify-content-center py-2" style="border-color: #333;">
+                                            <img src="~/img/G.png" alt="G" width="20" height="20" class="me-2" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg'">
+                                            <span class="fw-bold">Google</span>
+                                        </a>
+                                    </div>
+
                                     <div class="text-center mt-4">
                                         <p class="text-muted small">Уже есть аккаунт?</p>
                                         <button class="btn btn-outline-orange btn-sm" onclick="switchMode('login')">← ВЕРНУТЬСЯ КО ВХОДУ</button>
