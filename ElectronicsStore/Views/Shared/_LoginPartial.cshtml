@@ -9,8 +9,9 @@
 
         <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                @* Здесь используем Claim AvatarPath, который мы обновили в контроллере! *@
                 <img src="@avatarPath" class="rounded-circle" style="width: 35px; height: 35px; object-fit: cover; border: 2px solid #ff6600;" alt="Avatar">
-                <span class="ms-2 text-light-custom">@userName</span>
+                <span class="ms-2 text-light-custom d-none d-md-inline">@userName</span>
             </a>
             <ul class="dropdown-menu dropdown-menu-end bg-dark border-secondary" aria-labelledby="navbarDropdown">
                 <li>
@@ -23,13 +24,18 @@
                         🛒 Корзина
                     </a>
                 </li>
-                @* Сюда позже добавим ссылку на историю заказов *@
+                @* Добавим место для Архива (Истории заказов), который реализуем позже *@
+                <li>
+                    <a class="dropdown-item text-light hover-orange" href="#">
+                        📦 Мои заказы (Архив)
+                    </a>
+                </li>
 
                 @if (User.IsInRole("Admin"))
                 {
                     <li><hr class="dropdown-divider bg-secondary"></li>
                     <li>
-                        <a class="dropdown-item text-warning fw-bold" asp-controller="Admin" asp-action="Index">
+                        <a class="dropdown-item text-warning fw-bold hover-orange" asp-controller="Admin" asp-action="Index">
                             🛠 Панель администратора
                         </a>
                     </li>
@@ -37,7 +43,7 @@
 
                 <li><hr class="dropdown-divider bg-secondary"></li>
                 <li>
-                    <a class="dropdown-item text-danger" asp-controller="Account" asp-action="Logout">
+                    <a class="dropdown-item text-danger hover-orange" asp-controller="Account" asp-action="Logout">
                         🚪 Выход
                     </a>
                 </li>
@@ -48,6 +54,7 @@
     {
         <li class="nav-item">
             <div class="form-btn-container">
+                @* Кнопка, привязанная к скрипту через id="click-to-hide" *@
                 <button class="nav-link btn btn-link text-light-custom" id="click-to-hide">
                     Войти / Регистрация
                 </button>

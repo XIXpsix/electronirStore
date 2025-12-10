@@ -4,6 +4,7 @@ using ElectronicsStore.Domain.Entity;
 using ElectronicsStore.Domain.Enum;
 using ElectronicsStore.Domain.Filters;
 using ElectronicsStore.Domain.Response;
+using ElectronicsStore.Domain.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -18,16 +19,19 @@ namespace ElectronicsStore.BLL.Realizations
         private readonly IBaseStorage<ProductImage> _productImageRepository;
         private readonly IBaseStorage<User> _userRepository;
         private readonly IBaseStorage<Review> _reviewRepository;
+        private readonly IBaseStorage<Category> _categoryRepository;
 
         public ProductService(IBaseStorage<Product> productRepository,
                               IBaseStorage<ProductImage> productImageRepository,
                               IBaseStorage<User> userRepository,
-                              IBaseStorage<Review> reviewRepository)
+                              IBaseStorage<Review> reviewRepository,
+                              IBaseStorage<Category> categoryRepository)
         {
             _productRepository = productRepository;
             _productImageRepository = productImageRepository;
             _userRepository = userRepository;
             _reviewRepository = reviewRepository;
+            _categoryRepository = categoryRepository;
         }
 
         public async Task<IBaseResponse<Product>> GetProduct(int id)
@@ -37,7 +41,7 @@ namespace ElectronicsStore.BLL.Realizations
                 var product = await _productRepository.GetAll()
                     .Include(x => x.Category)
                     .Include(x => x.Images)
-                    .Include(x => x.Reviews).ThenInclude(r => r.User)
+                    .Include(x => x.Reviews!).ThenInclude(r => r.User)
                     .FirstOrDefaultAsync(x => x.Id == id);
 
                 if (product == null)
@@ -86,11 +90,10 @@ namespace ElectronicsStore.BLL.Realizations
                 if (filter.CategoryId > 0)
                     query = query.Where(x => x.CategoryId == filter.CategoryId);
 
-                // ИСПРАВЛЕНИЕ: Сохраняем filter.Name в локальную переменную перед запросом
                 var filterName = filter.Name;
                 if (!string.IsNullOrWhiteSpace(filterName))
                 {
-                    query = query.Where(x => x.Name.ToLower().Contains(filterName.ToLower()));
+                    query = query.Where(x => x.Name.Contains(filterName, StringComparison.OrdinalIgnoreCase));
                 }
 
                 if (filter.MinPrice > 0) query = query.Where(x => x.Price >= filter.MinPrice);
@@ -135,7 +138,6 @@ namespace ElectronicsStore.BLL.Realizations
         {
             try
             {
-                // ИСПРАВЛЕНИЕ: Безопасная выборка ImagePath (замена null на пустую строку)
                 var images = await _productImageRepository.GetAll()
                     .Where(x => x.ProductId == id && x.ImagePath != null)
                     .Select(x => x.ImagePath ?? "")
@@ -168,8 +170,8 @@ namespace ElectronicsStore.BLL.Realizations
 
                 var review = new Review
                 {
-                    User = user,
-                    Product = product,
+                    UserId = user.Id,
+                    ProductId = product.Id,
                     Content = content,
                     Rating = rating,
                     CreatedAt = DateTime.Now
@@ -182,6 +184,146 @@ namespace ElectronicsStore.BLL.Realizations
             catch (Exception ex)
             {
                 return new BaseResponse<Review>() { Description = ex.Message, StatusCode = StatusCode.InternalServerError };
+            }
+        }
+
+        public async Task<IBaseResponse<Product>> CreateProduct(ProductViewModel model)
+        {
+            try
+            {
+                var product = new Product
+                {
+                    Name = model.Name,
+                    Description = model.Description,
+                    Price = model.Price,
+                    CategoryId = model.CategoryId,
+                    CreatedAt = DateTime.Now
+                };
+
+                await _productRepository.Add(product);
+
+                return new BaseResponse<Product>() { Data = product, StatusCode = StatusCode.OK };
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponse<Product>() { Description = $"[CreateProduct] : {ex.Message}", StatusCode = StatusCode.InternalServerError };
+            }
+        }
+
+        public async Task<IBaseResponse<ProductViewModel>> GetProductForEdit(int id)
+        {
+            try
+            {
+                var product = await _productRepository.GetAll()
+                    .Include(p => p.Images)
+                    .FirstOrDefaultAsync(x => x.Id == id);
+
+                if (product == null)
+                    return new BaseResponse<ProductViewModel>() { Description = "Товар не найден", StatusCode = StatusCode.ProductNotFound };
+
+                var model = new ProductViewModel
+                {
+                    Id = product.Id,
+                    Name = product.Name,
+                    Description = product.Description,
+                    Price = product.Price,
+                    CategoryId = product.CategoryId,
+                    ExistingImages = product.Images.ToList()
+                };
+
+                return new BaseResponse<ProductViewModel>() { Data = model, StatusCode = StatusCode.OK };
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponse<ProductViewModel>() { Description = $"[GetProductForEdit] : {ex.Message}", StatusCode = StatusCode.InternalServerError };
+            }
+        }
+
+        public async Task<IBaseResponse<Product>> EditProduct(ProductViewModel model)
+        {
+            try
+            {
+                var product = await _productRepository.GetAll().FirstOrDefaultAsync(x => x.Id == model.Id);
+
+                if (product == null)
+                    return new BaseResponse<Product>() { Description = "Товар не найден", StatusCode = StatusCode.ProductNotFound };
+
+                product.Name = model.Name;
+                product.Description = model.Description;
+                product.Price = model.Price;
+                product.CategoryId = model.CategoryId;
+                product.UpdatedAt = DateTime.Now;
+
+                await _productRepository.Update(product);
+
+                return new BaseResponse<Product>() { Data = product, StatusCode = StatusCode.OK };
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponse<Product>() { Description = $"[EditProduct] : {ex.Message}", StatusCode = StatusCode.InternalServerError };
+            }
+        }
+
+        public async Task<IBaseResponse<bool>> DeleteProduct(int id)
+        {
+            try
+            {
+                var product = await _productRepository.GetAll()
+                    .Include(p => p.Images)
+                    .FirstOrDefaultAsync(x => x.Id == id);
+
+                if (product == null)
+                    return new BaseResponse<bool>() { Description = "Товар не найден", StatusCode = StatusCode.ProductNotFound };
+
+                if (product.Images != null)
+                {
+                    foreach (var image in product.Images)
+                    {
+                        await _productImageRepository.Delete(image);
+                    }
+                }
+
+                await _productRepository.Delete(product);
+
+                return new BaseResponse<bool>() { Data = true, StatusCode = StatusCode.OK };
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponse<bool>() { Description = $"[DeleteProduct] : {ex.Message}", StatusCode = StatusCode.InternalServerError };
+            }
+        }
+
+        public async Task<IBaseResponse<bool>> AddImage(int productId, string imagePath)
+        {
+            try
+            {
+                var productImage = new ProductImage
+                {
+                    ProductId = productId,
+                    ImagePath = imagePath
+                };
+                await _productImageRepository.Add(productImage);
+                return new BaseResponse<bool> { Data = true, StatusCode = StatusCode.OK };
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponse<bool> { Description = ex.Message, StatusCode = StatusCode.InternalServerError };
+            }
+        }
+
+        public async Task<IBaseResponse<bool>> DeleteImage(int imageId)
+        {
+            try
+            {
+                var image = await _productImageRepository.GetAll().FirstOrDefaultAsync(x => x.Id == imageId);
+                if (image == null) return new BaseResponse<bool> { Description = "Изображение не найдено" };
+
+                await _productImageRepository.Delete(image);
+                return new BaseResponse<bool> { Data = true, StatusCode = StatusCode.OK };
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponse<bool> { Description = ex.Message, StatusCode = StatusCode.InternalServerError };
             }
         }
     }

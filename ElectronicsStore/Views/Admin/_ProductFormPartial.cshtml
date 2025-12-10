@@ -1,5 +1,69 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model ElectronicsStore.Domain.ViewModels.ProductViewModel
+@using Microsoft.AspNetCore.Mvc.Rendering
+
 @{
+    var categories = ViewBag.Categories as List<SelectListItem> ?? new List<SelectListItem>();
+    var isEdit = Model.Id > 0;
 }
+
+<div class="card-body p-4 text-light-custom">
+    <form asp-action="@(isEdit ? "Edit" : "Create")" method="post" enctype="multipart/form-data">
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-4"></div>
+
+        <input type="hidden" asp-for="Id" />
+
+        <div class="mb-3">
+            <label asp-for="Name" class="form-label fw-bold"></label>
+            <input asp-for="Name" class="form-control form-control-dark-custom" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Description" class="form-label fw-bold"></label>
+            <textarea asp-for="Description" class="form-control form-control-dark-custom" rows="5"></textarea>
+            <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3 row">
+            <div class="col-md-6">
+                <label asp-for="Price" class="form-label fw-bold"></label>
+                <input asp-for="Price" type="number" step="0.01" class="form-control form-control-dark-custom" />
+                <span asp-validation-for="Price" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="CategoryId" class="form-label fw-bold"></label>
+                <select asp-for="CategoryId" asp-items="categories" class="form-select form-control-dark-custom">
+                    <option value="">-- Выберите категорию --</option>
+                </select>
+                <span asp-validation-for="CategoryId" class="text-danger"></span>
+            </div>
+        </div>
+
+        <h5 class="mt-4 text-main-orange">Изображения товара</h5>
+
+        @if (isEdit && Model.ExistingImages != null && Model.ExistingImages.Any())
+        {
+            <div class="row mb-3">
+                @foreach (var image in Model.ExistingImages)
+                {
+                    <div class="col-4 col-md-3 mb-3 text-center" id="image_@image.Id">
+                        <img src="@image.ImagePath" class="img-thumbnail" style="height: 100px; object-fit: cover;" />
+                        <button type="button" class="btn btn-sm btn-danger mt-1 delete-image-btn" data-image-id="@image.Id">Удалить</button>
+                    </div>
+                }
+            </div>
+        }
+
+        <div class="mb-4">
+            <label asp-for="NewImages" class="form-label fw-bold"></label>
+            <input asp-for="NewImages" type="file" multiple class="form-control form-control-dark-custom" accept="image/*" />
+        </div>
+
+        <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-warning text-black fw-bold">
+                @(isEdit ? "Сохранить изменения" : "Создать товар")
+            </button>
+            <a asp-action="Index" class="btn btn-outline-secondary">Отмена</a>
+        </div>
+    </form>
+</div>

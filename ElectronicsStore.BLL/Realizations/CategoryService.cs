@@ -1,22 +1,30 @@
-﻿using ElectronicsStore.DAL.Interfaces;
+﻿using ElectronicsStore.BLL.Interfaces;
+using ElectronicsStore.DAL.Interfaces;
 using ElectronicsStore.Domain.Entity;
-using ElectronicsStore.Domain.Enum;
-using ElectronicsStore.BLL.Interfaces;
-using Microsoft.EntityFrameworkCore;
 using ElectronicsStore.Domain.Response;
-
+using ElectronicsStore.Domain.Enum;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace ElectronicsStore.BLL.Realizations
 {
-    public class CategoryService(IBaseStorage<Category> categoryStorage) : ICategoryService
+    public class CategoryService : ICategoryService
     {
-        public async Task<IBaseResponse<List<Category>>> GetAllCategories()
+        private readonly IBaseStorage<Category> _categoryRepository;
+
+        public CategoryService(IBaseStorage<Category> categoryRepository)
+        {
+            _categoryRepository = categoryRepository;
+        }
+
+        public async Task<IBaseResponse<IEnumerable<Category>>> GetCategories()
         {
             try
             {
-                var categories = await categoryStorage.GetAll().ToListAsync();
-
-                return new BaseResponse<List<Category>>()
+                var categories = await _categoryRepository.GetAll().ToListAsync();
+                return new BaseResponse<IEnumerable<Category>>
                 {
                     Data = categories,
                     StatusCode = StatusCode.OK
@@ -24,12 +32,17 @@ namespace ElectronicsStore.BLL.Realizations
             }
             catch (Exception ex)
             {
-                return new BaseResponse<List<Category>>()
+                return new BaseResponse<IEnumerable<Category>>
                 {
-                    Description = $"[GetAllCategories] : {ex.Message}",
+                    Description = $"[GetCategories]: {ex.Message}",
                     StatusCode = StatusCode.InternalServerError
                 };
             }
+        }
+
+        public Task<IBaseResponse<Category>> GetCategoryById(int id)
+        {
+            throw new NotImplementedException();
         }
     }
 }

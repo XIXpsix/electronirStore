@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 
 namespace ElectronicsStore.BLL.Realizations
 {
+    // Используем IEmailService (интерфейс)
     public class AccountService(IBaseStorage<User> userRepository, IEmailService emailService) : IAccountService
     {
         private static string HashPassword(string password)
@@ -135,6 +136,7 @@ namespace ElectronicsStore.BLL.Realizations
         {
             try
             {
+                // Ищем пользователя по имени (которое в нашей системе является Email)
                 var user = await userRepository.GetAll().FirstOrDefaultAsync(x => x.Name == name);
                 if (user == null) return new() { Description = "Пользователь не найден", StatusCode = StatusCode.UserNotFound };
 
@@ -155,7 +157,7 @@ namespace ElectronicsStore.BLL.Realizations
 
                 // Обновляем данные
                 user.Name = model.Name;
-                user.Email = model.Email; // Можно добавить проверку на уникальность email, если он меняется
+                user.Email = model.Email;
 
                 if (!string.IsNullOrEmpty(newAvatarPath))
                 {
@@ -176,6 +178,8 @@ namespace ElectronicsStore.BLL.Realizations
         {
             var claims = new List<Claim>
             {
+                // Имя пользователя (DefaultNameClaimType) должно быть уникальным, 
+                // в вашей системе это, по-видимому, Email или Name, используем Name
                 new(ClaimsIdentity.DefaultNameClaimType, user.Name ?? ""),
                 new(ClaimsIdentity.DefaultRoleClaimType, user.Role.ToString()),
                 new("Id", user.Id.ToString()),

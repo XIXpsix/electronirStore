@@ -1,12 +1,15 @@
 ﻿using ElectronicsStore.Domain.Entity;
-using ElectronicsStore.BLL;
+using ElectronicsStore.Domain.Response;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using ElectronicsStore.Domain.Response;
+
 namespace ElectronicsStore.BLL.Interfaces
 {
     public interface ICategoryService
     {
-        Task<IBaseResponse<List<Category>>> GetAllCategories();
+        // FIX: Корректное имя метода, используемое в рабочем коде
+        Task<IBaseResponse<IEnumerable<Category>>> GetCategories();
+
+        Task<IBaseResponse<Category>> GetCategoryById(int id);
     }
 }
