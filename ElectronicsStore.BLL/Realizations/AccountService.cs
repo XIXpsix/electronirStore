@@ -2,7 +2,7 @@
 using ElectronicsStore.DAL.Interfaces;
 using ElectronicsStore.Domain.Entity;
 using ElectronicsStore.Domain.Enum;
-using ElectronicsStore.Domain.Response; // Убедитесь, что namespace совпадает с BaseResponse.cs
+using ElectronicsStore.Domain.Response;
 using ElectronicsStore.Domain.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 
 namespace ElectronicsStore.BLL.Realizations
 {
+    // Используем IEmailService (интерфейс)
     public class AccountService(IBaseStorage<User> userRepository, IEmailService emailService) : IAccountService
     {
         private static string HashPassword(string password)
@@ -23,20 +24,23 @@ namespace ElectronicsStore.BLL.Realizations
             return Convert.ToHexString(hash).ToLower();
         }
 
-        // Метод для входа через Google
+        // --- МЕТОД ДЛЯ ВХОДА ЧЕРЕЗ GOOGLE ---
         public async Task<BaseResponse<ClaimsIdentity>> IsCreatedAccount(User model)
         {
             try
             {
+                // Ищем пользователя по Email
                 var user = await userRepository.GetAll().FirstOrDefaultAsync(x => x.Email == model.Email);
 
                 if (user == null)
                 {
+                    // Если нет - создаем нового
                     user = new User()
                     {
                         Name = model.Name,
                         Email = model.Email,
                         Role = Role.User,
+                        // Генерируем случайный пароль, так как вход через Google
                         Password = HashPassword("GoogleAuth_" + Guid.NewGuid().ToString()),
                         IsEmailConfirmed = true,
                         AvatarPath = model.AvatarPath ?? "/img/w.png",
@@ -46,6 +50,7 @@ namespace ElectronicsStore.BLL.Realizations
                     await userRepository.Add(user);
                 }
 
+                // Авторизуем
                 var result = Authenticate(user);
                 return new()
                 {
@@ -64,6 +69,7 @@ namespace ElectronicsStore.BLL.Realizations
             }
         }
 
+        // --- СТАНДАРТНЫЕ МЕТОДЫ ---
         public async Task<BaseResponse<ClaimsIdentity>> Register(RegisterViewModel model)
         {
             try

@@ -11,6 +11,7 @@ using System.Linq;
 
 namespace ElectronicsStore.Controllers
 {
+    // Используем основной конструктор
     public class AccountController(IAccountService accountService) : Controller
     {
         [HttpGet]
@@ -24,6 +25,7 @@ namespace ElectronicsStore.Controllers
                 var response = await accountService.Register(model);
                 if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK)
                 {
+                    // Возвращаем JSON для обработки в модальном окне
                     return Json(new { description = response.Description });
                 }
                 return BadRequest(new { error = response.Description });
@@ -42,6 +44,7 @@ namespace ElectronicsStore.Controllers
                 var response = await accountService.Login(model);
                 if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK)
                 {
+                    // Вход выполнен, создаем куки
                     await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(response.Data));
                     return RedirectToAction("Index", "Home");
                 }
@@ -78,6 +81,7 @@ namespace ElectronicsStore.Controllers
         [HttpGet]
         public IActionResult AuthenticationGoogle()
         {
+            // Перенаправляем пользователя на Google
             var properties = new AuthenticationProperties { RedirectUri = Url.Action("GoogleResponse") };
             return Challenge(properties, GoogleDefaults.AuthenticationScheme);
         }
@@ -85,10 +89,12 @@ namespace ElectronicsStore.Controllers
         [HttpGet]
         public async Task<IActionResult> GoogleResponse()
         {
+            // Получаем ответ от Google
             var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
             if (result?.Principal == null) return RedirectToAction("Index", "Home");
 
+            // Извлекаем данные
             var claims = result.Principal.Identities.FirstOrDefault()?.Claims;
             var name = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
             var email = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
@@ -101,10 +107,12 @@ namespace ElectronicsStore.Controllers
                 AvatarPath = avatar
             };
 
+            // Проверяем/создаем пользователя в нашей БД
             var response = await accountService.IsCreatedAccount(userModel);
 
             if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK && response.Data != null)
             {
+                // Входим в систему под нашим пользователем
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(response.Data));
                 return RedirectToAction("Index", "Home");
             }
