@@ -1,28 +1,29 @@
 ﻿using ElectronicsStore;
 using ElectronicsStore.DAL;
 using Microsoft.EntityFrameworkCore;
-using ElectronicsStore.Domain.Entity; // Для User, если нужно
-using Microsoft.AspNetCore.Authentication.Cookies; // Для Cookie
-using Microsoft.AspNetCore.Authentication.Google; // Для Google
+using ElectronicsStore.Domain.Entity;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Подключение к БД PostgreSQL
+// 1. Подключение к БД
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ElectronicsStoreContext>(options =>
     options.UseNpgsql(connectionString));
 
-// 2. Инициализация репозиториев и сервисов (ваш класс Initializer)
+// 2. Инициализация слоев (Твой класс Initializer)
 builder.Services.InitializeRepositories();
 builder.Services.InitializeServices();
 
-// 3. Добавление контроллеров с представлениями
+// 3. Контроллеры
 builder.Services.AddControllersWithViews();
 
-// 4. Настройка Аутентификации (Cookies + Google)
+// 4. Аутентификация
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    // ChallengeScheme ставим Cookie по умолчанию, но для Google будем вызывать явно в контроллере
     options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
 })
 .AddCookie(options =>
@@ -32,13 +33,14 @@ builder.Services.AddAuthentication(options =>
 })
 .AddGoogle(googleOptions =>
 {
+    // Важно: убедись, что в secrets.json структура именно такая:
+    // "Authentication": { "Google": { "ClientId": "...", "ClientSecret": "..." } }
     googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"];
     googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
 });
 
 var app = builder.Build();
 
-// 5. Middleware (Порядок важен!)
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -50,8 +52,8 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseAuthentication(); // <-- Сначала проверяем "кто это"
-app.UseAuthorization();  // <-- Потом "что можно"
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",

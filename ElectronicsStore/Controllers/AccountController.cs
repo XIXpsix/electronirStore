@@ -11,9 +11,9 @@ using System.Linq;
 
 namespace ElectronicsStore.Controllers
 {
-    // Используем основной конструктор
     public class AccountController(IAccountService accountService) : Controller
     {
+        // --- РЕГИСТРАЦИЯ ---
         [HttpGet]
         public IActionResult Register() => View();
 
@@ -25,14 +25,17 @@ namespace ElectronicsStore.Controllers
                 var response = await accountService.Register(model);
                 if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK)
                 {
-                    // Возвращаем JSON для обработки в модальном окне
-                    return Json(new { description = response.Description });
+                    // После успешной регистрации перенаправляем на Вход
+                    return RedirectToAction("Login", "Account");
                 }
-                return BadRequest(new { error = response.Description });
+                // Если ошибка (напр. такой email есть), добавляем её на форму
+                ModelState.AddModelError("", response.Description);
             }
+            // Возвращаем ту же страницу с ошибками
             return View(model);
         }
 
+        // --- ВХОД ---
         [HttpGet]
         public IActionResult Login() => View();
 
@@ -44,15 +47,16 @@ namespace ElectronicsStore.Controllers
                 var response = await accountService.Login(model);
                 if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK)
                 {
-                    // Вход выполнен, создаем куки
                     await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(response.Data));
                     return RedirectToAction("Index", "Home");
                 }
-                return BadRequest(new { error = response.Description });
+                // ОШИБКА: Добавляем описание ошибки (Неверный пароль) в модель, чтобы показать на странице
+                ModelState.AddModelError("", response.Description);
             }
             return View(model);
         }
 
+        // --- ПОДТВЕРЖДЕНИЕ ПОЧТЫ (Если используется) ---
         [HttpPost]
         public async Task<IActionResult> ConfirmEmail(ConfirmEmailViewModel model)
         {
@@ -64,24 +68,34 @@ namespace ElectronicsStore.Controllers
                     await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(response.Data));
                     return RedirectToAction("Index", "Home");
                 }
-                return BadRequest(new { error = response.Description });
+                ModelState.AddModelError("", response.Description);
             }
-            return BadRequest(new { error = "Ошибка валидации" });
+            // Если была ошибка, лучше вернуть View, но так как это обычно AJAX или отдельная форма,
+            // оставим Redirect или View по твоей логике. Для простоты вернем на главную с ошибкой.
+            return RedirectToAction("Index", "Home");
         }
 
-        [HttpPost]
+        // --- ВЫХОД ---
+        [HttpPost] // Лучше использовать HttpPost для выхода ради безопасности
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Index", "Home");
         }
 
-        // --- МЕТОДЫ ДЛЯ GOOGLE ---
+        // Для удобства можно добавить и GET версию, если ссылка в меню обычная
+        [HttpGet]
+        public async Task<IActionResult> LogoutGet()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return RedirectToAction("Index", "Home");
+        }
+
+        // --- GOOGLE AUTHENTICATION ---
 
         [HttpGet]
         public IActionResult AuthenticationGoogle()
         {
-            // Перенаправляем пользователя на Google
             var properties = new AuthenticationProperties { RedirectUri = Url.Action("GoogleResponse") };
             return Challenge(properties, GoogleDefaults.AuthenticationScheme);
         }
@@ -89,16 +103,17 @@ namespace ElectronicsStore.Controllers
         [HttpGet]
         public async Task<IActionResult> GoogleResponse()
         {
-            // Получаем ответ от Google
             var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
-            if (result?.Principal == null) return RedirectToAction("Index", "Home");
+            // Если результат пустой (ошибка со стороны гугл или отмена), возвращаем на логин
+            if (result?.Principal == null) return RedirectToAction("Login");
 
-            // Извлекаем данные
             var claims = result.Principal.Identities.FirstOrDefault()?.Claims;
             var name = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
             var email = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-            var avatar = claims?.FirstOrDefault(c => c.Type == "picture")?.Value;
+            // Иногда картинка приходит как "picture", иногда как URI claim. Пробуем найти.
+            var avatar = claims?.FirstOrDefault(c => c.Type == "picture")?.Value ??
+                         claims?.FirstOrDefault(c => c.Type == "image")?.Value;
 
             var userModel = new User()
             {
@@ -107,17 +122,15 @@ namespace ElectronicsStore.Controllers
                 AvatarPath = avatar
             };
 
-            // Проверяем/создаем пользователя в нашей БД
             var response = await accountService.IsCreatedAccount(userModel);
 
             if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK && response.Data != null)
             {
-                // Входим в систему под нашим пользователем
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(response.Data));
                 return RedirectToAction("Index", "Home");
             }
 
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Login");
         }
     }
 }
