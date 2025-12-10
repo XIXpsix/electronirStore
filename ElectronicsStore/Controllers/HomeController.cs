@@ -3,23 +3,12 @@ using ElectronicsStore.Domain.Entity;
 using ElectronicsStore.Domain.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Collections.Generic;
 
 namespace ElectronicsStore.Controllers
 {
-    public class HomeController : Controller
+    // C# 12: Основной конструктор
+    public class HomeController(IProductService productService) : Controller
     {
-        private readonly IProductService _productService;
-        private readonly ICategoryService _categoryService;
-
-        public HomeController(IProductService productService, ICategoryService categoryService)
-        {
-            _productService = productService;
-            _categoryService = categoryService;
-        }
-
         public IActionResult Index() => View();
 
         public IActionResult Privacy() => View();
@@ -31,30 +20,34 @@ namespace ElectronicsStore.Controllers
         [HttpGet]
         public async Task<IActionResult> Catalog(string category, string searchString)
         {
-            var response = await _productService.GetProducts();
+            var response = await productService.GetProducts();
 
-            // Инициализируем пустым списком, если пришел null
-            IEnumerable<Product> products = response.Data ?? new List<Product>();
+            // C# 12: Collection expression []
+            IEnumerable<Product> products = response.Data ?? [];
 
-            // ИСПРАВЛЕНИЕ: Используем полный путь ElectronicsStore.Domain.Enum.StatusCode
-            // чтобы избежать конфликта с методом ControllerBase.StatusCode()
             if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK)
             {
                 // 1. Фильтрация по Категории
                 if (!string.IsNullOrEmpty(category))
                 {
+                    // StringComparison для производительности (работает, т.к. фильтрация в памяти)
                     if (category == "tvs")
-                        products = products.Where(p => p.Category != null && (p.Category.Name.Contains("Телевизор") || p.Category.Name.Contains("Монитор")));
+                        products = products.Where(p => p.Category?.Name != null &&
+                            (p.Category.Name.Contains("Телевизор", StringComparison.OrdinalIgnoreCase) ||
+                             p.Category.Name.Contains("Монитор", StringComparison.OrdinalIgnoreCase)));
                     else if (category == "pc")
-                        products = products.Where(p => p.Category != null && (p.Category.Name.Contains("ПК") || p.Category.Name.Contains("Ноутбук")));
+                        products = products.Where(p => p.Category?.Name != null &&
+                            (p.Category.Name.Contains("ПК", StringComparison.OrdinalIgnoreCase) ||
+                             p.Category.Name.Contains("Ноутбук", StringComparison.OrdinalIgnoreCase)));
                     else
-                        products = products.Where(p => p.Category != null && p.Category.Name == category);
+                        products = products.Where(p => p.Category?.Name == category);
                 }
 
                 // 2. Поиск
                 if (!string.IsNullOrEmpty(searchString))
                 {
-                    products = products.Where(p => p.Name != null && p.Name.ToLower().Contains(searchString.ToLower()));
+                    products = products.Where(p => p.Name != null &&
+                        p.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase));
                 }
 
                 return View(products.ToList());

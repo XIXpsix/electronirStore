@@ -8,8 +8,8 @@ namespace ElectronicsStore.Domain.Entity
         public Guid Id { get; set; }
 
         public Guid UserId { get; set; }
-        public User User { get; set; } = null!; // Гарантируем, что не null
+        public User User { get; set; } = null!;
 
-        public List<CartItem> Items { get; set; } = new(); // Инициализируем список
+        public List<CartItem> Items { get; set; } = new();
     }
 }

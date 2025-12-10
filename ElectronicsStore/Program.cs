@@ -4,25 +4,19 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// --- ИСПРАВЛЕНИЕ ОШИБКИ ТУТ ---
-// 1. Получаем строку подключения
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+// 1. Получаем строку подключения с проверкой
+// Если её нет, программа сразу скажет об этом, а не упадет молча
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException("ОШИБКА: Строка подключения 'DefaultConnection' не найдена в appsettings.json!");
 
-// 2. Проверяем: если она пустая, выбрасываем понятную ошибку
-if (string.IsNullOrEmpty(connectionString))
-{
-    throw new InvalidOperationException("Не найдена строка подключения 'DefaultConnection' в файле appsettings.json");
-}
-
-// 3. Передаем проверенную строку (компилятор теперь доволен)
+// 2. Подключаем Базу Данных
 builder.Services.AddDbContext<ElectronicsStoreContext>(options =>
     options.UseNpgsql(connectionString));
-// -----------------------------
 
-// Добавление MVC
+// 3. Добавляем MVC (Контроллеры и Представления)
 builder.Services.AddControllersWithViews();
 
-// Аутентификация (Cookie)
+// 4. Настраиваем Аутентификацию (Вход/Регистрация)
 builder.Services.AddAuthentication("Cookies")
     .AddCookie("Cookies", config =>
     {
@@ -30,18 +24,17 @@ builder.Services.AddAuthentication("Cookies")
         config.AccessDeniedPath = "/Account/AccessDenied";
     });
 
-// Подключение сервисов (Инициализация)
+// 5. Инициализация наших сервисов (из файла Initializer.cs)
 Initializer.InitializeRepositories(builder.Services);
 Initializer.InitializeServices(builder.Services);
 
-// Сборка приложения
-var app = builder.Build(); // Ошибка должна исчезнуть, так как конфигурация выше теперь корректна
+// --- Сборка приложения (Ошибка падает здесь, если пункты выше не сработали) ---
+var app = builder.Build();
 
-// Настройка конвейера запросов (Pipeline)
+// 6. Настройка конвейера (Pipeline)
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // Значение HSTS по умолчанию — 30 дней.
     app.UseHsts();
 }
 
@@ -50,8 +43,8 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseAuthentication(); // Сначала аутентификация
-app.UseAuthorization();  // Потом авторизация
+app.UseAuthentication(); // Кто ты?
+app.UseAuthorization();  // Можно ли тебе сюда?
 
 app.MapControllerRoute(
     name: "default",

@@ -2,49 +2,36 @@
 using ElectronicsStore.DAL.Interfaces;
 using ElectronicsStore.Domain.Entity;
 using ElectronicsStore.Domain.Enum;
-using ElectronicsStore.Domain.Response;
+using ElectronicsStore.Domain.Response; // Убедитесь, что namespace в BaseResponse.cs совпадает
 using ElectronicsStore.Domain.ViewModels;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace ElectronicsStore.BLL.Realizations
 {
-    public class AccountService : IAccountService
+    // C# 12: Основной конструктор
+    public class AccountService(IBaseStorage<User> userRepository, EmailService emailService) : IAccountService
     {
-        private readonly IBaseStorage<User> _userRepository;
-        private readonly EmailService _emailService;
-
-        public AccountService(IBaseStorage<User> userRepository, EmailService emailService)
+        // Хеширование (Static + SHA256.HashData)
+        private static string HashPassword(string password)
         {
-            _userRepository = userRepository;
-            _emailService = emailService;
-        }
-
-        // Хеширование
-        private string HashPassword(string password)
-        {
-            using (var sha256 = SHA256.Create())
-            {
-                var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
-                return BitConverter.ToString(hashedBytes).Replace("-", "").ToLower();
-            }
+            var bytes = Encoding.UTF8.GetBytes(password);
+            var hash = SHA256.HashData(bytes);
+            return Convert.ToHexString(hash).ToLower();
         }
 
         public async Task<BaseResponse<ClaimsIdentity>> Register(RegisterViewModel model)
         {
             try
             {
-                var user = await _userRepository.GetAll()
+                var user = await userRepository.GetAll()
                     .FirstOrDefaultAsync(x => x.Name == model.Name || x.Email == model.Email);
 
                 if (user != null)
                 {
-                    return new BaseResponse<ClaimsIdentity>()
+                    return new()
                     {
                         Description = "Пользователь с таким именем или email уже есть",
                     };
@@ -53,7 +40,7 @@ namespace ElectronicsStore.BLL.Realizations
                 var random = new Random();
                 var code = random.Next(100000, 999999).ToString();
 
-                user = new User()
+                user = new()
                 {
                     Name = model.Name,
                     Role = Role.User,
@@ -64,12 +51,12 @@ namespace ElectronicsStore.BLL.Realizations
                     IsEmailConfirmed = false
                 };
 
-                await _userRepository.Add(user);
+                await userRepository.Add(user);
 
-                await _emailService.SendEmailAsync(user.Email, "Код подтверждения регистрации",
+                await emailService.SendEmailAsync(user.Email, "Код подтверждения регистрации",
                     $"<h3>Добро пожаловать в ElectronicsHub!</h3><p>Ваш код подтверждения: <b>{code}</b></p>");
 
-                return new BaseResponse<ClaimsIdentity>()
+                return new()
                 {
                     Description = "На вашу почту отправлен код подтверждения",
                     StatusCode = StatusCode.OK
@@ -77,7 +64,7 @@ namespace ElectronicsStore.BLL.Realizations
             }
             catch (Exception ex)
             {
-                return new BaseResponse<ClaimsIdentity>()
+                return new()
                 {
                     Description = ex.Message,
                     StatusCode = StatusCode.InternalServerError
@@ -89,11 +76,11 @@ namespace ElectronicsStore.BLL.Realizations
         {
             try
             {
-                var user = await _userRepository.GetAll().FirstOrDefaultAsync(x => x.Email == email);
+                var user = await userRepository.GetAll().FirstOrDefaultAsync(x => x.Email == email);
 
-                if (user == null)
+                if (user is null) // Упрощенная проверка на null
                 {
-                    return new BaseResponse<ClaimsIdentity>()
+                    return new()
                     {
                         Description = "Пользователь не найден",
                         StatusCode = StatusCode.UserNotFound
@@ -102,7 +89,7 @@ namespace ElectronicsStore.BLL.Realizations
 
                 if (user.ConfirmationCode != code)
                 {
-                    return new BaseResponse<ClaimsIdentity>()
+                    return new()
                     {
                         Description = "Неверный код подтверждения",
                         StatusCode = StatusCode.InternalServerError
@@ -112,11 +99,11 @@ namespace ElectronicsStore.BLL.Realizations
                 user.IsEmailConfirmed = true;
                 user.ConfirmationCode = "";
 
-                await _userRepository.Update(user);
+                await userRepository.Update(user);
 
                 var result = Authenticate(user);
 
-                return new BaseResponse<ClaimsIdentity>()
+                return new()
                 {
                     Data = result,
                     Description = "Почта успешно подтверждена!",
@@ -125,7 +112,7 @@ namespace ElectronicsStore.BLL.Realizations
             }
             catch (Exception ex)
             {
-                return new BaseResponse<ClaimsIdentity>()
+                return new()
                 {
                     Description = ex.Message,
                     StatusCode = StatusCode.InternalServerError
@@ -137,11 +124,11 @@ namespace ElectronicsStore.BLL.Realizations
         {
             try
             {
-                var user = await _userRepository.GetAll().FirstOrDefaultAsync(x => x.Email == model.Email);
+                var user = await userRepository.GetAll().FirstOrDefaultAsync(x => x.Email == model.Email);
 
-                if (user == null)
+                if (user is null)
                 {
-                    return new BaseResponse<ClaimsIdentity>()
+                    return new()
                     {
                         Description = "Пользователь не найден",
                         StatusCode = StatusCode.UserNotFound
@@ -150,7 +137,7 @@ namespace ElectronicsStore.BLL.Realizations
 
                 if (user.Password != HashPassword(model.Password))
                 {
-                    return new BaseResponse<ClaimsIdentity>()
+                    return new()
                     {
                         Description = "Неверный пароль",
                         StatusCode = StatusCode.InternalServerError
@@ -159,7 +146,7 @@ namespace ElectronicsStore.BLL.Realizations
 
                 if (!user.IsEmailConfirmed)
                 {
-                    return new BaseResponse<ClaimsIdentity>()
+                    return new()
                     {
                         Description = "Ваша почта не подтверждена. Проверьте входящие.",
                         StatusCode = StatusCode.InternalServerError
@@ -168,7 +155,7 @@ namespace ElectronicsStore.BLL.Realizations
 
                 var result = Authenticate(user);
 
-                return new BaseResponse<ClaimsIdentity>()
+                return new()
                 {
                     Data = result,
                     StatusCode = StatusCode.OK,
@@ -177,7 +164,7 @@ namespace ElectronicsStore.BLL.Realizations
             }
             catch (Exception ex)
             {
-                return new BaseResponse<ClaimsIdentity>()
+                return new()
                 {
                     Description = ex.Message,
                     StatusCode = StatusCode.InternalServerError
@@ -185,15 +172,15 @@ namespace ElectronicsStore.BLL.Realizations
             }
         }
 
-        // <-- МЕТОД Authenticate ДОЛЖЕН БЫТЬ ЗДЕСЬ -->
-        private ClaimsIdentity Authenticate(User user)
+        // Static метод
+        private static ClaimsIdentity Authenticate(User user)
         {
             var claims = new List<Claim>
             {
-                new Claim(ClaimsIdentity.DefaultNameClaimType, user.Name),
-                new Claim(ClaimsIdentity.DefaultRoleClaimType, user.Role.ToString()),
-                new Claim("Id", user.Id.ToString()),
-                new Claim("AvatarPath", user.AvatarPath)
+                new(ClaimsIdentity.DefaultNameClaimType, user.Name ?? string.Empty),
+                new(ClaimsIdentity.DefaultRoleClaimType, user.Role.ToString()),
+                new("Id", user.Id.ToString()),
+                new("AvatarPath", user.AvatarPath ?? "/img/w.png")
             };
             return new ClaimsIdentity(claims, "ApplicationCookie",
                 ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);

@@ -3,40 +3,31 @@ using ElectronicsStore.Domain.Entity;
 using ElectronicsStore.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Linq;
-using System.Threading.Tasks;
-using System;
-using System.Collections.Generic;
 
 namespace ElectronicsStore.Controllers
 {
-    public class ProductController : Controller
+    // C# 12: Основной конструктор
+    public class ProductController(IProductService productService) : Controller
     {
-        private readonly IProductService _productService;
-
-        public ProductController(IProductService productService)
-        {
-            _productService = productService;
-        }
-
         [HttpGet]
         public async Task<IActionResult> GetProduct(int id)
         {
-            var response = await _productService.GetProduct(id);
+            var response = await productService.GetProduct(id);
 
             if (response.StatusCode == Domain.Enum.StatusCode.OK && response.Data != null)
             {
                 var product = response.Data;
 
                 double avgRating = 0;
-                if (product.Reviews != null && product.Reviews.Any())
+                // Оптимизация: вместо Any() используем Count > 0, если это список
+                if (product.Reviews != null && product.Reviews.Count != 0)
                 {
                     avgRating = product.Reviews.Average(r => r.Rating);
                 }
 
                 string imageUrl = "/img/w.png";
 
-                if (product.Images != null && product.Images.Any())
+                if (product.Images != null && product.Images.Count != 0)
                 {
                     var firstImg = product.Images.FirstOrDefault();
                     if (firstImg != null && !string.IsNullOrEmpty(firstImg.ImagePath))
@@ -57,9 +48,10 @@ namespace ElectronicsStore.Controllers
                     Price = product.Price,
                     CategoryName = product.Category?.Name ?? "Без категории",
                     ImageUrl = imageUrl,
+                    // C# 12: Collection expression
                     Reviews = product.Reviews != null
                         ? product.Reviews.OrderByDescending(r => r.CreatedAt).ToList()
-                        : new List<Review>(),
+                        : [],
                     AverageRating = Math.Round(avgRating, 1),
                     ReviewsCount = product.Reviews?.Count ?? 0
                 };
@@ -74,10 +66,9 @@ namespace ElectronicsStore.Controllers
         [Authorize]
         public async Task<IActionResult> AddReview(int productId, string content, int rating)
         {
-            // Исправлено: User?.Identity?.Name
             var userName = User?.Identity?.Name ?? string.Empty;
 
-            var response = await _productService.AddReview(userName, productId, content, rating);
+            var response = await productService.AddReview(userName, productId, content, rating);
 
             if (response.StatusCode == Domain.Enum.StatusCode.OK)
             {

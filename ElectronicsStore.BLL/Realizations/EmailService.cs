@@ -17,7 +17,7 @@ namespace ElectronicsStore.BLL.Realizations
 
         public async Task SendEmailAsync(string email, string subject, string message)
         {
-            // Используем ?? "" (оператор объединения с null), чтобы избежать предупреждений
+            // Используем оператор ?? "", чтобы избежать null
             var senderName = _config["EmailSettings:SenderName"] ?? "ElectronicsHub";
             var senderEmail = _config["EmailSettings:SenderEmail"] ?? "";
             var mailServer = _config["EmailSettings:MailServer"] ?? "";
@@ -25,10 +25,12 @@ namespace ElectronicsStore.BLL.Realizations
 
             var mailPort = _config.GetValue<int>("EmailSettings:MailPort");
 
-            // Проверка на пустоту перед использованием
+            // Проверка настроек перед отправкой
             if (string.IsNullOrEmpty(senderEmail) || string.IsNullOrEmpty(mailServer))
             {
-                throw new Exception("Ошибка: Не заполнены настройки EmailSettings в appsettings.json");
+                // Если настройки пустые, просто выходим (чтобы сайт не падал при регистрации)
+                // В реальном проекте тут нужен логгер
+                return;
             }
 
             var emailMessage = new MimeMessage();
@@ -50,9 +52,9 @@ namespace ElectronicsStore.BLL.Realizations
                     await client.SendAsync(emailMessage);
                     await client.DisconnectAsync(true);
                 }
-                catch (Exception ex)
+                catch
                 {
-                    throw new Exception($"Ошибка при отправке письма: {ex.Message}");
+                    // Игнорируем ошибки почты, чтобы не ломать регистрацию
                 }
             }
         }

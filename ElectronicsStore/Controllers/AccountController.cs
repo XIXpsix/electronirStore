@@ -4,19 +4,12 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace ElectronicsStore.Controllers
 {
-    public class AccountController : Controller
+    // C# 12: Основной конструктор
+    public class AccountController(IAccountService accountService) : Controller
     {
-        private readonly IAccountService _accountService;
-
-        public AccountController(IAccountService accountService)
-        {
-            _accountService = accountService;
-        }
-
         [HttpGet]
         public IActionResult Register() => View();
 
@@ -25,9 +18,8 @@ namespace ElectronicsStore.Controllers
         {
             if (ModelState.IsValid)
             {
-                var response = await _accountService.Register(model);
+                var response = await accountService.Register(model);
 
-                // ИСПРАВЛЕНИЕ: Полный путь к Enum, чтобы не путать с методом контроллера
                 if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK)
                 {
                     return RedirectToAction("ConfirmEmail", "Account", new { email = model.Email });
@@ -49,13 +41,11 @@ namespace ElectronicsStore.Controllers
         {
             if (ModelState.IsValid)
             {
-                var response = await _accountService.ConfirmEmail(model.Email, model.Code);
+                var response = await accountService.ConfirmEmail(model.Email, model.Code);
 
-                // ИСПРАВЛЕНИЕ: Полный путь к Enum
                 if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK && response.Data != null)
                 {
-                    // ИСПРАВЛЕНИЕ: response.Data! (восклицательный знак), чтобы убрать предупреждение о null
-                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(response.Data!));
+                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(response.Data));
                     return RedirectToAction("Index", "Home");
                 }
 
@@ -72,13 +62,11 @@ namespace ElectronicsStore.Controllers
         {
             if (ModelState.IsValid)
             {
-                var response = await _accountService.Login(model);
+                var response = await accountService.Login(model);
 
-                // ИСПРАВЛЕНИЕ: Полный путь к Enum
                 if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK && response.Data != null)
                 {
-                    // ИСПРАВЛЕНИЕ: response.Data!
-                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(response.Data!));
+                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(response.Data));
                     return RedirectToAction("Index", "Home");
                 }
 
