@@ -13,6 +13,7 @@ namespace ElectronicsStore.Controllers
 {
     public class AccountController(IAccountService accountService) : Controller
     {
+        // --- РЕГИСТРАЦИЯ ---
         [HttpGet]
         public IActionResult Register() => View();
 
@@ -24,25 +25,17 @@ namespace ElectronicsStore.Controllers
                 var response = await accountService.Register(model);
                 if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK)
                 {
-                    // ЕСЛИ В response.Data ВЕРНУЛСЯ ClaimsPrincipal (Пользователь)
-                    if (response.Data != null)
-                    {
-                        // СРАЗУ АВТОРИЗУЕМ
-                        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
-                            new ClaimsPrincipal(response.Data));
-
-                        // И КИДАЕМ НА ГЛАВНУЮ
-                        return RedirectToAction("Index", "Home");
-                    }
-
-                    // Если сервис не вернул данные пользователя сразу, тогда кидаем на логин
-                    return RedirectToAction("Login", "Account");
+                    // ИСПРАВЛЕНИЕ: Перенаправляем на страницу ввода кода
+                    // Передаем email, чтобы пользователю не вводить его заново
+                    return RedirectToAction("ConfirmEmail", "Account", new { email = model.Email });
                 }
+                // Ошибка
                 ModelState.AddModelError("", response.Description);
             }
             return View(model);
         }
 
+        // --- ВХОД ---
         [HttpGet]
         public IActionResult Login() => View();
 
@@ -62,12 +55,40 @@ namespace ElectronicsStore.Controllers
             return View(model);
         }
 
+        // --- ПОДТВЕРЖДЕНИЕ ПОЧТЫ ---
+
+        // Добавил этот метод, чтобы страница открывалась
+        [HttpGet]
+        public IActionResult ConfirmEmail(string email)
+        {
+            return View(new ConfirmEmailViewModel { Email = email });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ConfirmEmail(ConfirmEmailViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var response = await accountService.ConfirmEmail(model.Email, model.Code);
+                if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK)
+                {
+                    // После успешного кода сразу входим
+                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(response.Data));
+                    return RedirectToAction("Index", "Home");
+                }
+                ModelState.AddModelError("", response.Description);
+            }
+            return View(model);
+        }
+
+        // --- ВЫХОД ---
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Index", "Home");
         }
 
+        // --- GOOGLE ВХОД ---
         [HttpGet]
         public IActionResult AuthenticationGoogle()
         {
@@ -80,7 +101,6 @@ namespace ElectronicsStore.Controllers
         {
             var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
-            // Если отмена или ошибка - на логин
             if (result?.Principal == null) return RedirectToAction("Login");
 
             var claims = result.Principal.Identities.FirstOrDefault()?.Claims;
