@@ -1,11 +1,11 @@
 ﻿using ElectronicsStore.Domain.Enum;
 
-namespace ElectronicsStore.Domain.Response
+namespace ElectronicsStore.Domain.Response // ВЕРНУЛИ ElectronicsStore.Domain.Response
 {
     public interface IBaseResponse<T>
     {
-        StatusCode StatusCode { get; }
-        T? Data { get; }
-        string Description { get; }
+        string? Description { get; set; }
+        StatusCode StatusCode { get; set; }
+        T? Data { get; set; }
     }
 }

@@ -9,11 +9,8 @@ namespace ElectronicsStore.Controllers
     public class HomeController(IProductService productService) : Controller
     {
         public IActionResult Index() => View();
-
         public IActionResult Privacy() => View();
-
         public IActionResult About() => View();
-
         public IActionResult Contacts() => View();
 
         [HttpGet]
@@ -21,15 +18,14 @@ namespace ElectronicsStore.Controllers
         {
             var response = await productService.GetProducts();
 
-            // Исправление: [] вместо new List
+            // Защита от null списка
             IEnumerable<Product> products = response.Data ?? [];
 
             if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK)
             {
-                // 1. Фильтрация по Категории
                 if (!string.IsNullOrEmpty(category))
                 {
-                    // Исправление: проверка p.Category?.Name != null
+                    // ИСПРАВЛЕНИЕ: Проверяем p.Category?.Name != null
                     if (category == "tvs")
                         products = products.Where(p => p.Category?.Name != null &&
                             (p.Category.Name.Contains("Телевизор", StringComparison.OrdinalIgnoreCase) ||
@@ -42,10 +38,8 @@ namespace ElectronicsStore.Controllers
                         products = products.Where(p => p.Category?.Name == category);
                 }
 
-                // 2. Поиск
                 if (!string.IsNullOrEmpty(searchString))
                 {
-                    // Исправление: StringComparison эффективнее чем ToLower()
                     products = products.Where(p => p.Name != null &&
                         p.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase));
                 }

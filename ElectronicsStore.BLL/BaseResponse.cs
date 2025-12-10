@@ -1,12 +1,16 @@
-﻿using ElectronicsStore.Domain.Enum;
-using ElectronicsStore.Domain.Response;
+﻿using ElectronicsStore.BLL;
+using ElectronicsStore.Domain.Enum;
 
-namespace ElectronicsStore.BLL // Было ElectronicsStore.Domain.Response
+namespace ElectronicsStore.Domain.Response // ВЕРНУЛИ ElectronicsStore.Domain.Response
 {
     public class BaseResponse<T> : IBaseResponse<T>
     {
-        public string Description { get; set; }
+        // Добавили '?', чтобы разрешить null и убрать ошибку конструктора
+        public string? Description { get; set; }
+
         public StatusCode StatusCode { get; set; }
-        public T Data { get; set; }
+
+        // Добавили '?'
+        public T? Data { get; set; }
     }
 }

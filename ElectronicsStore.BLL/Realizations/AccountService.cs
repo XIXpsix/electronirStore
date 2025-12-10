@@ -2,21 +2,17 @@
 using ElectronicsStore.DAL.Interfaces;
 using ElectronicsStore.Domain.Entity;
 using ElectronicsStore.Domain.Enum;
-using ElectronicsStore.Domain.ViewModels; // Убрал лишний using Response, т.к. теперь namespace BLL
+using ElectronicsStore.Domain.Response; // Теперь этот using снова работает корректно
+using ElectronicsStore.Domain.ViewModels;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace ElectronicsStore.BLL.Realizations
 {
-    // C# 12: Основной конструктор
     public class AccountService(IBaseStorage<User> userRepository, EmailService emailService) : IAccountService
     {
-        // Оптимизация: static + HashData
         private static string HashPassword(string password)
         {
             var bytes = Encoding.UTF8.GetBytes(password);
@@ -174,12 +170,12 @@ namespace ElectronicsStore.BLL.Realizations
             }
         }
 
-        // Static метод для оптимизации
         private static ClaimsIdentity Authenticate(User user)
         {
             var claims = new List<Claim>
             {
-                // Исправление Null Reference: ?? string.Empty
+                // ВОТ ЗДЕСЬ БЫЛА ОШИБКА РАЗЫМЕНОВАНИЯ:
+                // Добавляем ?? "", чтобы защититься от null
                 new(ClaimsIdentity.DefaultNameClaimType, user.Name ?? string.Empty),
                 new(ClaimsIdentity.DefaultRoleClaimType, user.Role.ToString()),
                 new("Id", user.Id.ToString()),
