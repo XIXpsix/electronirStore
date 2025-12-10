@@ -17,41 +17,41 @@ html, body {
     background-color: var(--bg-dark);
 }
 
-/* --- 2. Боковые Видео --- */
+/* --- 2. Боковые Картинки (Вместо Видео) --- */
 .side-video {
     position: fixed;
     top: 0;
     bottom: 0;
     width: 20%;
     z-index: 0;
-    overflow: hidden;
-    background: #000;
+    background-color: #000; /* Фон, если картинка не загрузится */
 }
 
+/* ЛЕВАЯ СТОРОНА */
 .left-side {
     left: 0;
     border-right: 2px solid var(--main-orange);
+    /* Указываем путь к картинке pc.jpg */
+    background-image: url('/img/pc.jpg');
+    background-size: cover; /* Растянуть на весь блок */
+    background-position: center; /* Центрировать */
+    background-repeat: no-repeat;
 }
 
+/* ПРАВАЯ СТОРОНА */
 .right-side {
     right: 0;
     border-left: 2px solid var(--main-orange);
-}
-
-.side-video video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    opacity: 0.7;
+    /* Указываем путь к картинке pc1.jpg */
+    background-image: url('/img/pc1.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 .video-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.3);
+    /* Можно убрать, если не нужно затемнение */
+    display: none;
 }
 
 /* --- 3. Центральная часть --- */
@@ -88,8 +88,9 @@ html, body {
 }
 
 @media (max-width: 992px) {
+    /* Скрываем боковые картинки на планшетах и телефонах */
     .side-video {
-        display: none;
+        display: none !important;
     }
 
     .main-wrapper {
@@ -136,18 +137,17 @@ html, body {
         color: var(--main-orange) !important;
     }
 
-/* Hero Section (ИСПРАВЛЕНО) */
-/* --- Начало изменений для блока "Добро пожаловать" --- */
+/* --- 5. Элементы Главной Страницы --- */
 
+/* Hero Section (ИЗМЕНЕНО: Без картинки) */
 .hero-section {
     position: relative;
+    /* Убрали картинку */
+    background-image: none !important;
+    /* Поставили темный фон */
+    background-color: var(--bg-panel);
     height: 500px;
     width: 100%;
-    /* 1. УБИРАЕМ КАРТИНКУ */
-    background-image: none !important;
-    /* 2. СТАВИМ ТЕМНЫЙ ФОН (чтобы белый текст был виден) */
-    background-color: var(--bg-panel);
-    /* Настройки выравнивания (оставляем как было) */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -155,12 +155,10 @@ html, body {
     margin-bottom: 40px;
 }
 
-/* Скрываем затемнение, так как картинки больше нет */
 .hero-overlay {
+    /* Скрыли затемнение, так как картинки нет */
     display: none !important;
 }
-
-/* --- Конец изменений --- */
 
 .hero-content {
     position: relative;
