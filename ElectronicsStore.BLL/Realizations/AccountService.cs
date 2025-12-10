@@ -2,12 +2,15 @@
 using ElectronicsStore.DAL.Interfaces;
 using ElectronicsStore.Domain.Entity;
 using ElectronicsStore.Domain.Enum;
-using ElectronicsStore.Domain.Response;
+using ElectronicsStore.Domain.Response; // Убедитесь, что namespace совпадает с BaseResponse.cs
 using ElectronicsStore.Domain.ViewModels;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace ElectronicsStore.BLL.Realizations
 {
@@ -20,7 +23,7 @@ namespace ElectronicsStore.BLL.Realizations
             return Convert.ToHexString(hash).ToLower();
         }
 
-        // --- МЕТОД ДЛЯ ГУГЛ ---
+        // Метод для входа через Google
         public async Task<BaseResponse<ClaimsIdentity>> IsCreatedAccount(User model)
         {
             try
@@ -61,14 +64,15 @@ namespace ElectronicsStore.BLL.Realizations
             }
         }
 
-        // --- ОСТАЛЬНЫЕ МЕТОДЫ ---
         public async Task<BaseResponse<ClaimsIdentity>> Register(RegisterViewModel model)
         {
             try
             {
                 var user = await userRepository.GetAll().FirstOrDefaultAsync(x => x.Email == model.Email);
                 if (user != null)
+                {
                     return new() { Description = "Пользователь с таким email уже есть" };
+                }
 
                 var random = new Random();
                 var code = random.Next(100000, 999999).ToString();
@@ -102,13 +106,19 @@ namespace ElectronicsStore.BLL.Realizations
             {
                 var user = await userRepository.GetAll().FirstOrDefaultAsync(x => x.Email == model.Email);
                 if (user == null)
+                {
                     return new() { Description = "Пользователь не найден", StatusCode = StatusCode.UserNotFound };
+                }
 
                 if (user.Password != HashPassword(model.Password))
+                {
                     return new() { Description = "Неверный пароль", StatusCode = StatusCode.InternalServerError };
+                }
 
                 if (!user.IsEmailConfirmed)
+                {
                     return new() { Description = "Почта не подтверждена", StatusCode = StatusCode.InternalServerError };
+                }
 
                 var result = Authenticate(user);
                 return new() { Data = result, StatusCode = StatusCode.OK, Description = "Успешный вход" };

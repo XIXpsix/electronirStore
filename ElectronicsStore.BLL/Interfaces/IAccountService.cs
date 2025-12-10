@@ -13,7 +13,7 @@ namespace ElectronicsStore.BLL.Interfaces
         Task<BaseResponse<ClaimsIdentity>> Login(LoginViewModel model);
         Task<BaseResponse<ClaimsIdentity>> ConfirmEmail(string email, string code);
 
-        [cite_start]// Метод для входа через Google [cite: 870-871]
+        [cite_start]
         Task<BaseResponse<ClaimsIdentity>> IsCreatedAccount(User model);
     }
 }

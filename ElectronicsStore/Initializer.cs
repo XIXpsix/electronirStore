@@ -9,7 +9,7 @@ namespace ElectronicsStore
 {
     public static class Initializer
     {
-        // Добавлено слово 'this' перед IServiceCollection
+        // Добавлено слово 'this' - теперь это метод расширения
         public static void InitializeRepositories(this IServiceCollection services)
         {
             services.AddScoped<IBaseStorage<User>, UserStorage>();
@@ -21,7 +21,7 @@ namespace ElectronicsStore
             services.AddScoped<IBaseStorage<CartItem>, CartItemStorage>();
         }
 
-        // Добавлено слово 'this' перед IServiceCollection
+        // Добавлено слово 'this'
         public static void InitializeServices(this IServiceCollection services)
         {
             services.AddScoped<IAccountService, AccountService>();

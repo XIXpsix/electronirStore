@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using System.Threading.Tasks;
+using System.Linq;
 
 namespace ElectronicsStore.Controllers
 {
@@ -20,7 +22,7 @@ namespace ElectronicsStore.Controllers
             if (ModelState.IsValid)
             {
                 var response = await accountService.Register(model);
-                if (response.StatusCode == Domain.Enum.StatusCode.OK)
+                if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK)
                 {
                     return Json(new { description = response.Description });
                 }
@@ -38,7 +40,7 @@ namespace ElectronicsStore.Controllers
             if (ModelState.IsValid)
             {
                 var response = await accountService.Login(model);
-                if (response.StatusCode == Domain.Enum.StatusCode.OK)
+                if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK)
                 {
                     await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(response.Data));
                     return RedirectToAction("Index", "Home");
@@ -54,7 +56,7 @@ namespace ElectronicsStore.Controllers
             if (ModelState.IsValid)
             {
                 var response = await accountService.ConfirmEmail(model.Email, model.Code);
-                if (response.StatusCode == Domain.Enum.StatusCode.OK)
+                if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK)
                 {
                     await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(response.Data));
                     return RedirectToAction("Index", "Home");
@@ -101,7 +103,7 @@ namespace ElectronicsStore.Controllers
 
             var response = await accountService.IsCreatedAccount(userModel);
 
-            if (response.StatusCode == Domain.Enum.StatusCode.OK && response.Data != null)
+            if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK && response.Data != null)
             {
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(response.Data));
                 return RedirectToAction("Index", "Home");
