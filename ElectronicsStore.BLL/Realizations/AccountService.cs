@@ -2,19 +2,21 @@
 using ElectronicsStore.DAL.Interfaces;
 using ElectronicsStore.Domain.Entity;
 using ElectronicsStore.Domain.Enum;
-using ElectronicsStore.Domain.Response;
-using ElectronicsStore.Domain.ViewModels;
+using ElectronicsStore.Domain.ViewModels; // Убрал лишний using Response, т.к. теперь namespace BLL
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace ElectronicsStore.BLL.Realizations
 {
-    // C# 12: Основной конструктор (Primary Constructor)
+    // C# 12: Основной конструктор
     public class AccountService(IBaseStorage<User> userRepository, EmailService emailService) : IAccountService
     {
-        // Оптимизация: метод сделан статическим и используется современный SHA256.HashData
+        // Оптимизация: static + HashData
         private static string HashPassword(string password)
         {
             var bytes = Encoding.UTF8.GetBytes(password);
@@ -31,7 +33,7 @@ namespace ElectronicsStore.BLL.Realizations
 
                 if (user != null)
                 {
-                    return new() // Упрощенное создание new()
+                    return new()
                     {
                         Description = "Пользователь с таким именем или email уже есть",
                     };
@@ -78,7 +80,6 @@ namespace ElectronicsStore.BLL.Realizations
             {
                 var user = await userRepository.GetAll().FirstOrDefaultAsync(x => x.Email == email);
 
-                // Упрощенная проверка на null (C# pattern matching)
                 if (user is null)
                 {
                     return new()
@@ -173,12 +174,12 @@ namespace ElectronicsStore.BLL.Realizations
             }
         }
 
-        // Оптимизация: метод static, так как не использует поля класса
+        // Static метод для оптимизации
         private static ClaimsIdentity Authenticate(User user)
         {
             var claims = new List<Claim>
             {
-                // Защита от NullReferenceException (?? string.Empty)
+                // Исправление Null Reference: ?? string.Empty
                 new(ClaimsIdentity.DefaultNameClaimType, user.Name ?? string.Empty),
                 new(ClaimsIdentity.DefaultRoleClaimType, user.Role.ToString()),
                 new("Id", user.Id.ToString()),

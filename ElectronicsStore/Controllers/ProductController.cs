@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ElectronicsStore.Controllers
 {
-    // C# 12: Основной конструктор
     public class ProductController(IProductService productService) : Controller
     {
         [HttpGet]
@@ -19,7 +18,7 @@ namespace ElectronicsStore.Controllers
                 var product = response.Data;
 
                 double avgRating = 0;
-                // Оптимизация: Count > 0 вместо Any()
+                // Исправление: Count > 0 эффективнее Any()
                 if (product.Reviews != null && product.Reviews.Count > 0)
                 {
                     avgRating = product.Reviews.Average(r => r.Rating);
@@ -27,6 +26,7 @@ namespace ElectronicsStore.Controllers
 
                 string imageUrl = "/img/w.png";
 
+                // Исправление: Count > 0
                 if (product.Images != null && product.Images.Count > 0)
                 {
                     var firstImg = product.Images.FirstOrDefault();
@@ -50,7 +50,7 @@ namespace ElectronicsStore.Controllers
                     ImageUrl = imageUrl,
                     Reviews = product.Reviews != null
                         ? product.Reviews.OrderByDescending(r => r.CreatedAt).ToList()
-                        : [], // Упрощение []
+                        : [], // Упрощение
                     AverageRating = Math.Round(avgRating, 1),
                     ReviewsCount = product.Reviews?.Count ?? 0
                 };
@@ -69,10 +69,6 @@ namespace ElectronicsStore.Controllers
 
             var response = await productService.AddReview(userName, productId, content, rating);
 
-            if (response.StatusCode == Domain.Enum.StatusCode.OK)
-            {
-                return RedirectToAction("GetProduct", new { id = productId });
-            }
             return RedirectToAction("GetProduct", new { id = productId });
         }
     }

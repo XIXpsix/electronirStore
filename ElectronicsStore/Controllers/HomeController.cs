@@ -6,7 +6,6 @@ using System.Diagnostics;
 
 namespace ElectronicsStore.Controllers
 {
-    // C# 12: Основной конструктор
     public class HomeController(IProductService productService) : Controller
     {
         public IActionResult Index() => View();
@@ -22,7 +21,7 @@ namespace ElectronicsStore.Controllers
         {
             var response = await productService.GetProducts();
 
-            // C# 12: Выражение коллекции []
+            // Исправление: [] вместо new List
             IEnumerable<Product> products = response.Data ?? [];
 
             if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK)
@@ -30,8 +29,7 @@ namespace ElectronicsStore.Controllers
                 // 1. Фильтрация по Категории
                 if (!string.IsNullOrEmpty(category))
                 {
-                    // Исправлено: StringComparison.OrdinalIgnoreCase для скорости и игнорирования регистра
-                    // Исправлено: Проверки p.Category?.Name != null
+                    // Исправление: проверка p.Category?.Name != null
                     if (category == "tvs")
                         products = products.Where(p => p.Category?.Name != null &&
                             (p.Category.Name.Contains("Телевизор", StringComparison.OrdinalIgnoreCase) ||
@@ -47,6 +45,7 @@ namespace ElectronicsStore.Controllers
                 // 2. Поиск
                 if (!string.IsNullOrEmpty(searchString))
                 {
+                    // Исправление: StringComparison эффективнее чем ToLower()
                     products = products.Where(p => p.Name != null &&
                         p.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase));
                 }
