@@ -49,10 +49,10 @@ namespace ElectronicsStore.Controllers
             {
                 var response = await _accountService.ConfirmEmail(model.Email, model.Code);
 
-                if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK)
+                // ИСПРАВЛЕНИЕ: Проверка Data на null
+                if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK && response.Data != null)
                 {
-                    // ! говорит компилятору, что Data точно не null
-                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(response.Data!));
+                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(response.Data));
                     return RedirectToAction("Index", "Home");
                 }
                 ModelState.AddModelError("", response.Description);
@@ -70,6 +70,7 @@ namespace ElectronicsStore.Controllers
             {
                 var response = await _accountService.Login(model);
 
+                // ИСПРАВЛЕНИЕ: Проверка Data на null
                 if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK && response.Data != null)
                 {
                     await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(response.Data));

@@ -78,13 +78,20 @@ namespace ElectronicsStore.BLL.Realizations
         {
             try
             {
-                var query = _productRepository.GetAll().Include(x => x.Category).Include(x => x.Images).AsQueryable();
+                var query = _productRepository.GetAll()
+                    .Include(x => x.Category)
+                    .Include(x => x.Images)
+                    .AsQueryable();
 
                 if (filter.CategoryId > 0)
                     query = query.Where(x => x.CategoryId == filter.CategoryId);
 
-                if (!string.IsNullOrWhiteSpace(filter.Name))
-                    query = query.Where(x => x.Name.ToLower().Contains(filter.Name.ToLower()));
+                // ИСПРАВЛЕНИЕ: Сохраняем filter.Name в локальную переменную перед запросом
+                var filterName = filter.Name;
+                if (!string.IsNullOrWhiteSpace(filterName))
+                {
+                    query = query.Where(x => x.Name.ToLower().Contains(filterName.ToLower()));
+                }
 
                 if (filter.MinPrice > 0) query = query.Where(x => x.Price >= filter.MinPrice);
                 if (filter.MaxPrice > 0) query = query.Where(x => x.Price <= filter.MaxPrice);
@@ -128,9 +135,10 @@ namespace ElectronicsStore.BLL.Realizations
         {
             try
             {
+                // ИСПРАВЛЕНИЕ: Безопасная выборка ImagePath (замена null на пустую строку)
                 var images = await _productImageRepository.GetAll()
                     .Where(x => x.ProductId == id && x.ImagePath != null)
-                    .Select(x => x.ImagePath!)
+                    .Select(x => x.ImagePath ?? "")
                     .ToListAsync();
 
                 return new BaseResponse<List<string>> { Data = images, StatusCode = StatusCode.OK };
@@ -141,7 +149,6 @@ namespace ElectronicsStore.BLL.Realizations
             }
         }
 
-        // Исправленный метод AddReview
         public async Task<IBaseResponse<Review>> AddReview(string? userName, int productId, string content, int rating)
         {
             try

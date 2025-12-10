@@ -5,7 +5,7 @@ namespace ElectronicsStore.Domain.Response
     public interface IBaseResponse<T>
     {
         StatusCode StatusCode { get; }
-        T? Data { get; } // ensure the question mark '?' is here
+        T? Data { get; }
         string Description { get; }
     }
 }

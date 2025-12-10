@@ -24,7 +24,7 @@ namespace ElectronicsStore.Controllers
         {
             var response = await _productService.GetProduct(id);
 
-            // ПРОВЕРКА: Убеждаемся, что статус OK и данные НЕ NULL
+            // ИСПРАВЛЕНИЕ: Проверка статуса и наличия данных
             if (response.StatusCode == Domain.Enum.StatusCode.OK && response.Data != null)
             {
                 var product = response.Data;
@@ -38,6 +38,8 @@ namespace ElectronicsStore.Controllers
 
                 // 2. Получаем картинку (безопасная проверка на null)
                 string imageUrl = "/img/w.png";
+
+                // Проверяем список Images на null перед обращением
                 if (product.Images != null && product.Images.Any())
                 {
                     var firstImg = product.Images.FirstOrDefault();
@@ -47,21 +49,20 @@ namespace ElectronicsStore.Controllers
                         imageUrl = firstImg.ImagePath;
                     }
                 }
-                // Запасной вариант, если картинки нет в списке, но есть в свойстве ImagePath
+                // Запасной вариант
                 else if (!string.IsNullOrEmpty(product.ImagePath))
                 {
                     imageUrl = product.ImagePath;
                 }
 
-                // 3. Создаем ViewModel с защитой от null (добавлено ?? string.Empty)
+                // 3. Создаем ViewModel с защитой от null
                 var viewModel = new GetProductViewModel
                 {
                     Id = product.Id,
-                    // Если в БД имя null, выводим пустую строку, чтобы не было ошибки
                     Name = product.Name ?? "Без названия",
                     Description = product.Description ?? "Описание отсутствует",
                     Price = product.Price,
-                    // Безопасное получение имени категории
+                    // Безопасное получение имени категории (CS8602)
                     CategoryName = product.Category?.Name ?? "Без категории",
 
                     ImageUrl = imageUrl,
@@ -85,8 +86,8 @@ namespace ElectronicsStore.Controllers
         [Authorize]
         public async Task<IActionResult> AddReview(int productId, string content, int rating)
         {
-            // ПРОВЕРКА: User или Identity может быть null. Заменяем на пустую строку.
-            // ?? string.Empty гарантирует, что в сервис не уйдет null.
+            // ИСПРАВЛЕНИЕ: User или Identity может быть null. 
+            // Используем оператор объединения с null (??)
             var userName = User?.Identity?.Name ?? string.Empty;
 
             var response = await _productService.AddReview(userName, productId, content, rating);
