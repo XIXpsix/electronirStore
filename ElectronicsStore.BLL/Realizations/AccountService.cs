@@ -12,6 +12,7 @@ using System.Text;
 namespace ElectronicsStore.BLL.Realizations
 {
     // Исправлено: IEmailService (интерфейс)
+    // Добавляем букву 'I' перед EmailService
     public class AccountService(IBaseStorage<User> userRepository, IEmailService emailService) : IAccountService
     {
         private static string HashPassword(string password)
