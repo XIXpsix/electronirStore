@@ -1,15 +1,15 @@
 ﻿using ElectronicsStore.Domain.Enum;
+using ElectronicsStore.Domain.Response;
 
-namespace ElectronicsStore.Domain.Response
+namespace ElectronicsStore.BLL
 {
     public class BaseResponse<T> : IBaseResponse<T>
     {
-        // Инициализируем пустой строкой, чтобы убрать ошибку
-        public string Description { get; set; } = "";
+        public string Description { get; set; } = string.Empty;
 
         public StatusCode StatusCode { get; set; }
 
-        // Разрешаем null для Data
+        // Исправлено: T? Data
         public T? Data { get; set; }
     }
 }

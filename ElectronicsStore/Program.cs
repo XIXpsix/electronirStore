@@ -39,6 +39,8 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
 builder.Services.AddControllersWithViews();
 
+builder.Services.AddScoped<IBaseStorage<Review>, BaseStorage<Review>>();
+
 var app = builder.Build();
 
 // --- АВТОМАТИЧЕСКОЕ ДОБАВЛЕНИЕ КАТЕГОРИЙ ---

@@ -1,8 +1,8 @@
 using ElectronicsStore.Domain.Entity;
 using ElectronicsStore.Domain.Filters;
+using ElectronicsStore.Domain.Response;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using ElectronicsStore.Domain.Response;
 
 namespace ElectronicsStore.BLL.Interfaces
 {
@@ -13,5 +13,8 @@ namespace ElectronicsStore.BLL.Interfaces
         Task<IBaseResponse<List<Product>>> GetProductsByFilter(ProductFilter filter);
         Task<IBaseResponse<List<Product>>> GetProductsByCategory(int categoryId);
         Task<IBaseResponse<IEnumerable<Product>>> GetProducts();
+
+        // Исправлено: string? userName (добавлен вопросительный знак)
+        Task<IBaseResponse<Review>> AddReview(string? userName, int productId, string content, int rating);
     }
 }

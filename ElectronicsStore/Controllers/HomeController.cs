@@ -1,9 +1,10 @@
 ﻿using ElectronicsStore.BLL.Interfaces;
+using ElectronicsStore.Domain.Entity;
 using ElectronicsStore.Domain.ViewModels; // Теперь это пространство имен существует
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
-using System.Threading.Tasks;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace ElectronicsStore.Controllers
 {
@@ -28,22 +29,35 @@ namespace ElectronicsStore.Controllers
         public IActionResult Contacts() => View();
 
         [HttpGet]
-        public async Task<IActionResult> Catalog()
+        public async Task<IActionResult> Catalog(string category, string searchString)
         {
-            // 1. Получаем товары
-            var productsResponse = await _productService.GetProducts();
+            var response = await _productService.GetProducts();
 
-            // 2. Получаем категории (ИСПРАВЛЕНО ИМЯ МЕТОДА)
-            var categoriesResponse = await _categoryService.GetAllCategories(); // Было GetCategories
+            // Инициализируем пустым списком, если пришел null
+            IEnumerable<Product> products = response.Data ?? new List<Product>();
 
-            // 3. Собираем ViewModel
-            var model = new CatalogViewModel
+            if (response.StatusCode == Domain.Enum.StatusCode.OK)
             {
-                Products = productsResponse.Data ?? new List<Domain.Entity.Product>(),
-                Categories = categoriesResponse.Data ?? new List<Domain.Entity.Category>()
-            };
+                // 1. Фильтрация по Категории (добавили проверку на null для Category)
+                if (!string.IsNullOrEmpty(category))
+                {
+                    if (category == "tvs")
+                        products = products.Where(p => p.Category != null && (p.Category.Name.Contains("Телевизор") || p.Category.Name.Contains("Монитор")));
+                    else if (category == "pc")
+                        products = products.Where(p => p.Category != null && (p.Category.Name.Contains("ПК") || p.Category.Name.Contains("Ноутбук")));
+                    else
+                        products = products.Where(p => p.Category != null && p.Category.Name == category);
+                }
 
-            return View(model);
+                // 2. Поиск
+                if (!string.IsNullOrEmpty(searchString))
+                {
+                    products = products.Where(p => p.Name.ToLower().Contains(searchString.ToLower()));
+                }
+
+                return View(products.ToList());
+            }
+            return RedirectToAction("Error");
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

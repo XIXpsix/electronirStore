@@ -1,9 +1,12 @@
 ﻿using ElectronicsStore.BLL.Interfaces;
 using ElectronicsStore.Domain.Entity;
-using ElectronicsStore.Domain.Filters;
 using ElectronicsStore.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 using System.Threading.Tasks;
+using System;
+using System.Collections.Generic;
 
 namespace ElectronicsStore.Controllers
 {
@@ -17,43 +20,74 @@ namespace ElectronicsStore.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> List(int categoryId)
-        {
-            var response = await _productService.GetProductsByCategory(categoryId);
-
-            // Используем ПОЛНОЕ имя перечисления, чтобы избежать ошибки "ControllerBase.StatusCode"
-            if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK && response.Data != null)
-            {
-                return View(response.Data);
-            }
-
-            return RedirectToAction("Error", "Home");
-        }
-
-        [HttpGet]
         public async Task<IActionResult> GetProduct(int id)
         {
             var response = await _productService.GetProduct(id);
 
-            if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK && response.Data != null)
+            // ПРОВЕРКА 1: Убеждаемся, что статус OK и данные НЕ NULL
+            if (response.StatusCode == Domain.Enum.StatusCode.OK && response.Data != null)
             {
-                return View(response.Data);
+                var product = response.Data;
+
+                // Считаем рейтинг безопасно
+                double avgRating = 0;
+                if (product.Reviews != null && product.Reviews.Any())
+                {
+                    avgRating = product.Reviews.Average(r => r.Rating);
+                }
+
+                // Получаем картинку безопасно
+                string imageUrl = "/img/w.png";
+                if (product.Images != null && product.Images.Any())
+                {
+                    var firstImg = product.Images.First();
+                    // Проверяем, что путь внутри картинки не null
+                    if (firstImg != null && !string.IsNullOrEmpty(firstImg.ImagePath))
+                    {
+                        imageUrl = firstImg.ImagePath;
+                    }
+                }
+                else if (!string.IsNullOrEmpty(product.ImagePath))
+                {
+                    imageUrl = product.ImagePath;
+                }
+
+                var viewModel = new GetProductViewModel
+                {
+                    Id = product.Id,
+                    Name = product.Name,
+                    Description = product.Description,
+                    Price = product.Price,
+                    // Используем оператор ?. и ?? для безопасного доступа
+                    CategoryName = product.Category?.Name ?? "Без категории",
+
+                    ImageUrl = imageUrl,
+                    Reviews = product.Reviews != null ? product.Reviews.OrderByDescending(r => r.CreatedAt).ToList() : new List<Review>(),
+                    AverageRating = Math.Round(avgRating, 1),
+                    ReviewsCount = product.Reviews?.Count ?? 0
+                };
+
+                return View(viewModel);
             }
 
             return RedirectToAction("Error", "Home");
         }
 
         [HttpPost]
-        public async Task<IActionResult> Filter([FromBody] ProductFilter filter)
+        [Authorize]
+        public async Task<IActionResult> AddReview(int productId, string content, int rating)
         {
-            var response = await _productService.GetProductsByFilter(filter);
+            // ПРОВЕРКА 2: Имя пользователя может быть null, заменяем на пустую строку, если так
+            var userName = User.Identity?.Name ?? string.Empty;
 
-            if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK)
+            var response = await _productService.AddReview(userName, productId, content, rating);
+
+            if (response.StatusCode == Domain.Enum.StatusCode.OK)
             {
-                return Json(new { data = response.Data });
+                return RedirectToAction("GetProduct", new { id = productId });
             }
 
-            return Json(new { error = response.Description });
+            return RedirectToAction("GetProduct", new { id = productId });
         }
     }
 }

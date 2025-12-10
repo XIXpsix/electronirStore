@@ -1,10 +1,10 @@
+using ElectronicsStore.BLL.Interfaces;
 using ElectronicsStore.DAL.Interfaces;
 using ElectronicsStore.Domain.Entity;
 using ElectronicsStore.Domain.Enum;
 using ElectronicsStore.Domain.Filters;
-using ElectronicsStore.BLL.Interfaces;
-using Microsoft.EntityFrameworkCore;
 using ElectronicsStore.Domain.Response;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,27 +12,79 @@ using System.Threading.Tasks;
 
 namespace ElectronicsStore.BLL.Realizations
 {
-    public class ProductService(
-        IBaseStorage<Product> productStorage,
-        IBaseStorage<ProductImage> productImageStorage) : IProductService
+    public class ProductService : IProductService
     {
+        private readonly IBaseStorage<Product> _productRepository;
+        private readonly IBaseStorage<ProductImage> _productImageRepository;
+        private readonly IBaseStorage<User> _userRepository;
+        private readonly IBaseStorage<Review> _reviewRepository;
+
+        public ProductService(IBaseStorage<Product> productRepository,
+                              IBaseStorage<ProductImage> productImageRepository,
+                              IBaseStorage<User> userRepository,
+                              IBaseStorage<Review> reviewRepository)
+        {
+            _productRepository = productRepository;
+            _productImageRepository = productImageRepository;
+            _userRepository = userRepository;
+            _reviewRepository = reviewRepository;
+        }
+
+        public async Task<IBaseResponse<Product>> GetProduct(int id)
+        {
+            try
+            {
+                var product = await _productRepository.GetAll()
+                    .Include(x => x.Category)
+                    .Include(x => x.Images)
+                    .Include(x => x.Reviews).ThenInclude(r => r.User)
+                    .FirstOrDefaultAsync(x => x.Id == id);
+
+                if (product == null)
+                {
+                    return new BaseResponse<Product>()
+                    {
+                        Description = "Товар не найден",
+                        StatusCode = StatusCode.ProductNotFound
+                    };
+                }
+
+                return new BaseResponse<Product>() { Data = product, StatusCode = StatusCode.OK };
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponse<Product>() { Description = $"[GetProduct] : {ex.Message}", StatusCode = StatusCode.InternalServerError };
+            }
+        }
+
+        public async Task<IBaseResponse<IEnumerable<Product>>> GetProducts()
+        {
+            try
+            {
+                var products = await _productRepository.GetAll()
+                    .Include(x => x.Category)
+                    .Include(x => x.Images)
+                    .ToListAsync();
+
+                return new BaseResponse<IEnumerable<Product>>() { Data = products, StatusCode = StatusCode.OK };
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponse<IEnumerable<Product>>() { Description = $"[GetProducts] : {ex.Message}", StatusCode = StatusCode.InternalServerError };
+            }
+        }
+
         public async Task<IBaseResponse<List<Product>>> GetProductsByFilter(ProductFilter filter)
         {
             try
             {
-                // Явно указываем тип IQueryable<Product>
-                IQueryable<Product> query = productStorage.GetAll().Include(x => x.Category);
+                var query = _productRepository.GetAll().Include(x => x.Category).Include(x => x.Images).AsQueryable();
 
                 if (filter.CategoryId > 0)
-                {
                     query = query.Where(x => x.CategoryId == filter.CategoryId);
-                }
 
                 if (!string.IsNullOrWhiteSpace(filter.Name))
-                {
-                    var search = filter.Name.ToLower();
-                    query = query.Where(x => x.Name.ToLower().Contains(search));
-                }
+                    query = query.Where(x => x.Name.ToLower().Contains(filter.Name.ToLower()));
 
                 if (filter.MinPrice > 0) query = query.Where(x => x.Price >= filter.MinPrice);
                 if (filter.MaxPrice > 0) query = query.Where(x => x.Price <= filter.MaxPrice);
@@ -46,7 +98,6 @@ namespace ElectronicsStore.BLL.Realizations
                 };
 
                 var products = await query.ToListAsync();
-
                 return new BaseResponse<List<Product>> { Data = products, StatusCode = StatusCode.OK };
             }
             catch (Exception ex)
@@ -59,8 +110,9 @@ namespace ElectronicsStore.BLL.Realizations
         {
             try
             {
-                var products = await productStorage.GetAll()
+                var products = await _productRepository.GetAll()
                     .Include(x => x.Category)
+                    .Include(x => x.Images)
                     .Where(x => x.CategoryId == categoryId)
                     .ToListAsync();
 
@@ -72,49 +124,11 @@ namespace ElectronicsStore.BLL.Realizations
             }
         }
 
-        public async Task<IBaseResponse<IEnumerable<Product>>> GetProducts()
-        {
-            try
-            {
-                var products = await productStorage.GetAll()
-                    .Include(x => x.Category)
-                    .ToListAsync();
-
-                return new BaseResponse<IEnumerable<Product>> { Data = products, StatusCode = StatusCode.OK };
-            }
-            catch (Exception ex)
-            {
-                return new BaseResponse<IEnumerable<Product>> { Description = ex.Message, StatusCode = StatusCode.InternalServerError };
-            }
-        }
-
-        public async Task<IBaseResponse<Product>> GetProduct(int id)
-        {
-            try
-            {
-                var product = await productStorage.GetAll()
-                    .Include(x => x.Category)
-                    .FirstOrDefaultAsync(x => x.Id == id);
-
-                if (product == null)
-                    return new BaseResponse<Product> { StatusCode = StatusCode.ProductNotFound, Description = "Товар не найден" };
-
-                return new BaseResponse<Product> { Data = product, StatusCode = StatusCode.OK };
-            }
-            catch (Exception ex)
-            {
-                return new BaseResponse<Product> { Description = ex.Message, StatusCode = StatusCode.InternalServerError };
-            }
-        }
-
         public async Task<IBaseResponse<List<string>>> GetImagesByProductId(int id)
         {
             try
             {
-                // ИСПРАВЛЕНИЕ ЗДЕСЬ:
-                // 1. Проверяем, что картинка не null (Where)
-                // 2. Используем ! (null-forgiving operator), чтобы успокоить компилятор
-                var images = await productImageStorage.GetAll()
+                var images = await _productImageRepository.GetAll()
                     .Where(x => x.ProductId == id && x.ImagePath != null)
                     .Select(x => x.ImagePath!)
                     .ToListAsync();
@@ -124,6 +138,43 @@ namespace ElectronicsStore.BLL.Realizations
             catch (Exception ex)
             {
                 return new BaseResponse<List<string>> { Description = ex.Message, StatusCode = StatusCode.InternalServerError };
+            }
+        }
+
+        // Исправленный метод AddReview
+        public async Task<IBaseResponse<Review>> AddReview(string? userName, int productId, string content, int rating)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(userName))
+                {
+                    return new BaseResponse<Review>() { Description = "Имя пользователя не найдено", StatusCode = StatusCode.UserNotFound };
+                }
+
+                var user = await _userRepository.GetAll().FirstOrDefaultAsync(x => x.Name == userName);
+                var product = await _productRepository.GetAll().FirstOrDefaultAsync(x => x.Id == productId);
+
+                if (user == null || product == null)
+                {
+                    return new BaseResponse<Review>() { Description = "Пользователь или товар не найден", StatusCode = StatusCode.UserNotFound };
+                }
+
+                var review = new Review
+                {
+                    User = user,
+                    Product = product,
+                    Content = content,
+                    Rating = rating,
+                    CreatedAt = DateTime.Now
+                };
+
+                await _reviewRepository.Add(review);
+
+                return new BaseResponse<Review>() { Data = review, StatusCode = StatusCode.OK };
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponse<Review>() { Description = ex.Message, StatusCode = StatusCode.InternalServerError };
             }
         }
     }

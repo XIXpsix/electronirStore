@@ -2,10 +2,11 @@
 
 namespace ElectronicsStore.Domain.Response
 {
+    // Исправлено: T? Data вместо T Data
     public interface IBaseResponse<T>
     {
-        string Description { get; }
         StatusCode StatusCode { get; }
-        T? Data { get; } // Добавили '?', теперь Data может быть null
+        T? Data { get; }
+        string Description { get; }
     }
 }

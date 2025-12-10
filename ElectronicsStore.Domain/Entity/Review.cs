@@ -9,7 +9,7 @@ namespace ElectronicsStore.Domain.Entity
         public int Rating { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        public Guid UserId { get; set; }
+        public int UserId { get; set; } // Обычно Id пользователя - int, проверьте, если у вас Guid
         public User User { get; set; } = null!;
 
         public int ProductId { get; set; }
