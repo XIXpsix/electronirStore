@@ -17,7 +17,7 @@ namespace ElectronicsStore.BLL.Realizations
     public class AccountService : IAccountService
     {
         private readonly IBaseStorage<User> _userRepository;
-        private readonly EmailService _emailService; // Добавляем сервис для отправки писем
+        private readonly EmailService _emailService;
 
         public AccountService(IBaseStorage<User> userRepository, EmailService emailService)
         {
@@ -39,7 +39,6 @@ namespace ElectronicsStore.BLL.Realizations
         {
             try
             {
-                // Проверяем, есть ли уже такой пользователь (по имени или email)
                 var user = await _userRepository.GetAll()
                     .FirstOrDefaultAsync(x => x.Name == model.Name || x.Email == model.Email);
 
@@ -51,7 +50,6 @@ namespace ElectronicsStore.BLL.Realizations
                     };
                 }
 
-                // Генерируем случайный 6-значный код
                 var random = new Random();
                 var code = random.Next(100000, 999999).ToString();
 
@@ -60,21 +58,17 @@ namespace ElectronicsStore.BLL.Realizations
                     Name = model.Name,
                     Role = Role.User,
                     Email = model.Email,
-                    Password = HashPassword(model.Password), // Хешируем пароль
+                    Password = HashPassword(model.Password),
                     CreatedAt = DateTime.UtcNow,
-
-                    // Сохраняем код и ставим статус "Не подтвержден"
                     ConfirmationCode = code,
                     IsEmailConfirmed = false
                 };
 
                 await _userRepository.Add(user);
 
-                // Отправляем письмо с кодом
                 await _emailService.SendEmailAsync(user.Email, "Код подтверждения регистрации",
                     $"<h3>Добро пожаловать в ElectronicsHub!</h3><p>Ваш код подтверждения: <b>{code}</b></p>");
 
-                // Возвращаем ответ. Обрати внимание, Data = null, так как мы еще не входим в систему
                 return new BaseResponse<ClaimsIdentity>()
                 {
                     Description = "На вашу почту отправлен код подтверждения",
@@ -91,7 +85,6 @@ namespace ElectronicsStore.BLL.Realizations
             }
         }
 
-        // Новый метод для подтверждения почты
         public async Task<BaseResponse<ClaimsIdentity>> ConfirmEmail(string email, string code)
         {
             try
@@ -107,7 +100,6 @@ namespace ElectronicsStore.BLL.Realizations
                     };
                 }
 
-                // Проверяем код
                 if (user.ConfirmationCode != code)
                 {
                     return new BaseResponse<ClaimsIdentity>()
@@ -117,13 +109,11 @@ namespace ElectronicsStore.BLL.Realizations
                     };
                 }
 
-                // Активируем аккаунт
                 user.IsEmailConfirmed = true;
-                user.ConfirmationCode = ""; // Сбрасываем код
+                user.ConfirmationCode = "";
 
                 await _userRepository.Update(user);
 
-                // Сразу авторизуем пользователя
                 var result = Authenticate(user);
 
                 return new BaseResponse<ClaimsIdentity>()
@@ -158,7 +148,6 @@ namespace ElectronicsStore.BLL.Realizations
                     };
                 }
 
-                // --- ВАЖНО: Проверка хеша пароля (а не простого текста) ---
                 if (user.Password != HashPassword(model.Password))
                 {
                     return new BaseResponse<ClaimsIdentity>()
@@ -196,26 +185,18 @@ namespace ElectronicsStore.BLL.Realizations
             }
         }
 
-        // ... (остальной код AccountService)
-
-   
-
-namespace ElectronicsStore.BLL.Realizations
-    {
-        // ... (остальной код)
-
+        // <-- МЕТОД Authenticate ДОЛЖЕН БЫТЬ ЗДЕСЬ -->
         private ClaimsIdentity Authenticate(User user)
         {
             var claims = new List<Claim>
-        {
-            new Claim(ClaimsIdentity.DefaultNameClaimType, user.Name),
-            new Claim(ClaimsIdentity.DefaultRoleClaimType, user.Role.ToString()),
-            new Claim("Id", user.Id.ToString()), // <-- ID ПОЛЬЗОВАТЕЛЯ
-            new Claim("AvatarPath", user.AvatarPath) // <-- ПУТЬ К АВАТАРУ
-        };
+            {
+                new Claim(ClaimsIdentity.DefaultNameClaimType, user.Name),
+                new Claim(ClaimsIdentity.DefaultRoleClaimType, user.Role.ToString()),
+                new Claim("Id", user.Id.ToString()),
+                new Claim("AvatarPath", user.AvatarPath)
+            };
             return new ClaimsIdentity(claims, "ApplicationCookie",
                 ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
         }
     }
-}
 }
