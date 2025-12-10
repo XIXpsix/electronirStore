@@ -1,18 +1,19 @@
-﻿/* --- 1. УПРАВЛЕНИЕ МОДАЛЬНЫМ ОКНОМ И АНИМАЦИЕЙ --- */
+﻿/* --- 1. УПРАВЛЕНИЕ МОДАЛЬНЫМ ОКНОМ --- */
 
-// Открытие модального окна
 function openAuthModal(mode) {
     var authModalEl = document.getElementById('authModal');
+    if (!authModalEl) return;
+
     var authModal = new bootstrap.Modal(authModalEl);
 
-    // Сначала переключаем на нужный вид без анимации
+    // Сначала переключаем режим
     switchMode(mode, false);
 
-    // Показываем окно
     authModal.show();
 }
 
-// Переключение между Входом и Регистрацией
+/* --- 2. ПЕРЕКЛЮЧЕНИЕ РЕЖИМОВ (СЛАЙДЕР) --- */
+
 function switchMode(mode, animate = true) {
     var slider = document.getElementById('authSlider');
     var loginView = document.getElementById('loginView');
@@ -20,28 +21,27 @@ function switchMode(mode, animate = true) {
 
     if (!slider || !loginView || !registerView) return;
 
-    // Убираем активные классы прозрачности
+    // Сбрасываем активные классы (прозрачность)
     loginView.classList.remove('active');
     registerView.classList.remove('active');
 
     if (mode === 'register') {
-        // Сдвигаем влево (показываем регистрацию)
+        // Сдвигаем влево
         slider.classList.remove('mode-login');
         slider.classList.add('mode-register');
 
-        // Плавно показываем контент регистрации
+        // Показываем контент регистрации
         if (animate) {
             setTimeout(() => registerView.classList.add('active'), 200);
         } else {
             registerView.classList.add('active');
         }
-
     } else {
-        // Сдвигаем вправо (показываем вход)
+        // Сдвигаем вправо
         slider.classList.remove('mode-register');
         slider.classList.add('mode-login');
 
-        // Плавно показываем контент входа
+        // Показываем контент входа
         if (animate) {
             setTimeout(() => loginView.classList.add('active'), 200);
         } else {
@@ -50,51 +50,48 @@ function switchMode(mode, animate = true) {
     }
 }
 
-// Инициализация при загрузке страницы
+/* --- 3. ЛОГИКА ОТПРАВКИ ФОРМ (AJAX) --- */
+
 document.addEventListener("DOMContentLoaded", function () {
+    // Устанавливаем начальное состояние
     var loginView = document.getElementById('loginView');
     if (loginView) loginView.classList.add('active');
 
-    // Навешиваем обработчики на формы
-    attachFormHandlers();
-});
-
-
-/* --- 2. ЛОГИКА ОТПРАВКИ ФОРМ (AJAX FETCH) --- */
-
-function attachFormHandlers() {
-    // Находим формы внутри модального окна
+    // Подключаем обработчики форм
     const loginForm = document.querySelector('#loginView form');
     const registerForm = document.querySelector('#registerView form');
 
     if (loginForm) {
         loginForm.addEventListener('submit', function (e) {
-            e.preventDefault(); // Останавливаем обычную отправку (чтобы не было белого экрана)
+            e.preventDefault(); // ОТМЕНЯЕМ стандартную отправку
             submitForm(this, '/Account/Login');
         });
     }
 
     if (registerForm) {
         registerForm.addEventListener('submit', function (e) {
-            e.preventDefault();
+            e.preventDefault(); // ОТМЕНЯЕМ стандартную отправку
             submitForm(this, '/Account/Register');
         });
     }
-}
+});
 
-// Универсальная функция отправки
 async function submitForm(form, url) {
     const formData = new FormData(form);
-    const errorContainer = form.querySelector('.error-message') || createErrorContainer(form);
 
-    // Очищаем старые ошибки
+    // Ищем или создаем контейнер для ошибок внутри формы
+    let errorContainer = form.querySelector('.error-message');
+    if (!errorContainer) {
+        errorContainer = document.createElement('div');
+        errorContainer.className = 'error-message text-danger text-center mt-3 fw-bold';
+        // Вставляем ошибку перед кнопкой отправки
+        const btn = form.querySelector('button[type="submit"]');
+        if (btn) btn.before(errorContainer);
+        else form.appendChild(errorContainer);
+    }
+
     errorContainer.textContent = '';
     errorContainer.style.display = 'none';
-
-    // Превращаем FormData в объект для отправки (если контроллер ждет JSON) или отправляем как есть
-    // В вашем случае контроллер ждет Form/ViewModel, так что FormData подойдет, 
-    // но лучше отправить как x-www-form-urlencoded или JSON, если контроллер ждет [FromBody].
-    // Однако стандартный контроллер MVC ждет form-data.
 
     try {
         const response = await fetch(url, {
@@ -102,16 +99,22 @@ async function submitForm(form, url) {
             body: formData
         });
 
-        // Если сервер вернул JSON (например, ошибку или успех)
-        if (response.headers.get("content-type")?.includes("application/json")) {
+        // Проверяем, вернул ли сервер JSON
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.indexOf("application/json") !== -1) {
             const data = await response.json();
 
             if (response.ok) {
                 // УСПЕХ: Перезагружаем страницу
                 window.location.reload();
             } else {
-                // ОШИБКА СЕРВЕРА (например "Неверный пароль")
-                showError(errorContainer, data.error || data.description || "Произошла ошибка");
+                // ОШИБКА: Показываем её в форме
+                errorContainer.textContent = data.error || data.description || "Ошибка сервера";
+                errorContainer.style.display = 'block';
+
+                // Эффект тряски
+                form.classList.add('shake');
+                setTimeout(() => form.classList.remove('shake'), 500);
             }
         } else {
             // Если сервер вернул HTML (например, редирект), просто перезагружаем
@@ -119,26 +122,7 @@ async function submitForm(form, url) {
         }
     } catch (error) {
         console.error('Ошибка:', error);
-        showError(errorContainer, "Ошибка соединения с сервером");
-    }
-}
-
-// Вспомогательная функция для создания блока ошибок, если его нет
-function createErrorContainer(form) {
-    let div = document.createElement('div');
-    div.className = 'error-message text-danger text-center mt-3 fw-bold';
-    form.appendChild(div);
-    return div;
-}
-
-function showError(container, message) {
-    container.textContent = message;
-    container.style.display = 'block';
-
-    // Эффект тряски для формы (визуализация ошибки)
-    const form = container.closest('form');
-    if (form) {
-        form.classList.add('shake-animation');
-        setTimeout(() => form.classList.remove('shake-animation'), 500);
+        errorContainer.textContent = "Ошибка соединения";
+        errorContainer.style.display = 'block';
     }
 }
