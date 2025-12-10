@@ -4,15 +4,20 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ИСПРАВЛЕНИЕ: Гарантируем, что строка подключения не null
+// --- ИСПРАВЛЕНИЕ ОШИБКИ ТУТ ---
+// 1. Получаем строку подключения
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+// 2. Проверяем: если она пустая, выбрасываем понятную ошибку
 if (string.IsNullOrEmpty(connectionString))
 {
-    throw new InvalidOperationException("Строка подключения 'DefaultConnection' не найдена в appsettings.json");
+    throw new InvalidOperationException("Не найдена строка подключения 'DefaultConnection' в файле appsettings.json");
 }
 
+// 3. Передаем проверенную строку (компилятор теперь доволен)
 builder.Services.AddDbContext<ElectronicsStoreContext>(options =>
     options.UseNpgsql(connectionString));
+// -----------------------------
 
 // Добавление MVC
 builder.Services.AddControllersWithViews();
@@ -25,16 +30,18 @@ builder.Services.AddAuthentication("Cookies")
         config.AccessDeniedPath = "/Account/AccessDenied";
     });
 
-// Подключение сервисов
+// Подключение сервисов (Инициализация)
 Initializer.InitializeRepositories(builder.Services);
 Initializer.InitializeServices(builder.Services);
 
-var app = builder.Build();
+// Сборка приложения
+var app = builder.Build(); // Ошибка должна исчезнуть, так как конфигурация выше теперь корректна
 
-// Pipeline
+// Настройка конвейера запросов (Pipeline)
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
+    // Значение HSTS по умолчанию — 30 дней.
     app.UseHsts();
 }
 
@@ -43,8 +50,8 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseAuthentication();
-app.UseAuthorization();
+app.UseAuthentication(); // Сначала аутентификация
+app.UseAuthorization();  // Потом авторизация
 
 app.MapControllerRoute(
     name: "default",

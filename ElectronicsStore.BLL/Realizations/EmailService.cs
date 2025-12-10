@@ -17,13 +17,15 @@ namespace ElectronicsStore.BLL.Realizations
 
         public async Task SendEmailAsync(string email, string subject, string message)
         {
-            // ИСПРАВЛЕНИЕ: Используем ?? "" чтобы избежать предупреждений о null
+            // Используем ?? "" (оператор объединения с null), чтобы избежать предупреждений
             var senderName = _config["EmailSettings:SenderName"] ?? "ElectronicsHub";
             var senderEmail = _config["EmailSettings:SenderEmail"] ?? "";
             var mailServer = _config["EmailSettings:MailServer"] ?? "";
-            var mailPort = _config.GetValue<int>("EmailSettings:MailPort");
             var senderPassword = _config["EmailSettings:SenderPassword"] ?? "";
 
+            var mailPort = _config.GetValue<int>("EmailSettings:MailPort");
+
+            // Проверка на пустоту перед использованием
             if (string.IsNullOrEmpty(senderEmail) || string.IsNullOrEmpty(mailServer))
             {
                 throw new Exception("Ошибка: Не заполнены настройки EmailSettings в appsettings.json");
