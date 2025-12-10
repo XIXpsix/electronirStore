@@ -15,7 +15,6 @@ namespace ElectronicsStore.Models
 
         public string CategoryName { get; set; } = string.Empty;
 
-        // --- ВОТ ЭТИ ПОЛЯ, КОТОРЫХ НЕ ХВАТАЛО ---
         public string ImageUrl { get; set; } = "/img/w.png";
 
         public double AverageRating { get; set; }

@@ -13,8 +13,6 @@ namespace ElectronicsStore.BLL.Interfaces
         Task<IBaseResponse<List<Product>>> GetProductsByFilter(ProductFilter filter);
         Task<IBaseResponse<List<Product>>> GetProductsByCategory(int categoryId);
         Task<IBaseResponse<IEnumerable<Product>>> GetProducts();
-
-        // Исправлено: string? userName (добавлен вопросительный знак)
         Task<IBaseResponse<Review>> AddReview(string? userName, int productId, string content, int rating);
     }
 }
