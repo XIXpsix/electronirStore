@@ -1,75 +1,16 @@
-﻿@model ElectronicsStore.Domain.Entity.Cart
-
-@{
-    ViewData["Title"] = "Корзина";
+﻿@{
+    ViewData["Title"] = "Главная";
 }
 
-<div class="container py-5">
-    <h1 class="mb-4">🛒 Ваша корзина</h1>
+<div class="text-center">
+    <h1 class="display-4">Добро пожаловать в ElectronicsHub!</h1>
+    <p>Лучшая электроника по доступным ценам.</p>
 
-    @if (Model == null || Model.Items == null || !Model.Items.Any())
-    {
-        <div class="alert alert-info" role="alert">
-            Ваша корзина пуста. <a asp-controller="Home" asp-action="Catalog" class="alert-link">Перейти в каталог</a>.
-        </div>
-    }
-    else
-    {
-        <div class="row">
-            <div class="col-md-8">
-                <div class="card shadow-sm">
-                    <div class="card-body p-0">
-                        <ul class="list-group list-group-flush">
-                            @foreach (var item in Model.Items)
-                            {
-                                <li class="list-group-item d-flex justify-content-between align-items-center p-3">
-                                    <div class="d-flex align-items-center">
-                                        @if (!string.IsNullOrEmpty(item.Product.ImagePath))
-                                        {
-                                            <img src="@item.Product.ImagePath" alt="@item.Product.Name" class="rounded me-3" style="width: 60px; height: 60px; object-fit: cover;">
-                                        }
-                                        else
-                                        {
-                                            <div class="bg-secondary rounded me-3 d-flex align-items-center justify-content-center text-white" style="width: 60px; height: 60px;">Нет фото</div>
-                                        }
-                                        <div>
-                                            <h5 class="mb-1">@item.Product.Name</h5>
-                                            <small class="text-muted">Цена: @item.Product.Price ₽</small>
-                                        </div>
-                                    </div>
-                                    <a asp-controller="Cart" asp-action="Remove" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">
-                                        🗑️ Удалить
-                                    </a>
-                                </li>
-                            }
-                        </ul>
-                    </div>
-                </div>
-            </div>
+    <div class="mt-4">
+        <img src="/img/iphone15.jpg" class="img-fluid rounded shadow" alt="iPhone 15" style="max-height: 400px;">
+    </div>
 
-            <div class="col-md-4">
-                <div class="card shadow-sm mt-4 mt-md-0">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">Итого</h5>
-                    </div>
-                    <div class="card-body">
-                        <ul class="list-unstyled mb-4">
-                            <li class="d-flex justify-content-between">
-                                <strong>Всего товаров:</strong>
-                                <span>@Model.Items.Count</span>
-                            </li>
-                            <li class="d-flex justify-content-between mt-2">
-                                <strong>Общая сумма:</strong>
-                                <span class="fs-5 text-primary">@Model.Items.Sum(x => x.Product.Price) ₽</span>
-                            </li>
-                        </ul>
-                        <div class="d-grid gap-2">
-                            <button class="btn btn-success btn-lg">Оформить заказ</button>
-                            <a asp-action="Clear" class="btn btn-outline-danger">Очистить корзину</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    }
+    <div class="mt-5">
+        <a asp-controller="Home" asp-action="Catalog" class="btn btn-primary btn-lg">Перейти в каталог</a>
+    </div>
 </div>
