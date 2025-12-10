@@ -1,36 +1,24 @@
-﻿@* Убираем эти строки, так как они вызывают ошибку *@
-@* @using Microsoft.AspNetCore.Identity *@
-@* @using ElectronicsStore.Domain.Entity *@
-@* @inject UserManager<User> UserManager *@
-
-@if (User.Identity != null && User.Identity.IsAuthenticated)
+﻿@if (User.Identity != null && User.Identity.IsAuthenticated)
 {
-    // Получаем путь к аватарке из Claims, которые мы записали при входе.
-    // Если его нет, ставим картинку по умолчанию.
     var avatarPath = User.FindFirst("AvatarPath")?.Value ?? "/img/w.png";
 
     <div class="dropdown text-end">
         <a href="#" class="d-block link-light text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
-            @* Используем переменную avatarPath *@
-            <img src="@avatarPath" alt="User" width="32" height="32" class="rounded-circle">
+            <img src="@avatarPath" alt="User" width="32" height="32" class="rounded-circle border border-warning" style="border-color: #ff6600 !important;">
             <span class="text-white ms-2">@User.Identity.Name</span>
         </a>
-        <ul class="dropdown-menu text-small" aria-labelledby="dropdownUser1">
-            <li><a class="dropdown-item" asp-controller="User" asp-action="Profile">👤 Профиль</a></li>
-            <li><a class="dropdown-item" asp-controller="Cart" asp-action="Index">🛒 Корзина</a></li>
-
-            @* Проверка роли работает через стандартный механизм Claims *@
+        <ul class="dropdown-menu text-small shadow" aria-labelledby="dropdownUser1" style="background-color: #121212; border: 1px solid #ff6600;">
+            <li><a class="dropdown-item text-white hover-orange" asp-controller="User" asp-action="Profile">👤 Профиль</a></li>
+            <li><a class="dropdown-item text-white hover-orange" asp-controller="Cart" asp-action="Index">🛒 Корзина</a></li>
             @if (User.IsInRole("Admin"))
             {
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item text-danger" asp-controller="Admin" asp-action="Index">🔧 Админ-панель</a></li>
+                <li><hr class="dropdown-divider" style="border-top: 1px solid #333;"></li>
+                <li><a class="dropdown-item text-warning" asp-controller="Admin" asp-action="Index">🔧 Админ-панель</a></li>
             }
-
-            <li><hr class="dropdown-divider"></li>
-
+            <li><hr class="dropdown-divider" style="border-top: 1px solid #333;"></li>
             <li>
                 <form asp-controller="Account" asp-action="Logout" method="post">
-                    <button type="submit" class="dropdown-item">Выйти</button>
+                    <button type="submit" class="dropdown-item text-white hover-orange">Выйти</button>
                 </form>
             </li>
         </ul>
@@ -39,7 +27,23 @@
 else
 {
     <div class="text-end">
-        <a asp-controller="Account" asp-action="Login" class="btn btn-outline-light me-2">Войти</a>
-        <a asp-controller="Account" asp-action="Register" class="btn btn-warning">Регистрация</a>
+        <button type="button" class="btn btn-outline-warning me-2 fw-bold" onclick="openAuthModal('login')" style="border-color: #ff6600; color: #ff6600;">
+            ВОЙТИ
+        </button>
+        <button type="button" class="btn btn-warning fw-bold" onclick="openAuthModal('register')" style="background-color: #ff6600; border: none; color: #000;">
+            РЕГИСТРАЦИЯ
+        </button>
     </div>
 }
+
+<style>
+    .hover-orange:hover {
+        background-color: #ff6600 !important;
+        color: #000 !important;
+    }
+
+    .btn-outline-warning:hover {
+        background-color: #ff6600 !important;
+        color: #000 !important;
+    }
+</style>
