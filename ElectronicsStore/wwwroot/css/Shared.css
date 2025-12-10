@@ -136,18 +136,18 @@ html, body {
         color: var(--main-orange) !important;
     }
 
-/* --- 5. Элементы Главной Страницы --- */
-
 /* Hero Section (ИСПРАВЛЕНО) */
+/* --- Начало изменений для блока "Добро пожаловать" --- */
+
 .hero-section {
     position: relative;
     height: 500px;
     width: 100%;
-    /* Разбили сокращенное свойство background для совместимости */
-    background-image: url('/img/w.png');
-    background-position: center;
-    background-size: cover;
-    background-repeat: no-repeat;
+    /* 1. УБИРАЕМ КАРТИНКУ */
+    background-image: none !important;
+    /* 2. СТАВИМ ТЕМНЫЙ ФОН (чтобы белый текст был виден) */
+    background-color: var(--bg-panel);
+    /* Настройки выравнивания (оставляем как было) */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -155,14 +155,12 @@ html, body {
     margin-bottom: 40px;
 }
 
+/* Скрываем затемнение, так как картинки больше нет */
 .hero-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0,0,0,0.6);
+    display: none !important;
 }
+
+/* --- Конец изменений --- */
 
 .hero-content {
     position: relative;
