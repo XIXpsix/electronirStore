@@ -19,15 +19,15 @@ namespace ElectronicsStore.Controllers
                 var product = response.Data;
 
                 double avgRating = 0;
-                // Оптимизация: вместо Any() используем Count > 0, если это список
-                if (product.Reviews != null && product.Reviews.Count != 0)
+                // Оптимизация: Count > 0 вместо Any()
+                if (product.Reviews != null && product.Reviews.Count > 0)
                 {
                     avgRating = product.Reviews.Average(r => r.Rating);
                 }
 
                 string imageUrl = "/img/w.png";
 
-                if (product.Images != null && product.Images.Count != 0)
+                if (product.Images != null && product.Images.Count > 0)
                 {
                     var firstImg = product.Images.FirstOrDefault();
                     if (firstImg != null && !string.IsNullOrEmpty(firstImg.ImagePath))
@@ -48,10 +48,9 @@ namespace ElectronicsStore.Controllers
                     Price = product.Price,
                     CategoryName = product.Category?.Name ?? "Без категории",
                     ImageUrl = imageUrl,
-                    // C# 12: Collection expression
                     Reviews = product.Reviews != null
                         ? product.Reviews.OrderByDescending(r => r.CreatedAt).ToList()
-                        : [],
+                        : [], // Упрощение []
                     AverageRating = Math.Round(avgRating, 1),
                     ReviewsCount = product.Reviews?.Count ?? 0
                 };
