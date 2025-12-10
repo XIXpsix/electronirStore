@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using ElectronicsStore.Domain.Response;
 using System.Threading.Tasks;
 
 namespace ElectronicsStore.BLL.Interfaces
 {
-    internal class IEmailService
+    public interface IEmailService
     {
+        Task SendEmail(string email, string subject, string message);
     }
 }

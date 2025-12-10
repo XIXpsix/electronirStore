@@ -1,42 +1,39 @@
-﻿@using System.Security.Claims
+﻿@using Microsoft.AspNetCore.Identity
+@using ElectronicsStore.Domain.Entity
+@inject UserManager<User> UserManager
 
-<ul class="navbar-nav">
-    @if (User.Identity.IsAuthenticated)
-    {
-        <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <div class="rounded-circle bg-warning d-flex justify-content-center align-items-center me-2" style="width: 35px; height: 35px; color: black; font-weight: bold;">
-                    @(User.Identity.Name?.Length > 0 ? User.Identity.Name.Substring(0, 1).ToUpper() : "U")
-                </div>
-                <span class="text-white">@User.Identity.Name</span>
-            </a>
-            <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end" aria-labelledby="navbarDropdown">
-                <li>
-                    <a class="dropdown-item" asp-controller="User" asp-action="Profile">
-                        👤 Мой профиль
-                    </a>
-                </li>
-                <li>
-                    <a class="dropdown-item" asp-controller="Cart" asp-action="Index">
-                        🛒 Корзина
-                    </a>
-                </li>
+@if (User.Identity.IsAuthenticated)
+{
+    <div class="dropdown text-end">
+        <a href="#" class="d-block link-light text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+            <img src="/img/user_placeholder.png" alt="mdo" width="32" height="32" class="rounded-circle">
+            <span class="text-white ms-2">@User.Identity.Name</span>
+        </a>
+        <ul class="dropdown-menu text-small" aria-labelledby="dropdownUser1">
+            <li><a class="dropdown-item" asp-controller="User" asp-action="Profile">👤 Профиль</a></li>
+
+            <li><a class="dropdown-item" asp-controller="Cart" asp-action="Index">🛒 Корзина</a></li>
+
+            @if (User.IsInRole("Admin"))
+            {
                 <li><hr class="dropdown-divider"></li>
-                <li>
-                    <form method="post" asp-controller="Account" asp-action="Logout" class="d-inline">
-                        <button type="submit" class="dropdown-item text-danger">Выйти</button>
-                    </form>
-                </li>
-            </ul>
-        </li>
-    }
-    else
-    {
-        <li class="nav-item">
-            <a class="nav-link text-white" href="#" data-bs-toggle="modal" data-bs-target="#authModal" onclick="selectAuthTab('login-tab')">Вход</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link text-warning fw-bold" href="#" data-bs-toggle="modal" data-bs-target="#authModal" onclick="selectAuthTab('register-tab')">Регистрация</a>
-        </li>
-    }
-</ul>
+                <li><a class="dropdown-item text-danger" asp-controller="Admin" asp-action="Index">🔧 Админ-панель</a></li>
+            }
+
+            <li><hr class="dropdown-divider"></li>
+
+            <li>
+                <form asp-controller="Account" asp-action="Logout" method="post">
+                    <button type="submit" class="dropdown-item">Выйти</button>
+                </form>
+            </li>
+        </ul>
+    </div>
+}
+else
+{
+    <div class="text-end">
+        <a asp-controller="Account" asp-action="Login" class="btn btn-outline-light me-2">Войти</a>
+        <a asp-controller="Account" asp-action="Register" class="btn btn-warning">Регистрация</a>
+    </div>
+}

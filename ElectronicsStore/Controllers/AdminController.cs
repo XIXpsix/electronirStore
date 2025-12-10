@@ -1,11 +1,14 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
-[Authorize(Roles = "Admin")]
-public class AdminController : Controller
+namespace ElectronicsStore.Controllers
 {
-    public IActionResult Index()
+    [Authorize(Roles = "Admin")]
+    public class AdminController : Controller
     {
-        return View();
+        public IActionResult Index() // УБРАЛИ async Task<>
+        {
+            return View();
+        }
     }
 }

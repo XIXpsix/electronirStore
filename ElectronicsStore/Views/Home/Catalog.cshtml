@@ -36,15 +36,23 @@
             <div class="row row-cols-1 row-cols-md-3 g-4">
                 @if (Model != null && Model.Any())
                 {
+                    // ЦИКЛ НАЧИНАЕТСЯ ЗДЕСЬ
                     @foreach (var product in Model)
                     {
                         <div class="col">
                             <div class="card h-100 bg-dark border-secondary">
-                                <img src="@(product.Images != null && product.Images.Any() ? product.Images.First().ImagePath : "/img/w.png")" class="card-img-top p-3" alt="@product.Name" style="height: 200px; object-fit: contain;">
+                                <img src="@(product.Images != null && product.Images.Any() ? product.Images.First().ImagePath : "/img/w.png")"
+                                     class="card-img-top p-3" alt="@product.Name" style="height: 200px; object-fit: contain;">
+
                                 <div class="card-body text-center">
                                     <h5 class="card-title text-white">@product.Name</h5>
                                     <p class="card-text text-warning fw-bold">@product.Price.ToString("C")</p>
-                                    <a asp-controller="Product" asp-action="GetProduct" asp-route-id="@product.Id" class="btn btn-outline-warning w-100">Подробнее</a>
+
+                                    <div class="btn-group w-100">
+                                        <a asp-controller="Product" asp-action="GetProduct" asp-route-id="@product.Id" class="btn btn-outline-light">Подробнее</a>
+
+                                        <a asp-controller="Cart" asp-action="Add" asp-route-id="@product.Id" class="btn btn-warning">В корзину</a>
+                                    </div>
                                 </div>
                             </div>
                         </div>

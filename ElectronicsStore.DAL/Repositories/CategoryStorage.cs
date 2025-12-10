@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ElectronicsStore.DAL.Interfaces;
+using ElectronicsStore.Domain.Entity;
 
 namespace ElectronicsStore.DAL.Repositories
 {
-    internal class CategoryStorage
+    public class CategoryStorage : BaseStorage<Category>
     {
+        public CategoryStorage(ElectronicsStoreContext db) : base(db) { }
     }
 }

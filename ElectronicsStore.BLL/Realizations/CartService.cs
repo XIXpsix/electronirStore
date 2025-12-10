@@ -1,97 +1,153 @@
 ﻿using ElectronicsStore.BLL.Interfaces;
 using ElectronicsStore.DAL.Interfaces;
 using ElectronicsStore.Domain.Entity;
-using ElectronicsStore.Domain.Response;
 using ElectronicsStore.Domain.Enum;
+using ElectronicsStore.Domain.Response;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 
 namespace ElectronicsStore.BLL.Realizations
 {
     public class CartService : ICartService
     {
-        private readonly IBaseStorage<CartItem> _cartRepository;
+        private readonly IBaseStorage<Cart> _cartRepository;
+        private readonly IBaseStorage<CartItem> _cartItemRepository;
+        private readonly IBaseStorage<User> _userRepository;
+        private readonly IBaseStorage<Product> _productRepository;
 
-        public CartService(IBaseStorage<CartItem> cartRepository)
+        public CartService(IBaseStorage<Cart> cartRepository,
+                           IBaseStorage<CartItem> cartItemRepository,
+                           IBaseStorage<User> userRepository,
+                           IBaseStorage<Product> productRepository)
         {
             _cartRepository = cartRepository;
+            _cartItemRepository = cartItemRepository;
+            _userRepository = userRepository;
+            _productRepository = productRepository;
         }
 
-        public async Task<BaseResponse<CartItem>> AddToCart(Guid userId, int productId)
+        public async Task<IBaseResponse<IEnumerable<CartItem>>> GetItems(string? userName)
         {
             try
             {
-                var cartItem = await _cartRepository.GetAll()
-                    .FirstOrDefaultAsync(x => x.UserId == userId && x.ProductId == productId);
+                if (string.IsNullOrEmpty(userName))
+                    return new BaseResponse<IEnumerable<CartItem>> { StatusCode = StatusCode.UserNotFound };
 
-                if (cartItem != null)
+                var user = await _userRepository.GetAll().FirstOrDefaultAsync(x => x.Name == userName);
+                if (user == null)
                 {
-                    cartItem.Quantity++;
-                    await _cartRepository.Update(cartItem);
-                }
-                else
-                {
-                    cartItem = new CartItem
-                    {
-                        UserId = userId,
-                        ProductId = productId,
-                        Quantity = 1,
-                        DateCreated = DateTime.UtcNow
-                    };
-                    await _cartRepository.Add(cartItem);
+                    return new BaseResponse<IEnumerable<CartItem>> { Description = "Пользователь не найден", StatusCode = StatusCode.UserNotFound };
                 }
 
-                return new BaseResponse<CartItem> { StatusCode = StatusCode.OK, Description = "Товар добавлен в корзину" };
-            }
-            catch (Exception ex)
-            {
-                return new BaseResponse<CartItem> { StatusCode = StatusCode.InternalServerError, Description = $"Ошибка добавления в корзину: {ex.Message}" };
-            }
-        }
-
-        public async Task<BaseResponse<List<CartItem>>> GetUserCart(Guid userId)
-        {
-            try
-            {
-                // Загружаем элементы корзины, включая данные о товаре 
                 var cart = await _cartRepository.GetAll()
-                    .Where(x => x.UserId == userId)
-                    .Include(x => x.Product)
-                    .ToListAsync();
+                    .Include(x => x.Items)
+                    .ThenInclude(x => x.Product)
+                    .FirstOrDefaultAsync(x => x.UserId == user.Id);
 
-                return new BaseResponse<List<CartItem>>
+                if (cart == null)
                 {
-                    Data = cart,
-                    StatusCode = StatusCode.OK
-                };
+                    return new BaseResponse<IEnumerable<CartItem>> { Data = new List<CartItem>(), StatusCode = StatusCode.OK };
+                }
+
+                return new BaseResponse<IEnumerable<CartItem>> { Data = cart.Items, StatusCode = StatusCode.OK };
             }
             catch (Exception ex)
             {
-                return new BaseResponse<List<CartItem>> { StatusCode = StatusCode.InternalServerError, Description = ex.Message };
+                return new BaseResponse<IEnumerable<CartItem>> { Description = ex.Message, StatusCode = StatusCode.InternalServerError };
             }
         }
 
-        public async Task<BaseResponse<bool>> RemoveFromCart(Guid userId, int productId)
+        public async Task<IBaseResponse<CartItem>> AddItem(string? userName, int productId)
         {
             try
             {
-                var item = await _cartRepository.GetAll()
-                    .FirstOrDefaultAsync(x => x.UserId == userId && x.ProductId == productId);
+                if (string.IsNullOrEmpty(userName))
+                    return new BaseResponse<CartItem> { StatusCode = StatusCode.UserNotFound };
 
-                if (item == null)
+                var user = await _userRepository.GetAll().FirstOrDefaultAsync(x => x.Name == userName);
+                if (user == null) return new BaseResponse<CartItem> { StatusCode = StatusCode.UserNotFound };
+
+                var cart = await _cartRepository.GetAll().FirstOrDefaultAsync(x => x.UserId == user.Id);
+
+                if (cart == null)
                 {
-                    return new BaseResponse<bool> { StatusCode = StatusCode.NotFound, Description = "Товар не найден в корзине" };
+                    cart = new Cart { UserId = user.Id, Items = new List<CartItem>() };
+                    await _cartRepository.Add(cart);
                 }
 
-                await _cartRepository.Delete(item);
-                return new BaseResponse<bool> { StatusCode = StatusCode.OK, Data = true, Description = "Товар удален из корзины" };
+                var product = await _productRepository.GetAll().FirstOrDefaultAsync(x => x.Id == productId);
+                if (product == null) return new BaseResponse<CartItem> { StatusCode = StatusCode.ProductNotFound };
+
+                var cartItem = new CartItem
+                {
+                    CartId = cart.Id,
+                    ProductId = product.Id
+                };
+
+                await _cartItemRepository.Add(cartItem);
+
+                return new BaseResponse<CartItem> { Data = cartItem, StatusCode = StatusCode.OK };
             }
             catch (Exception ex)
             {
-                return new BaseResponse<bool> { StatusCode = StatusCode.InternalServerError, Description = ex.Message };
+                return new BaseResponse<CartItem> { Description = ex.Message, StatusCode = StatusCode.InternalServerError };
+            }
+        }
+
+        public async Task<IBaseResponse<bool>> RemoveItem(string? userName, Guid itemId)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(userName)) return new BaseResponse<bool> { StatusCode = StatusCode.UserNotFound };
+
+                var item = await _cartItemRepository.GetAll()
+                    .Include(x => x.Cart).ThenInclude(x => x.User)
+                    .FirstOrDefaultAsync(x => x.Id == itemId);
+
+                // Проверяем, что товар существует и принадлежит пользователю
+                if (item == null || item.Cart.User.Name != userName)
+                {
+                    return new BaseResponse<bool> { Description = "Ошибка доступа", StatusCode = StatusCode.InternalServerError };
+                }
+
+                await _cartItemRepository.Delete(item);
+                return new BaseResponse<bool> { Data = true, StatusCode = StatusCode.OK };
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponse<bool> { Description = ex.Message, StatusCode = StatusCode.InternalServerError };
+            }
+        }
+
+        public async Task<IBaseResponse<bool>> ClearCart(string? userName)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(userName)) return new BaseResponse<bool> { StatusCode = StatusCode.UserNotFound };
+
+                var user = await _userRepository.GetAll().FirstOrDefaultAsync(x => x.Name == userName);
+                if (user == null) return new BaseResponse<bool> { StatusCode = StatusCode.UserNotFound };
+
+                var cart = await _cartRepository.GetAll()
+                    .Include(x => x.Items)
+                    .FirstOrDefaultAsync(x => x.UserId == user.Id);
+
+                if (cart != null && cart.Items.Any())
+                {
+                    foreach (var item in cart.Items)
+                    {
+                        await _cartItemRepository.Delete(item);
+                    }
+                }
+
+                return new BaseResponse<bool> { Data = true, StatusCode = StatusCode.OK };
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponse<bool> { Description = ex.Message, StatusCode = StatusCode.InternalServerError };
             }
         }
     }

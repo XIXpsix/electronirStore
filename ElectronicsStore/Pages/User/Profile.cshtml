@@ -2,4 +2,16 @@
 @model ElectronicsStore.Pages.User.ProfileModel
 
 <h1>Профиль пользователя</h1>
+<form asp-action="EditProfile" method="post" enctype="multipart/form-data">
+    <h3>Редактирование профиля</h3>
+    <div class="mb-3">
+        <label>Имя</label>
+        <input type="text" name="Name" value="@User.Identity.Name" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label>Аватар</label>
+        <input type="file" name="avatar" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-primary">Сохранить</button>
+</form>
 <!-- Твой контент здесь -->

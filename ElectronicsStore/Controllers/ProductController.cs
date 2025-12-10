@@ -86,17 +86,16 @@ namespace ElectronicsStore.Controllers
         [Authorize]
         public async Task<IActionResult> AddReview(int productId, string content, int rating)
         {
-            // ИСПРАВЛЕНИЕ: User или Identity может быть null. 
-            // Используем оператор объединения с null (??)
-            var userName = User?.Identity?.Name ?? string.Empty;
+            // ИСПРАВЛЕНИЕ: Безопасное получение имени
+            var userName = User.Identity?.Name ?? "";
 
             var response = await _productService.AddReview(userName, productId, content, rating);
 
+            // ... остальной код ...
             if (response.StatusCode == Domain.Enum.StatusCode.OK)
             {
                 return RedirectToAction("GetProduct", new { id = productId });
             }
-
             return RedirectToAction("GetProduct", new { id = productId });
         }
     }

@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ElectronicsStore.DAL.Interfaces;
+using ElectronicsStore.Domain.Entity;
 
 namespace ElectronicsStore.DAL.Repositories
 {
-    internal class ProductStorage
+    public class ProductStorage : BaseStorage<Product>
     {
+        public ProductStorage(ElectronicsStoreContext db) : base(db) { }
     }
 }

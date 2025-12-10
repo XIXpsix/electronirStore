@@ -1,66 +1,58 @@
-﻿using ElectronicsStore.BLL.Interfaces;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
-using ElectronicsStore.Domain.Enum;
-using ElectronicsStore.Domain.Entity;
+using ElectronicsStore.BLL.Interfaces;
+using System;
 
-[Authorize]
-public class CartController : Controller
+namespace ElectronicsStore.Controllers
 {
-    private readonly ICartService _cartService;
-
-    public CartController(ICartService cartService)
+    [Authorize]
+    public class CartController : Controller
     {
-        _cartService = cartService;
-    }
+        private readonly ICartService _cartService;
 
-    public async Task<IActionResult> Index()
-    {
-        var userIdString = User.FindFirst("Id")?.Value;
-        if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid userId))
+        public CartController(ICartService cartService)
         {
-            return RedirectToAction("Login", "Account");
+            _cartService = cartService;
         }
 
-        var response = await _cartService.GetUserCart(userId);
-
-        if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK)
+        [HttpGet]
+        public async Task<IActionResult> Index()
         {
-            // Используем оператор объединения (??) для защиты от Null
-            return View(response.Data ?? new List<CartItem>());
+            // ИСПРАВЛЕНИЕ: ?? ""
+            var userName = User.Identity?.Name ?? "";
+
+            var response = await _cartService.GetItems(userName);
+
+            if (response.StatusCode == Domain.Enum.StatusCode.OK)
+            {
+                return View(response.Data);
+            }
+            return RedirectToAction("Error", "Home");
         }
 
-        ModelState.AddModelError("", response.Description ?? "Неизвестная ошибка при загрузке корзины.");
-        return View(new List<CartItem>());
-    }
-
-    [HttpPost]
-    // Принимаем ID товара
-    public async Task<IActionResult> Add(int productId)
-    {
-        var userIdString = User.FindFirst("Id")?.Value;
-        if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid userId))
+        [HttpGet]
+        public async Task<IActionResult> Add(int id)
         {
-            return RedirectToAction("Login", "Account");
+            var userName = User.Identity?.Name ?? "";
+            await _cartService.AddItem(userName, id);
+            return RedirectToAction("Catalog", "Home");
         }
 
-        await _cartService.AddToCart(userId, productId);
-        return RedirectToAction("Index", "Cart"); // Перенаправляем в корзину
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> Remove(int productId)
-    {
-        var userIdString = User.FindFirst("Id")?.Value;
-        if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid userId))
+        [HttpGet]
+        public async Task<IActionResult> Remove(Guid id)
         {
-            return RedirectToAction("Login", "Account");
+            var userName = User.Identity?.Name ?? "";
+            await _cartService.RemoveItem(userName, id);
+            return RedirectToAction("Index");
         }
 
-        await _cartService.RemoveFromCart(userId, productId);
-        return RedirectToAction("Index", "Cart");
+        [HttpGet]
+        public async Task<IActionResult> Clear()
+        {
+            var userName = User.Identity?.Name ?? "";
+            await _cartService.ClearCart(userName);
+            return RedirectToAction("Index");
+        }
     }
 }

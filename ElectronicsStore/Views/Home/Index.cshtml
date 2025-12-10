@@ -1,40 +1,36 @@
 ﻿@{
-    ViewData["Title"] = "Главная";
+    ViewData["Title"] = "Панель администратора";
 }
 
-<div class="hero-section">
-    <div class="hero-overlay"></div>
-    <div class="hero-content">
-        <h1 class="hero-title">Добро пожаловать в ElectronicsHub</h1>
-        <p class="hero-subtitle">Ваш путеводитель в мир электроники и инноваций.</p>
-        <a asp-controller="Home" asp-action="Catalog" class="btn btn-orange">ПЕРЕЙТИ В КАТАЛОГ</a>
-    </div>
-</div>
-
-<div class="container mb-5">
-    <h2 class="info-sections">Почему выбирают нас</h2>
-    <div class="cards-wrapper">
-
-        <div class="custom-card">
-            <div class="card-body-custom">
-                <h3 class="card-title-custom">Быстрая доставка</h3>
-                <p class="card-desc">Доставляем товары по всей стране в кратчайшие сроки.</p>
+<div class="container">
+    <h1>Администрирование</h1>
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card text-white bg-primary mb-3">
+                <div class="card-header">Товары</div>
+                <div class="card-body">
+                    <p class="card-text">Управление каталогом</p>
+                    <a href="#" class="btn btn-light">Добавить товар</a>
+                </div>
             </div>
         </div>
-
-        <div class="custom-card">
-            <div class="card-body-custom">
-                <h3 class="card-title-custom">Гарантия качества</h3>
-                <p class="card-desc">Только сертифицированная техника с официальной гарантией.</p>
+        <div class="col-md-4">
+            <div class="card text-white bg-success mb-3">
+                <div class="card-header">Заказы</div>
+                <div class="card-body">
+                    <p class="card-text">Просмотр всех заказов</p>
+                    <a href="#" class="btn btn-light">Перейти</a>
+                </div>
             </div>
         </div>
-
-        <div class="custom-card">
-            <div class="card-body-custom">
-                <h3 class="card-title-custom">Лучшие цены</h3>
-                <p class="card-desc">Мы следим за рынком, чтобы предложить вам самые выгодные цены.</p>
+        <div class="col-md-4">
+            <div class="card text-white bg-danger mb-3">
+                <div class="card-header">Пользователи</div>
+                <div class="card-body">
+                    <p class="card-text">Управление пользователями</p>
+                    <a href="#" class="btn btn-light">Список</a>
+                </div>
             </div>
         </div>
-
     </div>
 </div>

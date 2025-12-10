@@ -1,12 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using ElectronicsStore.DAL.Interfaces;
+using ElectronicsStore.Domain.Entity;
+using Microsoft.EntityFrameworkCore;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
-namespace ElectronicsStore.DAL.Interfaces
+namespace ElectronicsStore.DAL.Repositories
 {
-    internal class CartStorage
+    public class CartStorage : BaseStorage<Cart>
     {
+        public CartStorage(ElectronicsStoreContext db) : base(db)
+        {
+        }
     }
 }

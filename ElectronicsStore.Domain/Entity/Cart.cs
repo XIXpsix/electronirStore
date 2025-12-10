@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ElectronicsStore.Domain.Entity
 {
-    internal class Cart
+    public class Cart
     {
+        public Guid Id { get; set; }
+
+        public Guid UserId { get; set; }
+        public User User { get; set; } = null!; // Гарантируем, что не null
+
+        public List<CartItem> Items { get; set; } = new(); // Инициализируем список
     }
 }

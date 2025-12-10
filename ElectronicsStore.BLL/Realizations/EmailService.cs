@@ -3,10 +3,12 @@
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using System;
+using ElectronicsStore.BLL.Interfaces;
+using ElectronicsStore.Domain.Response;
 
 namespace ElectronicsStore.BLL.Realizations
 {
-    public class EmailService
+    public class EmailService : IEmailService
     {
         private readonly IConfiguration _config;
 
@@ -15,13 +17,14 @@ namespace ElectronicsStore.BLL.Realizations
             _config = config;
         }
 
-        public async Task SendEmailAsync(string email, string subject, string message)
+        public async Task SendEmail(string email, string subject, string message)
         {
             var emailMessage = new MimeMessage();
 
             var senderName = _config["EmailSettings:SenderName"] ?? "ElectronicsHub";
             var senderEmail = _config["EmailSettings:SenderEmail"];
             var mailServer = _config["EmailSettings:MailServer"];
+            await Task.CompletedTask;
 
             // ИСПРАВЛЕНИЕ 1: Безопасное получение порта (убираем ошибку int.Parse)
             var mailPort = _config.GetValue<int>("EmailSettings:MailPort");

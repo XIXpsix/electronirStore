@@ -8,8 +8,9 @@ namespace ElectronicsStore.BLL.Interfaces
 {
     public interface ICartService
     {
-        Task<BaseResponse<CartItem>> AddToCart(Guid userId, int productId);
-        Task<BaseResponse<bool>> RemoveFromCart(Guid userId, int productId);
-        Task<BaseResponse<List<CartItem>>> GetUserCart(Guid userId);
+        Task<IBaseResponse<IEnumerable<CartItem>>> GetItems(string? userName);
+        Task<IBaseResponse<CartItem>> AddItem(string? userName, int productId);
+        Task<IBaseResponse<bool>> RemoveItem(string? userName, Guid itemId);
+        Task<IBaseResponse<bool>> ClearCart(string? userName);
     }
 }
