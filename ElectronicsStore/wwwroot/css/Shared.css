@@ -13,7 +13,7 @@ html, body {
     margin: 0;
     padding: 0;
     color: var(--text-main);
-    font-family: 'Montserrat', 'Segoe UI', sans-serif; /* Шрифт как в современных магазинах */
+    font-family: 'Montserrat', 'Segoe UI', sans-serif;
     background-color: var(--bg-dark);
 }
 
@@ -70,7 +70,7 @@ html, body {
 
 .content-container {
     flex: 1;
-    padding: 0; /* Убрали отступы, чтобы Hero блок был во всю ширину */
+    padding: 0;
     width: 100%;
 }
 
@@ -136,14 +136,18 @@ html, body {
         color: var(--main-orange) !important;
     }
 
-/* --- 5. Элементы Главной Страницы (ИЗ МЕТОДИЧКИ + АДАПТАЦИЯ) --- */
+/* --- 5. Элементы Главной Страницы --- */
 
-/* Hero Section (Баннер) */
+/* Hero Section (ИСПРАВЛЕНО) */
 .hero-section {
     position: relative;
     height: 500px;
     width: 100%;
-    background: url('/img/w.png') center/cover no-repeat; /* Ваша картинка */
+    /* Разбили сокращенное свойство background для совместимости */
+    background-image: url('/img/w.png');
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -297,3 +301,22 @@ html, body {
             color: var(--main-orange);
             text-decoration: none;
         }
+/* Стили для табов в модальном окне */
+.nav-pills .nav-link {
+    color: #aaa;
+    border-radius: 30px;
+    transition: 0.3s;
+}
+
+    .nav-pills .nav-link.active {
+        background-color: var(--main-orange) !important;
+        color: #000 !important;
+    }
+
+    .nav-pills .nav-link:hover {
+        color: var(--main-orange);
+    }
+
+.modal-content {
+    box-shadow: 0 0 30px rgba(255, 102, 0, 0.3);
+}

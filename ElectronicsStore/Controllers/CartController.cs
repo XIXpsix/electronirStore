@@ -27,7 +27,7 @@ public class CartController : Controller
 
         var response = await _cartService.GetUserCart(userId);
 
-        if (response.StatusCode == StatusCode.OK)
+        if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK)
         {
             // Используем оператор объединения (??) для защиты от Null
             return View(response.Data ?? new List<CartItem>());

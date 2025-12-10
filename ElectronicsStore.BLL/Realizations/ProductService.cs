@@ -1,6 +1,5 @@
 using ElectronicsStore.DAL.Interfaces;
-using ElectronicsStore.Domain;
-using ElectronicsStore.Domain.Entity; // <-- Исправляет ошибку видимости Product
+using ElectronicsStore.Domain.Entity;
 using ElectronicsStore.Domain.Enum;
 using ElectronicsStore.Domain.Filters;
 using ElectronicsStore.BLL.Interfaces;
@@ -21,14 +20,14 @@ namespace ElectronicsStore.BLL.Realizations
         {
             try
             {
-                var query = productStorage.GetAll();
+                // Явно указываем IQueryable<Product> для корректной работы фильтров
+                IQueryable<Product> query = productStorage.GetAll().Include(x => x.Category);
 
                 if (filter.CategoryId > 0)
                 {
                     query = query.Where(x => x.CategoryId == filter.CategoryId);
                 }
 
-                // Исправлено: Простое сравнение через ToLower() (убирает warning про StringComparison)
                 if (!string.IsNullOrWhiteSpace(filter.Name))
                 {
                     var search = filter.Name.ToLower();
@@ -60,7 +59,10 @@ namespace ElectronicsStore.BLL.Realizations
         {
             try
             {
-                var products = await productStorage.GetAll().Where(x => x.CategoryId == categoryId).ToListAsync();
+                var products = await productStorage.GetAll()
+                    .Include(x => x.Category)
+                    .Where(x => x.CategoryId == categoryId)
+                    .ToListAsync();
                 return new BaseResponse<List<Product>> { Data = products, StatusCode = StatusCode.OK };
             }
             catch (Exception ex)
@@ -73,7 +75,9 @@ namespace ElectronicsStore.BLL.Realizations
         {
             try
             {
-                var products = await productStorage.GetAll().ToListAsync();
+                var products = await productStorage.GetAll()
+                    .Include(x => x.Category)
+                    .ToListAsync();
                 return new BaseResponse<IEnumerable<Product>> { Data = products, StatusCode = StatusCode.OK };
             }
             catch (Exception ex)
@@ -105,9 +109,10 @@ namespace ElectronicsStore.BLL.Realizations
         {
             try
             {
+                // ИСПРАВЛЕНИЕ: Добавлен восклицательный знак (!) после ImagePath
                 var images = await productImageStorage.GetAll()
-                    .Where(x => x.ProductId == id)
-                    .Select(x => x.ImagePath)
+                    .Where(x => x.ProductId == id && x.ImagePath != null)
+                    .Select(x => x.ImagePath!)
                     .ToListAsync();
                 return new BaseResponse<List<string>> { Data = images, StatusCode = StatusCode.OK };
             }

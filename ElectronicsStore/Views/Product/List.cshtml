@@ -4,52 +4,83 @@
     ViewData["Title"] = "Каталог товаров";
 }
 
-<h2 class="text-center mb-4 text-warning">КАТАЛОГ ТОВАРОВ</h2>
+<div class="container py-4">
+    <h2 class="text-center mb-5 text-warning fw-bold text-uppercase">Каталог товаров</h2>
 
-<div class="row">
-    @if (Model != null && Model.Any())
-    {
-        @foreach (var product in Model)
+    <div id="productsContainer">
+        @if (Model != null && Model.Any())
         {
-            <div class="col-6 col-md-4 col-lg-2 mb-4">
-                <div class="card h-100 border-secondary" style="background-color: #1e1e1e; color: #fff;">
+            @* 1. Группируем товары по названию категории *@
+            @foreach (var group in Model.GroupBy(x => x.Category?.Name ?? "Другое").OrderBy(g => g.Key))
+            {
+                @* 2. Выводим заголовок категории *@
+                <div class="category-section mb-5">
+                    <h3 class="text-white mb-4 ps-3 border-start border-warning border-5">
+                        @group.Key
+                    </h3>
 
-                    <div style="height: 150px; overflow: hidden; display: flex; align-items: center; justify-content: center; background-color: #fff;">
-                        @* ВАЖНО: Мы используем 'product.Avatar', а НЕ 'Model.Avatar' *@
-                        @if (product.Avatar != null && product.Avatar.Length > 0)
+                    <div class="row g-4">
+                        @* 3. Выводим товары этой группы *@
+                        @foreach (var product in group)
                         {
-                            <img src="data:image/jpeg;base64,@Convert.ToBase64String(product.Avatar)" alt="@product.Name" style="max-height: 100%; max-width: 100%; object-fit: contain;">
+                            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                                <div class="card h-100 border-secondary shadow-sm" style="background-color: #1e1e1e; transition: transform 0.2s;">
+
+                                    @* Изображение *@
+                                    <div class="position-relative bg-white overflow-hidden rounded-top" style="height: 200px; display: flex; align-items: center; justify-content: center;">
+                                        @if (product.Avatar != null && product.Avatar.Length > 0)
+                                        {
+                                            <img src="data:image/jpeg;base64,@Convert.ToBase64String(product.Avatar)" alt="@product.Name" style="max-height: 90%; max-width: 90%; object-fit: contain;">
+                                        }
+                                        else
+                                        {
+                                            <img src="~/img/placeholder.jpg" alt="Нет фото" style="max-height: 90%; max-width: 90%; object-fit: contain; opacity: 0.5;">
+                                        }
+                                    </div>
+
+                                    @* Контент карточки *@
+                                    <div class="card-body d-flex flex-column p-3">
+                                        <h6 class="card-title text-warning text-truncate mb-1" title="@product.Name" style="font-weight: 600;">
+                                            @product.Name
+                                        </h6>
+
+                                        <p class="text-muted small mb-3">
+                                            @* Можно вывести краткое описание или оставить пустым *@
+                                            @(product.Description?.Length > 50 ? product.Description.Substring(0, 50) + "..." : product.Description)
+                                        </p>
+
+                                        <div class="mt-auto">
+                                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                                <span class="text-white fs-5 fw-bold">@product.Price.ToString("N0") ₽</span>
+                                            </div>
+
+                                            <a asp-controller="Product" asp-action="GetProduct" asp-route-id="@product.Id" class="btn btn-warning w-100 fw-bold">
+                                                Подробнее
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         }
-                        else
-                        {
-                            <img src="~/img/iphone15.jpg" alt="Нет фото" style="max-height: 100%; max-width: 100%; object-fit: contain;">
-                        }
-                    </div>
-
-                    <div class="card-body d-flex flex-column">
-                        <h6 class="card-title text-warning text-truncate" title="@product.Name">
-                            @product.Name
-                        </h6>
-
-                        <p class="card-text small text-muted mb-2">
-                            <small>@(product.Category?.Name ?? "Категория")</small>
-                        </p>
-
-                        <div class="mt-auto">
-                            <h5 class="text-white mb-2">@product.Price ₽</h5>
-                            <a asp-controller="Product" asp-action="GetProduct" asp-route-id="@product.Id" class="btn btn-sm btn-primary w-100">
-                                Подробнее
-                            </a>
-                        </div>
                     </div>
                 </div>
+            }
+        }
+        else
+        {
+            <div class="text-center text-muted py-5">
+                <h4 class="fw-light">Товары не найдены :(</h4>
+                <p>Попробуйте изменить параметры поиска или загляните позже.</p>
             </div>
         }
-    }
-    else
-    {
-        <div class="col-12 text-center text-white mt-5">
-            <h4>Товаров пока нет :(</h4>
-        </div>
-    }
+    </div>
 </div>
+
+<style>
+    /* Легкий эффект при наведении на карточку */
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(255, 102, 0, 0.2) !important;
+        border-color: #ff6600 !important;
+    }
+</style>

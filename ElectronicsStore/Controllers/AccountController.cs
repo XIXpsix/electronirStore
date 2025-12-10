@@ -5,8 +5,6 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using System.Threading.Tasks;
-// Псевдоним для статуса
-using EnumStatusCode = ElectronicsStore.Domain.Enum.StatusCode;
 
 namespace ElectronicsStore.Controllers
 {
@@ -29,8 +27,8 @@ namespace ElectronicsStore.Controllers
             {
                 var response = await _accountService.Register(model);
 
-                if (response.StatusCode == EnumStatusCode.OK)
-                { 
+                if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK)
+                {
                     return RedirectToAction("ConfirmEmail", "Account", new { email = model.Email });
                 }
                 ModelState.AddModelError("", response.Description);
@@ -38,17 +36,10 @@ namespace ElectronicsStore.Controllers
             return View(model);
         }
 
-        // --- НОВЫЕ МЕТОДЫ ДЛЯ ПОДТВЕРЖДЕНИЯ ---
-
         [HttpGet]
         public IActionResult ConfirmEmail(string email)
         {
             return View(new ConfirmEmailViewModel { Email = email });
-        }
-
-        public IAccountService Get_accountService()
-        {
-            return _accountService;
         }
 
         [HttpPost]
@@ -56,11 +47,11 @@ namespace ElectronicsStore.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Теперь интерфейс знает этот метод, ошибки не будет
                 var response = await _accountService.ConfirmEmail(model.Email, model.Code);
 
-                if (response.StatusCode == EnumStatusCode.OK)
+                if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK)
                 {
+                    // ! говорит компилятору, что Data точно не null
                     await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(response.Data!));
                     return RedirectToAction("Index", "Home");
                 }
@@ -69,7 +60,8 @@ namespace ElectronicsStore.Controllers
             return View(model);
         }
 
-        // ----------------------------------------
+        [HttpGet]
+        public IActionResult Login() => View();
 
         [HttpPost]
         public async Task<IActionResult> Login(LoginViewModel model)
@@ -78,7 +70,7 @@ namespace ElectronicsStore.Controllers
             {
                 var response = await _accountService.Login(model);
 
-                if (response.StatusCode == EnumStatusCode.OK && response.Data != null)
+                if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK && response.Data != null)
                 {
                     await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(response.Data));
                     return RedirectToAction("Index", "Home");
@@ -88,20 +80,10 @@ namespace ElectronicsStore.Controllers
             return View(model);
         }
 
-        // --- ДОБАВИТЬ ЭТОТ МЕТОД ---
-        [HttpGet]
-        public IActionResult Login()
-        {
-            return View();
-        }
-        
-            [HttpPost]
+        [HttpPost]
         public async Task<IActionResult> Logout()
         {
-            // Удаляем куки авторизации
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-
-            // Перенаправляем на главную страницу (или на страницу входа)
             return RedirectToAction("Index", "Home");
         }
     }

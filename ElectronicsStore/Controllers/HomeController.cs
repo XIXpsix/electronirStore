@@ -1,81 +1,51 @@
 ﻿using ElectronicsStore.BLL.Interfaces;
-using ElectronicsStore.Domain.Entity; // Для модели Product
-using ElectronicsStore.Domain.ViewModels; // Для ErrorViewModel
+using ElectronicsStore.Domain.ViewModels; // Теперь это пространство имен существует
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
-using System.Linq; // Для LINQ-запросов (Where, ToList)
-using System.Collections.Generic;
-using System;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace ElectronicsStore.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
-        // Внедрение сервиса товаров для доступа к данным
         private readonly IProductService _productService;
+        private readonly ICategoryService _categoryService; // Добавляем сервис категорий
 
-        public HomeController(ILogger<HomeController> logger, IProductService productService)
+        // Обновляем конструктор
+        public HomeController(IProductService productService, ICategoryService categoryService)
         {
-            _logger = logger;
             _productService = productService;
+            _categoryService = categoryService;
         }
 
-        // --- Главные страницы (чистые) ---
-        public IActionResult Index()
-        {
-            return View();
-        }
+        public IActionResult Index() => View();
 
-        public IActionResult Privacy()
-        {
-            return View();
-        }
+        public IActionResult Privacy() => View();
 
-        public IActionResult About()
-        {
-            return View();
-        }
+        public IActionResult About() => View();
 
-        public IActionResult Contacts()
-        {
-            return View();
-        }
-        // ---------------------------------
+        public IActionResult Contacts() => View();
 
-        // --- Страница Каталога с логикой поиска ---
-        public async Task<IActionResult> Catalog(string searchString)
+        [HttpGet]
+        public async Task<IActionResult> Catalog()
         {
-            // Получаем все товары через сервис
-            var response = await _productService.GetProducts();
+            // 1. Получаем товары
+            var productsResponse = await _productService.GetProducts();
 
-            if (response.StatusCode != Domain.Enum.StatusCode.OK || response.Data == null)
+            // 2. Получаем категории (ИСПРАВЛЕНО ИМЯ МЕТОДА)
+            var categoriesResponse = await _categoryService.GetAllCategories(); // Было GetCategories
+
+            // 3. Собираем ViewModel
+            var model = new CatalogViewModel
             {
-                // В случае ошибки загрузки
-                ModelState.AddModelError("", response.Description ?? "Не удалось загрузить каталог товаров.");
-                return View(new List<Product>());
-            }
+                Products = productsResponse.Data ?? new List<Domain.Entity.Product>(),
+                Categories = categoriesResponse.Data ?? new List<Domain.Entity.Category>()
+            };
 
-            var products = response.Data.ToList();
-
-            // Логика фильтрации по поисковой строке
-            if (!string.IsNullOrEmpty(searchString))
-            {
-                // Сохраняем строку поиска для отображения в поле
-                ViewData["CurrentFilter"] = searchString;
-
-                // Фильтруем товары по названию (без учета регистра)
-                products = products
-                    .Where(p => p.Name != null && p.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
-                    .ToList();
-            }
-
-            // Передаем отфильтрованный или полный список в представление
-            return View(products);
+            return View(model);
         }
 
-        // --- Страница Ошибок ---
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {

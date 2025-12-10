@@ -3,7 +3,6 @@ using ElectronicsStore.Domain.Entity;
 using ElectronicsStore.Domain.Filters;
 using ElectronicsStore.Models;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace ElectronicsStore.Controllers
@@ -22,31 +21,26 @@ namespace ElectronicsStore.Controllers
         {
             var response = await _productService.GetProductsByCategory(categoryId);
 
-            // Проверяем статус И наличие данных
-            if (response.StatusCode == Domain.Enum.StatusCode.OK && response.Data != null)
+            // Используем ПОЛНОЕ имя перечисления, чтобы избежать ошибки "ControllerBase.StatusCode"
+            if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK && response.Data != null)
             {
                 return View(response.Data);
             }
 
-            // Если данных нет или ошибка
-            return RedirectToAction("Error");
+            return RedirectToAction("Error", "Home");
         }
 
         [HttpGet]
         public async Task<IActionResult> GetProduct(int id)
         {
-            var productResponse = await _productService.GetProduct(id);
+            var response = await _productService.GetProduct(id);
 
-            // Проверяем статус И наличие данных
-            if (productResponse.StatusCode == Domain.Enum.StatusCode.OK && productResponse.Data != null)
+            if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK && response.Data != null)
             {
-                // ВАЖНО: Мы передаем в View сам объект Product (productResponse.Data),
-                // так как в GetProduct.cshtml указано @model ElectronicsStore.Domain.Entity.Product
-                return View(productResponse.Data);
+                return View(response.Data);
             }
 
-            // Если товар не найден
-            return RedirectToAction("Error");
+            return RedirectToAction("Error", "Home");
         }
 
         [HttpPost]

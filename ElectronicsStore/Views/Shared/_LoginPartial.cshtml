@@ -3,29 +3,26 @@
 <ul class="navbar-nav">
     @if (User.Identity.IsAuthenticated)
     {
-        @{
-            // Получаем данные из Claims
-            var avatarPath = User.FindFirst("AvatarPath")?.Value ?? "/img/default-user.png";
-            var userName = User.Identity.Name;
-        }
+        var avatarPath = User.FindFirst("AvatarPath")?.Value ?? "/img/default-user.png";
+        var userName = User.Identity.Name;
 
         <li class="nav-item dropdown">
-            <a href="#" class="d-block link-light text-decoration-none dropdown-toggle me-3" 
+            <a href="#" class="d-block link-light text-decoration-none dropdown-toggle me-3"
                id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false">
                 <img src="@avatarPath" alt="Аватар" width="32" height="32" class="rounded-circle" style="object-fit: cover;">
                 <span class="ms-1 text-white d-none d-xl-inline">@userName</span>
             </a>
-            
+
             <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark" aria-labelledby="dropdownUser">
                 <li><a class="dropdown-item" asp-controller="User" asp-action="Profile">Профиль</a></li>
                 <li><a class="dropdown-item" asp-controller="Cart" asp-action="Index">Корзина/Архив</a></li>
-                
+
                 @if (User.IsInRole("Admin"))
                 {
                     <li><hr class="dropdown-divider"></li>
                     <li><a class="dropdown-item" asp-controller="Admin" asp-action="Index">Панель Админа</a></li>
                 }
-                
+
                 <li><hr class="dropdown-divider"></li>
                 <li>
                     <form method="post" asp-controller="Account" asp-action="Logout">
@@ -38,10 +35,18 @@
     else
     {
         <li class="nav-item">
-            <a class="btn btn-outline-warning me-2" asp-controller="Account" asp-action="Login">Войти</a>
+            <button class="btn btn-outline-warning me-2 fw-bold"
+                    data-bs-toggle="modal" data-bs-target="#authModal"
+                    onclick="selectAuthTab('login-tab')">
+                Войти
+            </button>
         </li>
         <li class="nav-item">
-            <a class="btn btn-warning" asp-controller="Account" asp-action="Register">Регистрация</a>
+            <button class="btn btn-warning fw-bold text-dark"
+                    data-bs-toggle="modal" data-bs-target="#authModal"
+                    onclick="selectAuthTab('register-tab')">
+                Регистрация
+            </button>
         </li>
     }
 </ul>
