@@ -1,49 +1,69 @@
-﻿@if (User.Identity != null && User.Identity.IsAuthenticated)
-{
-    var avatarPath = User.FindFirst("AvatarPath")?.Value ?? "/img/w.png";
+﻿@using System.Security.Claims
 
-    <div class="dropdown text-end">
-        <a href="#" class="d-block link-light text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
-            <img src="@avatarPath" alt="User" width="32" height="32" class="rounded-circle border border-warning" style="border-color: #ff6600 !important;">
-            <span class="text-white ms-2">@User.Identity.Name</span>
-        </a>
-        <ul class="dropdown-menu text-small shadow" aria-labelledby="dropdownUser1" style="background-color: #121212; border: 1px solid #ff6600;">
-            <li><a class="dropdown-item text-white hover-orange" asp-controller="User" asp-action="Profile">👤 Профиль</a></li>
-            <li><a class="dropdown-item text-white hover-orange" asp-controller="Cart" asp-action="Index">🛒 Корзина</a></li>
-            @if (User.IsInRole("Admin"))
-            {
-                <li><hr class="dropdown-divider" style="border-top: 1px solid #333;"></li>
-                <li><a class="dropdown-item text-warning" asp-controller="Admin" asp-action="Index">🔧 Админ-панель</a></li>
-            }
-            <li><hr class="dropdown-divider" style="border-top: 1px solid #333;"></li>
-            <li>
-                <form asp-controller="Account" asp-action="Logout" method="post">
-                    <button type="submit" class="dropdown-item text-white hover-orange">Выйти</button>
-                </form>
-            </li>
-        </ul>
-    </div>
-}
-else
-{
-    <div class="text-end">
-        <button type="button" class="btn btn-outline-warning me-2 fw-bold" onclick="openAuthModal('login')" style="border-color: #ff6600; color: #ff6600;">
-            ВОЙТИ
-        </button>
-        <button type="button" class="btn btn-warning fw-bold" onclick="openAuthModal('register')" style="background-color: #ff6600; border: none; color: #000;">
-            РЕГИСТРАЦИЯ
-        </button>
-    </div>
-}
+<ul class="navbar-nav">
+    @if (User.Identity.IsAuthenticated)
+    {
+        // Получаем путь к аватарке из Claims
+        var avatarPath = User.FindFirst("AvatarPath")?.Value ?? "/img/w.png";
+        var userName = User.Identity.Name;
+
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <img src="@avatarPath" class="rounded-circle" style="width: 35px; height: 35px; object-fit: cover; border: 2px solid #ff6600;" alt="Avatar">
+                <span class="ms-2 text-light-custom">@userName</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end bg-dark border-secondary" aria-labelledby="navbarDropdown">
+                <li>
+                    <a class="dropdown-item text-light hover-orange" asp-controller="User" asp-action="Profile">
+                        👤 Мой профиль
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item text-light hover-orange" asp-controller="Cart" asp-action="Index">
+                        🛒 Корзина
+                    </a>
+                </li>
+                @* Сюда позже добавим ссылку на историю заказов *@
+
+                @if (User.IsInRole("Admin"))
+                {
+                    <li><hr class="dropdown-divider bg-secondary"></li>
+                    <li>
+                        <a class="dropdown-item text-warning fw-bold" asp-controller="Admin" asp-action="Index">
+                            🛠 Панель администратора
+                        </a>
+                    </li>
+                }
+
+                <li><hr class="dropdown-divider bg-secondary"></li>
+                <li>
+                    <a class="dropdown-item text-danger" asp-controller="Account" asp-action="Logout">
+                        🚪 Выход
+                    </a>
+                </li>
+            </ul>
+        </li>
+    }
+    else
+    {
+        <li class="nav-item">
+            <div class="form-btn-container">
+                <button class="nav-link btn btn-link text-light-custom" id="click-to-hide">
+                    Войти / Регистрация
+                </button>
+            </div>
+        </li>
+    }
+</ul>
 
 <style>
     .hover-orange:hover {
         background-color: #ff6600 !important;
-        color: #000 !important;
+        color: white !important;
     }
 
-    .btn-outline-warning:hover {
-        background-color: #ff6600 !important;
-        color: #000 !important;
+    .dropdown-menu {
+        margin-top: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.5);
     }
 </style>

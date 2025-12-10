@@ -11,8 +11,10 @@ namespace ElectronicsStore.BLL.Interfaces
         Task<BaseResponse<ClaimsIdentity>> Register(RegisterViewModel model);
         Task<BaseResponse<ClaimsIdentity>> Login(LoginViewModel model);
         Task<BaseResponse<ClaimsIdentity>> ConfirmEmail(string email, string code);
-
-        [cite_start]
         Task<BaseResponse<ClaimsIdentity>> IsCreatedAccount(User model);
+
+        // Новые методы для профиля
+        Task<BaseResponse<User>> GetUser(string name);
+        Task<BaseResponse<User>> EditProfile(string name, UserProfileViewModel model, string newAvatarPath);
     }
 }

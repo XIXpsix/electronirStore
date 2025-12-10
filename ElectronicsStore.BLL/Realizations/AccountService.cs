@@ -14,7 +14,6 @@ using System.Threading.Tasks;
 
 namespace ElectronicsStore.BLL.Realizations
 {
-    // Используем IEmailService (интерфейс)
     public class AccountService(IBaseStorage<User> userRepository, IEmailService emailService) : IAccountService
     {
         private static string HashPassword(string password)
@@ -29,18 +28,14 @@ namespace ElectronicsStore.BLL.Realizations
         {
             try
             {
-                // Ищем пользователя по Email
                 var user = await userRepository.GetAll().FirstOrDefaultAsync(x => x.Email == model.Email);
-
                 if (user == null)
                 {
-                    // Если нет - создаем нового
                     user = new User()
                     {
                         Name = model.Name,
                         Email = model.Email,
                         Role = Role.User,
-                        // Генерируем случайный пароль, так как вход через Google
                         Password = HashPassword("GoogleAuth_" + Guid.NewGuid().ToString()),
                         IsEmailConfirmed = true,
                         AvatarPath = model.AvatarPath ?? "/img/w.png",
@@ -49,23 +44,12 @@ namespace ElectronicsStore.BLL.Realizations
                     };
                     await userRepository.Add(user);
                 }
-
-                // Авторизуем
                 var result = Authenticate(user);
-                return new()
-                {
-                    Data = result,
-                    Description = "Вход через Google успешен",
-                    StatusCode = StatusCode.OK
-                };
+                return new() { Data = result, Description = "Вход через Google успешен", StatusCode = StatusCode.OK };
             }
             catch (Exception ex)
             {
-                return new()
-                {
-                    Description = ex.Message,
-                    StatusCode = StatusCode.InternalServerError
-                };
+                return new() { Description = ex.Message, StatusCode = StatusCode.InternalServerError };
             }
         }
 
@@ -75,10 +59,7 @@ namespace ElectronicsStore.BLL.Realizations
             try
             {
                 var user = await userRepository.GetAll().FirstOrDefaultAsync(x => x.Email == model.Email);
-                if (user != null)
-                {
-                    return new() { Description = "Пользователь с таким email уже есть" };
-                }
+                if (user != null) return new() { Description = "Пользователь с таким email уже есть" };
 
                 var random = new Random();
                 var code = random.Next(100000, 999999).ToString();
@@ -111,20 +92,11 @@ namespace ElectronicsStore.BLL.Realizations
             try
             {
                 var user = await userRepository.GetAll().FirstOrDefaultAsync(x => x.Email == model.Email);
-                if (user == null)
-                {
-                    return new() { Description = "Пользователь не найден", StatusCode = StatusCode.UserNotFound };
-                }
+                if (user == null) return new() { Description = "Пользователь не найден", StatusCode = StatusCode.UserNotFound };
 
-                if (user.Password != HashPassword(model.Password))
-                {
-                    return new() { Description = "Неверный пароль", StatusCode = StatusCode.InternalServerError };
-                }
+                if (user.Password != HashPassword(model.Password)) return new() { Description = "Неверный пароль", StatusCode = StatusCode.InternalServerError };
 
-                if (!user.IsEmailConfirmed)
-                {
-                    return new() { Description = "Почта не подтверждена", StatusCode = StatusCode.InternalServerError };
-                }
+                if (!user.IsEmailConfirmed) return new() { Description = "Почта не подтверждена", StatusCode = StatusCode.InternalServerError };
 
                 var result = Authenticate(user);
                 return new() { Data = result, StatusCode = StatusCode.OK, Description = "Успешный вход" };
@@ -150,6 +122,49 @@ namespace ElectronicsStore.BLL.Realizations
 
                 var result = Authenticate(user);
                 return new() { Data = result, StatusCode = StatusCode.OK, Description = "Почта подтверждена" };
+            }
+            catch (Exception ex)
+            {
+                return new() { Description = ex.Message, StatusCode = StatusCode.InternalServerError };
+            }
+        }
+
+        // --- НОВЫЕ МЕТОДЫ ДЛЯ ПРОФИЛЯ ---
+
+        public async Task<BaseResponse<User>> GetUser(string name)
+        {
+            try
+            {
+                var user = await userRepository.GetAll().FirstOrDefaultAsync(x => x.Name == name);
+                if (user == null) return new() { Description = "Пользователь не найден", StatusCode = StatusCode.UserNotFound };
+
+                return new() { Data = user, StatusCode = StatusCode.OK };
+            }
+            catch (Exception ex)
+            {
+                return new() { Description = ex.Message, StatusCode = StatusCode.InternalServerError };
+            }
+        }
+
+        public async Task<BaseResponse<User>> EditProfile(string name, UserProfileViewModel model, string newAvatarPath)
+        {
+            try
+            {
+                var user = await userRepository.GetAll().FirstOrDefaultAsync(x => x.Name == name);
+                if (user == null) return new() { Description = "Пользователь не найден", StatusCode = StatusCode.UserNotFound };
+
+                // Обновляем данные
+                user.Name = model.Name;
+                user.Email = model.Email; // Можно добавить проверку на уникальность email, если он меняется
+
+                if (!string.IsNullOrEmpty(newAvatarPath))
+                {
+                    user.AvatarPath = newAvatarPath;
+                }
+
+                await userRepository.Update(user);
+
+                return new() { Data = user, StatusCode = StatusCode.OK, Description = "Профиль обновлен" };
             }
             catch (Exception ex)
             {
