@@ -2,7 +2,7 @@
 using ElectronicsStore.DAL.Interfaces;
 using ElectronicsStore.Domain.Entity;
 using ElectronicsStore.Domain.Enum;
-using ElectronicsStore.Domain.Response; // Теперь этот using снова работает корректно
+using ElectronicsStore.Domain.Response;
 using ElectronicsStore.Domain.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
@@ -11,10 +11,11 @@ using System.Text;
 
 namespace ElectronicsStore.BLL.Realizations
 {
-    // Исправлено: IEmailService (интерфейс)
-    // Добавляем букву 'I' перед EmailService
+    // C# 12: Основной конструктор
+    // ВАЖНО: Тут должен быть IEmailService (интерфейс), а не EmailService (класс)
     public class AccountService(IBaseStorage<User> userRepository, IEmailService emailService) : IAccountService
     {
+        // Оптимизация: static + HashData
         private static string HashPassword(string password)
         {
             var bytes = Encoding.UTF8.GetBytes(password);
@@ -48,7 +49,8 @@ namespace ElectronicsStore.BLL.Realizations
                     Password = HashPassword(model.Password),
                     CreatedAt = DateTime.UtcNow,
                     ConfirmationCode = code,
-                    IsEmailConfirmed = false
+                    IsEmailConfirmed = false,
+                    AvatarPath = "/img/w.png" // Указываем картинку по умолчанию при создании
                 };
 
                 await userRepository.Add(user);
@@ -176,8 +178,6 @@ namespace ElectronicsStore.BLL.Realizations
         {
             var claims = new List<Claim>
             {
-                // ВОТ ЗДЕСЬ БЫЛА ОШИБКА РАЗЫМЕНОВАНИЯ:
-                // Добавляем ?? "", чтобы защититься от null
                 new(ClaimsIdentity.DefaultNameClaimType, user.Name ?? string.Empty),
                 new(ClaimsIdentity.DefaultRoleClaimType, user.Role.ToString()),
                 new("Id", user.Id.ToString()),
