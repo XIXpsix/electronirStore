@@ -31,7 +31,8 @@ namespace ElectronicsStore.Controllers
                 {
                     return RedirectToAction("ConfirmEmail", "Account", new { email = model.Email });
                 }
-                ModelState.AddModelError("", response.Description);
+                // ИСПРАВЛЕНИЕ: Безопасное обращение к Description
+                ModelState.AddModelError("", response.Description ?? "Ошибка при регистрации");
             }
             return View(model);
         }
@@ -49,13 +50,14 @@ namespace ElectronicsStore.Controllers
             {
                 var response = await _accountService.ConfirmEmail(model.Email, model.Code);
 
-                // ИСПРАВЛЕНИЕ: Проверка Data на null
+                // ИСПРАВЛЕНИЕ: Проверка Data на null уже была, но добавлена проверка Description ниже
                 if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK && response.Data != null)
                 {
                     await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(response.Data));
                     return RedirectToAction("Index", "Home");
                 }
-                ModelState.AddModelError("", response.Description);
+                // ИСПРАВЛЕНИЕ: Безопасное обращение к Description
+                ModelState.AddModelError("", response.Description ?? "Неверный код или ошибка подтверждения");
             }
             return View(model);
         }
@@ -70,13 +72,14 @@ namespace ElectronicsStore.Controllers
             {
                 var response = await _accountService.Login(model);
 
-                // ИСПРАВЛЕНИЕ: Проверка Data на null
+                // ИСПРАВЛЕНИЕ: Проверка Data на null уже была
                 if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK && response.Data != null)
                 {
                     await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(response.Data));
                     return RedirectToAction("Index", "Home");
                 }
-                ModelState.AddModelError("", response.Description);
+                // ИСПРАВЛЕНИЕ: Безопасное обращение к Description
+                ModelState.AddModelError("", response.Description ?? "Неверный логин или пароль");
             }
             return View(model);
         }

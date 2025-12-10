@@ -28,7 +28,12 @@ namespace ElectronicsStore.DAL.Repositories
 
         public async Task<T> Get(int id)
         {
-            return await _db.Set<T>().FindAsync(id);
+            var entity = await _db.Set<T>().FindAsync(id);
+
+            if (entity == null)
+                throw new KeyNotFoundException($"{typeof(T).Name} with id={id} not found.");
+
+            return entity;
         }
 
         public IQueryable<T> GetAll()

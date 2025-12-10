@@ -16,25 +16,28 @@ namespace ElectronicsStore.Domain.Entity
 
         public decimal Price { get; set; }
 
-        // Картинка в байтах (основная)
         public byte[]? Avatar { get; set; }
 
-        // Путь к картинке (для совместимости, если используется в старых вьюхах)
         public string? ImagePath { get; set; }
 
         public int CategoryId { get; set; }
         public Category Category { get; set; } = null!;
 
-        // Связь с дополнительными картинками
         public virtual List<ProductImage> Images { get; set; } = new List<ProductImage>();
 
-        // Связь с отзывами
         public virtual List<Review> Reviews { get; set; } = new List<Review>();
 
-        // Вспомогательное свойство для отображения Avatar в img src (base64)
         [NotMapped]
-        public string AvatarUrl => Avatar != null && Avatar.Length > 0
-            ? $"data:image/jpeg;base64,{System.Convert.ToBase64String(Avatar)}"
-            : (ImagePath ?? "/img/w.png"); // Если аватара нет, берем ImagePath или заглушку
+        public string AvatarUrl
+        {
+            get
+            {
+                // ИСПРАВЛЕНИЕ: Присваиваем локальной переменной для безопасной проверки на null
+                var avatar = Avatar;
+                return avatar != null && avatar.Length > 0
+                    ? $"data:image/jpeg;base64,{System.Convert.ToBase64String(avatar)}"
+                    : (ImagePath ?? "/img/w.png");
+            }
+        }
     }
 }

@@ -6,7 +6,8 @@
     <h2>@ViewData["Title"]</h2>
     <hr />
 
-    @if (User.Identity.IsAuthenticated)
+    @(User.Identity.Name?.Length > 0 ? User.Identity.Name.Substring(0, 1).ToUpper() : "U")
+
     {
         <!-- Отображаем имя пользователя, которое должно быть его Email, так как мы его используем как UserName -->
         <p>Добро пожаловать в личный кабинет, <strong>@User.Identity.Name</strong>!</p>
