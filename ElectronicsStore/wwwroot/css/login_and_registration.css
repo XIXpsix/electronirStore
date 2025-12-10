@@ -164,3 +164,38 @@
         opacity: 1;
     }
 }
+/* Анимация тряски при ошибке */
+@keyframes shake {
+    0% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-5px);
+    }
+
+    50% {
+        transform: translateX(5px);
+    }
+
+    75% {
+        transform: translateX(-5px);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
+}
+
+.shake-animation {
+    animation: shake 0.4s ease-in-out;
+    border-color: red !important;
+}
+
+.error-message {
+    font-size: 0.9rem;
+    background-color: rgba(255, 0, 0, 0.1);
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid red;
+}
