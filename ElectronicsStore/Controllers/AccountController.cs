@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using ElectronicsStore.Domain.Enum;
 
 namespace ElectronicsStore.Controllers
 {
@@ -26,38 +27,13 @@ namespace ElectronicsStore.Controllers
             if (ModelState.IsValid)
             {
                 var response = await _accountService.Register(model);
-
-                if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK)
-                {
-                    return RedirectToAction("ConfirmEmail", "Account", new { email = model.Email });
-                }
-                // ИСПРАВЛЕНИЕ: Безопасное обращение к Description
-                ModelState.AddModelError("", response.Description ?? "Ошибка при регистрации");
-            }
-            return View(model);
-        }
-
-        [HttpGet]
-        public IActionResult ConfirmEmail(string email)
-        {
-            return View(new ConfirmEmailViewModel { Email = email });
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> ConfirmEmail(ConfirmEmailViewModel model)
-        {
-            if (ModelState.IsValid)
-            {
-                var response = await _accountService.ConfirmEmail(model.Email, model.Code);
-
-                // ИСПРАВЛЕНИЕ: Проверка Data на null уже была, но добавлена проверка Description ниже
-                if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK && response.Data != null)
+                // ИСПРАВЛЕНИЕ: Проверяем Data на null перед использованием
+                if (response.StatusCode == StatusCode.OK && response.Data != null)
                 {
                     await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(response.Data));
                     return RedirectToAction("Index", "Home");
                 }
-                // ИСПРАВЛЕНИЕ: Безопасное обращение к Description
-                ModelState.AddModelError("", response.Description ?? "Неверный код или ошибка подтверждения");
+                ModelState.AddModelError("", response.Description);
             }
             return View(model);
         }
@@ -71,20 +47,17 @@ namespace ElectronicsStore.Controllers
             if (ModelState.IsValid)
             {
                 var response = await _accountService.Login(model);
-
-                // ИСПРАВЛЕНИЕ: Проверка Data на null уже была
-                if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK && response.Data != null)
+                // ИСПРАВЛЕНИЕ: Проверяем Data на null
+                if (response.StatusCode == StatusCode.OK && response.Data != null)
                 {
                     await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(response.Data));
                     return RedirectToAction("Index", "Home");
                 }
-                // ИСПРАВЛЕНИЕ: Безопасное обращение к Description
-                ModelState.AddModelError("", response.Description ?? "Неверный логин или пароль");
+                ModelState.AddModelError("", response.Description);
             }
             return View(model);
         }
 
-        [HttpPost]
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);

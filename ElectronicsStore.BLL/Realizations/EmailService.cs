@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using System;
 using ElectronicsStore.BLL.Interfaces;
-// Удален лишний using, который мог вызывать конфликты
 
 namespace ElectronicsStore.BLL.Realizations
 {
@@ -16,24 +15,21 @@ namespace ElectronicsStore.BLL.Realizations
             _config = config;
         }
 
-        // Имя метода изменено на SendEmailAsync
         public async Task SendEmailAsync(string email, string subject, string message)
         {
-            var emailMessage = new MimeMessage();
-
+            // ИСПРАВЛЕНИЕ: Используем ?? "" чтобы избежать предупреждений о null
             var senderName = _config["EmailSettings:SenderName"] ?? "ElectronicsHub";
-            var senderEmail = _config["EmailSettings:SenderEmail"];
-            var mailServer = _config["EmailSettings:MailServer"];
-
-            // Безопасное получение порта
+            var senderEmail = _config["EmailSettings:SenderEmail"] ?? "";
+            var mailServer = _config["EmailSettings:MailServer"] ?? "";
             var mailPort = _config.GetValue<int>("EmailSettings:MailPort");
-            var senderPassword = _config["EmailSettings:SenderPassword"];
+            var senderPassword = _config["EmailSettings:SenderPassword"] ?? "";
 
             if (string.IsNullOrEmpty(senderEmail) || string.IsNullOrEmpty(mailServer))
             {
                 throw new Exception("Ошибка: Не заполнены настройки EmailSettings в appsettings.json");
             }
 
+            var emailMessage = new MimeMessage();
             emailMessage.From.Add(new MailboxAddress(senderName, senderEmail));
             emailMessage.To.Add(new MailboxAddress("", email));
             emailMessage.Subject = subject;

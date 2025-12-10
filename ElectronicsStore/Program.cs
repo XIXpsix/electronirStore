@@ -4,8 +4,13 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Подключение БД
+// ИСПРАВЛЕНИЕ: Гарантируем, что строка подключения не null
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+if (string.IsNullOrEmpty(connectionString))
+{
+    throw new InvalidOperationException("Строка подключения 'DefaultConnection' не найдена в appsettings.json");
+}
+
 builder.Services.AddDbContext<ElectronicsStoreContext>(options =>
     options.UseNpgsql(connectionString));
 
@@ -20,11 +25,9 @@ builder.Services.AddAuthentication("Cookies")
         config.AccessDeniedPath = "/Account/AccessDenied";
     });
 
-// === ВОТ ЗДЕСЬ ИСПРАВЛЕНИЕ ===
-// Используем builder.Services, а не просто services
+// Подключение сервисов
 Initializer.InitializeRepositories(builder.Services);
 Initializer.InitializeServices(builder.Services);
-// ============================
 
 var app = builder.Build();
 
@@ -40,7 +43,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseAuthentication(); // Обязательно перед Authorization
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
