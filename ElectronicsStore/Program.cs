@@ -1,37 +1,44 @@
 ﻿using ElectronicsStore;
 using ElectronicsStore.DAL;
 using Microsoft.EntityFrameworkCore;
+using ElectronicsStore.Domain.Entity; // Для User, если нужно
+using Microsoft.AspNetCore.Authentication.Cookies; // Для Cookie
+using Microsoft.AspNetCore.Authentication.Google; // Для Google
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Получаем строку подключения с проверкой
-// Если её нет, программа сразу скажет об этом, а не упадет молча
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? throw new InvalidOperationException("ОШИБКА: Строка подключения 'DefaultConnection' не найдена в appsettings.json!");
-
-// 2. Подключаем Базу Данных
+// 1. Подключение к БД PostgreSQL
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ElectronicsStoreContext>(options =>
     options.UseNpgsql(connectionString));
 
-// 3. Добавляем MVC (Контроллеры и Представления)
+// 2. Инициализация репозиториев и сервисов (ваш класс Initializer)
+builder.Services.InitializeRepositories();
+builder.Services.InitializeServices();
+
+// 3. Добавление контроллеров с представлениями
 builder.Services.AddControllersWithViews();
 
-// 4. Настраиваем Аутентификацию (Вход/Регистрация)
-builder.Services.AddAuthentication("Cookies")
-    .AddCookie("Cookies", config =>
-    {
-        config.LoginPath = "/Account/Login";
-        config.AccessDeniedPath = "/Account/AccessDenied";
-    });
+// 4. Настройка Аутентификации (Cookies + Google)
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+})
+.AddCookie(options =>
+{
+    options.LoginPath = "/Account/Login";
+    options.AccessDeniedPath = "/Account/AccessDenied";
+})
+.AddGoogle(googleOptions =>
+{
+    googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"];
+    googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+});
 
-// 5. Инициализация наших сервисов (из файла Initializer.cs)
-Initializer.InitializeRepositories(builder.Services);
-Initializer.InitializeServices(builder.Services);
-
-// --- Сборка приложения (Ошибка падает здесь, если пункты выше не сработали) ---
 var app = builder.Build();
 
-// 6. Настройка конвейера (Pipeline)
+// 5. Middleware (Порядок важен!)
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -43,8 +50,8 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseAuthentication(); // Кто ты?
-app.UseAuthorization();  // Можно ли тебе сюда?
+app.UseAuthentication(); // <-- Сначала проверяем "кто это"
+app.UseAuthorization();  // <-- Потом "что можно"
 
 app.MapControllerRoute(
     name: "default",

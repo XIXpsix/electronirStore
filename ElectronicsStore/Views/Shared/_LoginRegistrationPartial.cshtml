@@ -1,78 +1,27 @@
-﻿<div class="modal fade" id="authModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content overflow-hidden" style="background-color: #000; border: 2px solid #ff6600; box-shadow: 0 0 50px rgba(255, 102, 0, 0.3);">
-
-            <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" style="z-index: 10;"></button>
-
-            <div class="modal-body p-0">
-                <div class="row g-0">
-
-                    <div class="col-md-5 d-none d-md-block position-relative"
-                         style="background: url('/img/pc.jpg') center/cover; filter: grayscale(100%);">
-                        <div style="position: absolute; inset: 0; background: rgba(255, 102, 0, 0.3);"></div> <div class="d-flex align-items-center justify-content-center h-100 text-center p-4" style="position: relative; z-index: 2;">
-                            <div>
-                                <h3 class="fw-bold text-white text-uppercase" style="text-shadow: 0 0 20px #000;">Electronics<br><span style="color: #ff6600;">Hub</span></h3>
-                                <p class="text-white small mt-3">Твой путь в мир технологий начинается здесь.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-7" style="background-color: #121212;">
-                        <div class="p-5 overflow-hidden position-relative" style="min-height: 500px;">
-
-                            <div class="auth-slider" id="authSlider">
-
-                                <div class="auth-view" id="loginView">
-                                    <h2 class="fw-bold mb-4" style="color: #ff6600;">ВХОД</h2>
-                                    <form asp-controller="Account" asp-action="Login" method="post">
-                                        <div class="form-floating mb-3">
-                                            <input name="Email" type="email" class="form-control dark-input" placeholder="Email" required>
-                                            <label>Email адрес</label>
-                                        </div>
-                                        <div class="form-floating mb-4">
-                                            <input name="Password" type="password" class="form-control dark-input" placeholder="Пароль" required>
-                                            <label>Пароль</label>
-                                        </div>
-                                        <button type="submit" class="btn btn-orange w-100 py-3 fw-bold">ВОЙТИ В СИСТЕМУ</button>
-                                    </form>
-                                    <div class="text-center mt-4">
-                                        <p class="text-muted small">Впервые у нас?</p>
-                                        <button class="btn btn-outline-orange btn-sm" onclick="switchMode('register')">СОЗДАТЬ АККАУНТ →</button>
-                                    </div>
-                                </div>
-
-                                <div class="auth-view" id="registerView">
-                                    <h2 class="fw-bold mb-4" style="color: #ff6600;">РЕГИСТРАЦИЯ</h2>
-                                    <form asp-controller="Account" asp-action="Register" method="post">
-                                        <div class="form-floating mb-2">
-                                            <input name="Name" type="text" class="form-control dark-input" placeholder="Имя" required>
-                                            <label>Ваше Имя</label>
-                                        </div>
-                                        <div class="form-floating mb-2">
-                                            <input name="Email" type="email" class="form-control dark-input" placeholder="Email" required>
-                                            <label>Email</label>
-                                        </div>
-                                        <div class="form-floating mb-2">
-                                            <input name="Password" type="password" class="form-control dark-input" placeholder="Пароль" required>
-                                            <label>Пароль</label>
-                                        </div>
-                                        <div class="form-floating mb-4">
-                                            <input name="PasswordConfirm" type="password" class="form-control dark-input" placeholder="Повтор" required>
-                                            <label>Повторите пароль</label>
-                                        </div>
-                                        <button type="submit" class="btn btn-orange w-100 py-3 fw-bold">ЗАРЕГИСТРИРОВАТЬСЯ</button>
-                                    </form>
-                                    <div class="text-center mt-4">
-                                        <p class="text-muted small">Уже есть аккаунт?</p>
-                                        <button class="btn btn-outline-orange btn-sm" onclick="switchMode('login')">← ВЕРНУТЬСЯ КО ВХОДУ</button>
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+﻿<div class="auth-view" id="loginView">
+    <h2 class="fw-bold mb-4" style="color: #ff6600;">ВХОД</h2>
+    <form asp-controller="Account" asp-action="Login" method="post">
+        <div class="form-floating mb-3">
+            <input name="Email" type="email" class="form-control dark-input" placeholder="Email" required>
+            <label>Email адрес</label>
         </div>
+        <div class="form-floating mb-4">
+            <input name="Password" type="password" class="form-control dark-input" placeholder="Пароль" required>
+            <label>Пароль</label>
+        </div>
+        <button type="submit" class="btn btn-orange w-100 py-3 fw-bold">ВОЙТИ В СИСТЕМУ</button>
+    </form>
+
+    <div class="text-center mt-3">
+        <p class="text-muted small mb-2">или через</p>
+        <a href="@Url.Action("AuthenticationGoogle", "Account")" class="btn btn-outline-light w-100 d-flex align-items-center justify-content-center py-2" style="border-color: #333;">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google" width="20" height="20" class="me-2">
+            <span class="fw-bold">Google</span>
+        </a>
+    </div>
+
+    <div class="text-center mt-4">
+        <p class="text-muted small">Впервые у нас?</p>
+        <button class="btn btn-outline-orange btn-sm" onclick="switchMode('register')">СОЗДАТЬ АККАУНТ →</button>
     </div>
 </div>
