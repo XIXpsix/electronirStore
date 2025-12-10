@@ -19,8 +19,8 @@ namespace ElectronicsStore.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            // ИСПРАВЛЕНИЕ: ?? ""
-            var userName = User.Identity?.Name ?? "";
+            // Исправлено: User?.Identity?.Name
+            var userName = User?.Identity?.Name ?? string.Empty;
 
             var response = await _cartService.GetItems(userName);
 
@@ -34,7 +34,7 @@ namespace ElectronicsStore.Controllers
         [HttpGet]
         public async Task<IActionResult> Add(int id)
         {
-            var userName = User.Identity?.Name ?? "";
+            var userName = User?.Identity?.Name ?? string.Empty;
             await _cartService.AddItem(userName, id);
             return RedirectToAction("Catalog", "Home");
         }
@@ -42,7 +42,7 @@ namespace ElectronicsStore.Controllers
         [HttpGet]
         public async Task<IActionResult> Remove(Guid id)
         {
-            var userName = User.Identity?.Name ?? "";
+            var userName = User?.Identity?.Name ?? string.Empty;
             await _cartService.RemoveItem(userName, id);
             return RedirectToAction("Index");
         }
@@ -50,7 +50,7 @@ namespace ElectronicsStore.Controllers
         [HttpGet]
         public async Task<IActionResult> Clear()
         {
-            var userName = User.Identity?.Name ?? "";
+            var userName = User?.Identity?.Name ?? string.Empty;
             await _cartService.ClearCart(userName);
             return RedirectToAction("Index");
         }
