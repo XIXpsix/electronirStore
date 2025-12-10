@@ -196,15 +196,26 @@ namespace ElectronicsStore.BLL.Realizations
             }
         }
 
+        // ... (остальной код AccountService)
+
+   
+
+namespace ElectronicsStore.BLL.Realizations
+    {
+        // ... (остальной код)
+
         private ClaimsIdentity Authenticate(User user)
         {
             var claims = new List<Claim>
-            {
-                new Claim(ClaimsIdentity.DefaultNameClaimType, user.Name),
-                new Claim(ClaimsIdentity.DefaultRoleClaimType, user.Role.ToString())
-            };
+        {
+            new Claim(ClaimsIdentity.DefaultNameClaimType, user.Name),
+            new Claim(ClaimsIdentity.DefaultRoleClaimType, user.Role.ToString()),
+            new Claim("Id", user.Id.ToString()), // <-- ID ПОЛЬЗОВАТЕЛЯ
+            new Claim("AvatarPath", user.AvatarPath) // <-- ПУТЬ К АВАТАРУ
+        };
             return new ClaimsIdentity(claims, "ApplicationCookie",
                 ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
         }
     }
+}
 }

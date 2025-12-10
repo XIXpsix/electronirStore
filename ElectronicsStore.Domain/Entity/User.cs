@@ -14,10 +14,12 @@ namespace ElectronicsStore.Domain.Entity
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         // --- НОВЫЕ ПОЛЯ ---
-        public string ConfirmationCode { get; set; } = string.Empty; // Код из письма
-        public bool IsEmailConfirmed { get; set; } = false;          // Подтвержден ли
+        public string ConfirmationCode { get; set; } = string.Empty;
+        public bool IsEmailConfirmed { get; set; } = false;
+        public string AvatarPath { get; set; } = "/img/default-user.png"; // <-- ДЛЯ АВАТАРКИ
         // -------------------
 
         public ICollection<Review> Reviews { get; set; } = new List<Review>();
+        public ICollection<CartItem> CartItems { get; set; } = new List<CartItem>(); // <-- ДЛЯ КОРЗИНЫ
     }
 }

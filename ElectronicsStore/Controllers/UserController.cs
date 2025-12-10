@@ -1,12 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
-namespace ElectronicsStore.Controllers
+[Authorize]
+public class UserController : Controller
 {
-    public class UserController : Controller
+    // В этом представлении будет форма для редактирования профиля
+    public IActionResult Profile()
     {
-        public IActionResult Profile()
-        {
-            return View();
-        }
+        return View();
     }
 }

@@ -1,106 +1,39 @@
-﻿<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - ElectronicsHub</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/Shared.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/login_and_registration.css" asp-append-version="true" />
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
-</head>
-<body>
-    <div class="side-video left-side">
-        <video autoplay muted loop>
-            <source src="/img/pc.MP4" type="video/mp4">
-        </video>
-        <div class="video-overlay"></div>
-    </div>
+﻿<div class="main-wrapper">
+    <header>
+        <nav class="navbar navbar-expand-xl navbar-dark custom-navbar box-shadow mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand brand-orange" asp-area="" asp-controller="Home" asp-action="Index">
+                    ElectronicsHub
+                </a>
 
-    <div class="side-video right-side">
-        <video autoplay muted loop>
-            <source src="/img/pc1.MP4" type="video/mp4">
-        </video>
-        <div class="video-overlay"></div>
-    </div>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
 
-    <div class="main-wrapper">
-        <header>
-            <nav class="navbar navbar-expand-lg navbar-dark custom-navbar box-shadow mb-3">
-                <div class="container-fluid">
-                    <a class="navbar-brand brand-orange" asp-area="" asp-controller="Home" asp-action="Index">
-                        ElectronicsHub
-                    </a>
-                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                            aria-expanded="false" aria-label="Toggle navigation">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
-                    <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                <div class="navbar-collapse collapse" id="navbarSupportedContent">
 
-                        <ul class="navbar-nav flex-grow-1 justify-content-center">
-                            <li class="nav-item">
-                                <a class="nav-link text-light-custom" asp-controller="Home" asp-action="Index">Главная</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-light-custom" asp-controller="Home" asp-action="About">О нас</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-light-custom" asp-controller="Home" asp-action="Catalog">Каталог товаров</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-light-custom" asp-controller="Home" asp-action="Contacts">Контакты</a>
-                            </li>
-                        </ul>
+                    <ul class="navbar-nav mx-auto mb-2 mb-xl-0 text-center flex-grow-1 justify-content-center">
+                        <li class="nav-item">
+                            <a class="nav-link text-light-custom" asp-controller="Home" asp-action="Index">Главная</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-light-custom" asp-controller="Home" asp-action="About">О нас</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-light-custom" asp-controller="Home" asp-action="Catalog">Каталог товаров</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-light-custom" asp-controller="Home" asp-action="Contacts">Контакты</a>
+                        </li>
+                    </ul>
 
+                    <div class="ms-auto">
                         @await Html.PartialAsync("_LoginPartial")
                     </div>
                 </div>
-            </nav>
-        </header>
-
-        <div class="content-container">
-            <main role="main" class="pb-3 w-100">
-                @RenderBody()
-            </main>
-        </div>
-
-        <footer class="footer-custom">
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-4 text-start">
-                        <h5 class="brand-orange">ElectronicsHub</h5>
-                        <p class="text-muted small">Ваш надежный проводник в мир современной электроники. Лучшие гаджеты, компьютеры и комплектующие.</p>
-                    </div>
-                    <div class="col-md-4 text-center">
-                        <h6 class="text-white">Навигация</h6>
-                        <ul class="list-unstyled">
-                            <li><a asp-controller="Home" asp-action="Index">Главная</a></li>
-                            <li><a asp-controller="Home" asp-action="Catalog">Каталог</a></li>
-                            <li><a asp-controller="Home" asp-action="Contacts">Контакты</a></li>
-                        </ul>
-                    </div>
-                    <div class="col-md-4 text-end">
-                        <h6 class="text-white">Контакты</h6>
-                        <p class="text-muted small">
-                            Email: info@electronicshub.com<br>
-                            Тел: +373 777 12345<br>
-                            г. Тирасполь, ул. Ленина 1
-                        </p>
-                    </div>
-                </div>
-                <hr style="border-color: #333;">
-                <div class="text-center text-muted small">
-                    &copy; 2025 - ElectronicsHub - <a asp-controller="Home" asp-action="Privacy">Приватность</a>
-                </div>
             </div>
-        </footer>
-    </div>
+        </nav>
+    </header>
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/shared_script.js" asp-append-version="true"></script>
-    <script src="~/js/login_and_registration_script.js" asp-append-version="true"></script>
-    <script src="~/js/animation.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
-</body>
-</html>
+</div>

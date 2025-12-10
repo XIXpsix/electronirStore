@@ -13,8 +13,9 @@ namespace ElectronicsStore.DAL
             public DbSet<Category> Categories { get; set; }
             public DbSet<Review> Reviews { get; set; }
             public DbSet<ProductImage> ProductImages { get; set; }
+            public DbSet<CartItem> CartItems { get; set; }
 
-            protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
             {
                 base.OnModelCreating(modelBuilder);
 

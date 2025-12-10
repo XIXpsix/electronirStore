@@ -1,74 +1,67 @@
-﻿@{
+﻿@model List<ElectronicsStore.Domain.Entity.Product>
+
+@{
     ViewData["Title"] = "Каталог товаров";
 }
 
-<div id="catalog" class="container-section scroll-mt-24">
-    <h2 class="info-sections hidden-on-scroll fade-in">Категории товаров</h2>
+<div class="container mt-5">
+    <h2 class="info-sections">Каталог товаров</h2>
 
-    <div class="card-container">
-        <!-- 1. Смартфоны и Гаджеты -->
-        <div class="card hidden-on-scroll slide-in-bottom">
-            <div class="card-icon">&#128241;</div>
-            <h3 class="card-title">Смартфоны и Гаджеты</h3>
-            <p class="card-description">
-                Широкий выбор последних моделей смартфонов, умных часов, наушников и аксессуаров.
-                Оставайтесь на связи и в тренде.
-            </p>
-            <a asp-controller="Product" asp-action="List" asp-route-categoryId="1" class="card-link">Смотреть каталог &rarr;</a>
+    <form asp-controller="Home" asp-action="Catalog" method="get" class="mb-4">
+        <div class="input-group input-group-lg mx-auto" style="max-width: 600px;">
+            <input type="text" name="searchString" class="form-control bg-dark border-secondary text-white"
+                   placeholder="Поиск по названию товара..."
+                   value="@ViewData["CurrentFilter"]">
+            <button class="btn btn-warning" type="submit">
+                <i class="bi bi-search"></i> Найти
+            </button>
+            <a asp-controller="Home" asp-action="Catalog" class="btn btn-outline-secondary">Сброс</a>
         </div>
+    </form>
 
-        <!-- 2. Компьютеры и Ноутбуки -->
-        <div class="card hidden-on-scroll slide-in-bottom" style="transition-delay: 100ms;">
-            <div class="card-icon">&#128187;</div>
-            <h3 class="card-title">Компьютеры и Ноутбуки</h3>
-            <p class="card-description">
-                Мощные рабочие станции, игровые ПК и тонкие ноутбуки для учебы и работы.
-                Соберем идеальную конфигурацию.
-            </p>
-            <a asp-controller="Product" asp-action="List" asp-route-categoryId="2" class="card-link">Смотреть каталог &rarr;</a>
-        </div>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 cards-wrapper">
 
-        <!-- 3. Бытовая Техника -->
-        <div class="card hidden-on-scroll slide-in-bottom" style="transition-delay: 200ms;">
-            <div class="card-icon">&#128270;</div>
-            <h3 class="card-title">Бытовая Техника</h3>
-            <p class="card-description">
-                Современные решения для дома: от холодильников и стиральных машин до пылесосов и умных устройств для кухни.
-            </p>
-            <a asp-controller="Product" asp-action="List" asp-route-categoryId="3" class="card-link">Смотреть каталог &rarr;</a>
-        </div>
+        @if (Model != null && Model.Any())
+        {
+            @foreach (var product in Model)
+            {
+                <div class="col">
+                    <div class="custom-card h-100">
+                        <img src="@product.ImagePath" alt="@product.Name" class="card-img" style="height: 250px;">
 
-        <!-- 4. Телевизоры и Аудио -->
-        <div class="card hidden-on-scroll slide-in-bottom" style="transition-delay: 300ms;">
-            <div class="card-icon">&#128250;</div>
-            <h3 class="card-title">Телевизоры и Аудио</h3>
-            <p class="card-description">
-                Погрузитесь в мир качественного изображения и чистого звука.
-                Широкоформатные 4K/8K ТВ и профессиональные аудиосистемы.
-            </p>
-            <a asp-controller="Product" asp-action="List" asp-route-categoryId="4" class="card-link">Смотреть каталог &rarr;</a>
-        </div>
+                        <div class="card-body-custom">
+                            <h3 class="card-title-custom">@product.Name</h3>
+                            <p class="card-desc">@product.Description.Substring(0, Math.Min(product.Description.Length, 80))...</p>
 
-        <!-- 5. Игровые Приставки -->
-        <div class="card hidden-on-scroll slide-in-bottom" style="transition-delay: 400ms;">
-            <div class="card-icon">&#127918;</div>
-            <h3 class="card-title">Игровые Приставки</h3>
-            <p class="card-description">
-                Последние консоли и аксессуары для геймеров.
-                Начни свое приключение в виртуальном мире прямо сейчас.
-            </p>
-            <a asp-controller="Product" asp-action="List" asp-route-categoryId="5" class="card-link">Смотреть каталог &rarr;</a>
-        </div>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="h4 text-warning">@product.Price.ToString("C")</span>
+                                <span class="badge bg-secondary">В наличии</span>
+                            </div>
 
-        <!-- 6. Аксессуары и Запчасти -->
-        <div class="card hidden-on-scroll slide-in-bottom" style="transition-delay: 500ms;">
-            <div class="card-icon">&#128295;</div>
-            <h3 class="card-title">Аксессуары и Запчасти</h3>
-            <p class="card-description">
-                Все необходимое для ремонта, тюнинга и комфортного использования вашей техники.
-                Кабели, чехлы, комплектующие.
-            </p>
-            <a asp-controller="Product" asp-action="List" asp-route-categoryId="6" class="card-link">Смотреть каталог &rarr;</a>
-        </div>
+                            <form asp-controller="Cart" asp-action="Add" method="post">
+                                <input type="hidden" name="productId" value="@product.Id" />
+                                <button type="submit" class="btn btn-warning w-100">
+                                    <i class="bi bi-cart"></i> В корзину
+                                </button>
+                            </form>
+
+                            <a asp-controller="Product" asp-action="GetProduct" asp-route-id="@product.Id" class="btn btn-outline-secondary w-100 mt-2">
+                                Подробнее
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12 text-center mt-5">
+                <p class="text-white">Товары не найдены или каталог пуст.</p>
+                @if (ViewData["CurrentFilter"] != null)
+                {
+                    <a asp-controller="Home" asp-action="Catalog" class="btn btn-sm btn-outline-warning">Показать весь каталог</a>
+                }
+            </div>
+        }
     </div>
 </div>

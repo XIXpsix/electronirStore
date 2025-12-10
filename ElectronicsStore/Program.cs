@@ -16,6 +16,8 @@ builder.Services.AddDbContext<ElectronicsStoreContext>(options =>
 // 2. Регистрация Репозиториев (DAL)
 builder.Services.AddScoped<IBaseStorage<Category>, BaseStorage<Category>>();
 builder.Services.AddScoped<IBaseStorage<Product>, BaseStorage<Product>>();
+builder.Services.AddScoped<IBaseStorage<User>, BaseStorage<User>>();
+builder.Services.AddScoped<IBaseStorage<CartItem>, BaseStorage<CartItem>>(); // <-- КОРЗИНА
 builder.Services.AddScoped(typeof(IBaseStorage<>), typeof(BaseStorage<>)); // Универсальный репозиторий
 
 // Где-то в блоке регистрации сервисов (BLL)
@@ -24,8 +26,8 @@ builder.Services.AddScoped<EmailService>();
 // 3. Регистрация Сервисов (BLL)
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IProductService, ProductService>();
-// ВАЖНО: Добавляем AccountService, иначе контроллер аккаунта не запустится
 builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddScoped<ICartService, CartService>(); // <-- СЕРВИС КОРЗИНЫ
 
 // 4. Настройка аутентификации (Cookie) - чтобы работал вход
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
