@@ -136,12 +136,19 @@ namespace ElectronicsStore.BLL.Realizations
 
         // --- НОВЫЕ МЕТОДЫ ДЛЯ ПРОФИЛЯ ---
 
-        public async Task<BaseResponse<User>> GetUser(string name)
+        public async Task<BaseResponse<User>> GetUser(string? name) // ✅ Обновленная сигнатура
         {
             try
             {
+                // ✅ ИСПРАВЛЕНИЕ NRT: Проверка на null/пустую строку перед использованием
+                if (string.IsNullOrWhiteSpace(name))
+                {
+                    return new() { Description = "Имя пользователя не указано", StatusCode = StatusCode.UserNotFound };
+                }
+
                 // ИСПРАВЛЕНО: Устранена ошибка лямбда-выражения (используется Where)
                 // Ищем пользователя по имени (которое в нашей системе является Name из клеймов)
+                // Теперь безопасно использовать 'name' в лямбда-выражении
                 var user = await userRepository.GetAll().Where(x => x.Name == name).FirstOrDefaultAsync();
                 if (user == null) return new() { Description = "Пользователь не найден", StatusCode = StatusCode.UserNotFound };
 
@@ -153,11 +160,17 @@ namespace ElectronicsStore.BLL.Realizations
             }
         }
 
-        // ИСПРАВЛЕНО: newAvatarPath теперь string? (допускает null)
-        public async Task<BaseResponse<User>> EditProfile(string name, UserProfileViewModel model, string? newAvatarPath)
+        // ИСПРАВЛЕНО: name теперь string?
+        public async Task<BaseResponse<User>> EditProfile(string? name, UserProfileViewModel model, string? newAvatarPath)
         {
             try
             {
+                // ✅ ИСПРАВЛЕНИЕ NRT: Проверка на null/пустую строку перед использованием
+                if (string.IsNullOrWhiteSpace(name))
+                {
+                    return new() { Description = "Имя пользователя не указано", StatusCode = StatusCode.BadRequest };
+                }
+
                 // ИСПРАВЛЕНО: Устранена ошибка лямбда-выражения (используется Where)
                 var user = await userRepository.GetAll().Where(x => x.Name == name).FirstOrDefaultAsync();
                 if (user == null) return new() { Description = "Пользователь не найден", StatusCode = StatusCode.UserNotFound };

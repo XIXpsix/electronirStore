@@ -1,6 +1,7 @@
 ﻿using ElectronicsStore.BLL.Interfaces;
 using ElectronicsStore.Domain.Entity;
 using ElectronicsStore.Domain.ViewModels;
+using ElectronicsStore.Domain.Enum;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
@@ -8,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Linq;
-using ElectronicsStore.Domain.Enum; // Для явного указания StatusCode
+ // Для явного указания StatusCode
 
 // ИСПРАВЛЕНО: Предупреждение "Использовать основной конструктор" уже устранено
 namespace ElectronicsStore.Controllers
@@ -25,7 +26,7 @@ namespace ElectronicsStore.Controllers
             if (ModelState.IsValid)
             {
                 var response = await accountService.Register(model);
-                if (response.StatusCode == StatusCode.OK)
+                if (response.StatusCode == Domain.Enum.StatusCode.OK)
                 {
                     // УСПЕХ: Возвращаем JSON с адресом для перехода (на ввод кода)
                     return Json(new
@@ -56,7 +57,7 @@ namespace ElectronicsStore.Controllers
             {
                 var response = await accountService.Login(model);
                 // ИСПРАВЛЕНО: Добавлена явная проверка Data != null для устранения NRT-предупреждения
-                if (response.StatusCode == StatusCode.OK && response.Data != null)
+                if (response.StatusCode == Domain.Enum.StatusCode.OK && response.Data != null)
                 {
                     await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(response.Data));
                     // УСПЕХ: Возвращаем JSON с адресом главной страницы
@@ -86,7 +87,7 @@ namespace ElectronicsStore.Controllers
             {
                 var response = await accountService.ConfirmEmail(model.Email, model.Code);
                 // ИСПРАВЛЕНО: Добавлена явная проверка Data != null для устранения NRT-предупреждения
-                if (response.StatusCode == StatusCode.OK && response.Data != null)
+                if (response.StatusCode == Domain.Enum.StatusCode.OK && response.Data != null)
                 {
                     await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(response.Data));
                     return RedirectToAction("Index", "Home");
@@ -136,7 +137,7 @@ namespace ElectronicsStore.Controllers
             };
             var response = await accountService.IsCreatedAccount(userModel);
 
-            if (response.StatusCode == StatusCode.OK && response.Data != null)
+            if (response.StatusCode == Domain.Enum.StatusCode.OK && response.Data != null)
             {
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(response.Data));
                 return RedirectToAction("Index", "Home");

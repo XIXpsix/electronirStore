@@ -1,82 +1,88 @@
-﻿@using ElectronicsStore
-@using ElectronicsStore.Models
-@using ElectronicsStore.Domain.ViewModels
-@using ElectronicsStore.Domain.Entity
-@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelper
-@model ElectronicsStore.Domain.ViewModels.CatalogViewModel
+﻿using ElectronicsStore.BLL.Interfaces;
+using ElectronicsStore.Domain.Entity;
+using ElectronicsStore.Domain.ViewModels;
+using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
+using System.Collections.Generic; // Добавлено для IEnumerable
+using System.Linq; // Добавлено для Where и ToList
+using System; // Добавлено для StringComparison
 
-@{
-    ViewData["Title"] = "Каталог товаров";
-}
+namespace ElectronicsStore.Controllers
+{
+    // ИСПРАВЛЕНО: Использование основного конструктора для IProductService и ICategoryService
+    public class HomeController(IProductService productService, ICategoryService categoryService) : Controller
+    {
+        // Инжектированные сервисы (productService, categoryService) используются напрямую
 
-<div class="container py-4">
-    <h2 class="text-center mb-5 text-warning fw-bold text-uppercase">Каталог товаров</h2>
+        public IActionResult Index() => View();
+        public IActionResult Privacy() => View();
+        public IActionResult About() => View();
+        public IActionResult Contacts() => View();
 
-    <div id="productsContainer">
-        @if (Model != null && Model.Any())
-        {
-            @* 1. Группируем товары по названию категории *@
-            @foreach (var group in Model.GroupBy(x => x.Category?.Name ?? "Другое").OrderBy(g => g.Key))
-            {
-                @* 2. Выводим заголовок категории *@
-                <div class="category-section mb-5">
-                    <h3 class="text-white mb-4 ps-3 border-start border-warning border-5">
-                        @group.Key
-                    </h3>
+        [HttpGet]
+        // ИСПРАВЛЕНО NRT: category и searchString могут быть null (string?)
+        public async Task<IActionResult>
+    Catalog(string? category, string? searchString)
+    {
+    // 1. Получаем продукты
+    var productsResponse = await productService.GetProducts();
+    // ИСПРАВЛЕНО NRT: Используем ?? [] для пустой коллекции (requires C# 12, or switch to new List<Product>
+        ())
+        IEnumerable<Product>
+            products = productsResponse.Data ?? [];
 
-                    <div class="row g-4">
-                        @* 3. Выводим товары этой группы *@
-                        @foreach (var product in group)
-                        {
-                            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-                                <div class="card h-100 border-secondary shadow-sm" style="background-color: #1e1e1e; transition: transform 0.2s;">
+            // 2. Получаем категории (для CatalogViewModel)
+            var categoriesResponse = await categoryService.GetCategories();
+            IEnumerable<Category>
+                categories = categoriesResponse.Data ?? [];
 
-                                    @* Изображение *@
-                                    <div class="position-relative bg-white overflow-hidden rounded-top" style="height: 200px; display: flex; align-items: center; justify-content: center;">
-                                        @if (product.Avatar != null && product.Avatar.Length > 0)
-                                        {
-                                            <img src="data:image/jpeg;base64,@Convert.ToBase64String(product.Avatar)" alt="@product.Name" style="max-height: 90%; max-width: 90%; object-fit: contain;">
-                                        }
-                                        else
-                                        {
-                                            <img src="~/img/placeholder.jpg" alt="Нет фото" style="max-height: 90%; max-width: 90%; object-fit: contain; opacity: 0.5;">
-                                        }
-                                    </div>
+                // Если возникла ошибка при получении продуктов (хотя категории могли быть получены)
+                if (productsResponse.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK)
+                {
+                // Применяем фильтр по категории
+                if (!string.IsNullOrEmpty(category))
+                {
+                // ИСПРАВЛЕНИЕ: Проверяем p.Category?.Name != null
+                if (category == "tvs")
+                products = products.Where(p => p.Category?.Name != null &&
+                (p.Category.Name.Contains("Телевизор", StringComparison.OrdinalIgnoreCase) ||
+                p.Category.Name.Contains("Монитор", StringComparison.OrdinalIgnoreCase)));
+                else if (category == "pc")
+                products = products.Where(p => p.Category?.Name != null &&
+                (p.Category.Name.Contains("ПК", StringComparison.OrdinalIgnoreCase) ||
+                p.Category.Name.Contains("Ноутбук", StringComparison.OrdinalIgnoreCase)));
+                else
+                // ИСПРАВЛЕНИЕ: Фильтруем по Slug категории
+                products = products.Where(p => p.Category?.Slug == category);
+                }
 
-                                    @* Контент карточки *@
-                                    <div class="card-body d-flex flex-column p-3">
-                                        <h6 class="card-title text-warning text-truncate mb-1" title="@product.Name" style="font-weight: 600;">
-                                            @product.Name
-                                        </h6>
+                // Применяем фильтр по поисковой строке
+                if (!string.IsNullOrEmpty(searchString))
+                {
+                // ИСПРАВЛЕНО NRT: Проверяем p.Name != null
+                products = products.Where(p => p.Name != null &&
+                p.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase));
+                }
 
-                                        <p class="text-muted small mb-3">
-                                            @* Можно вывести краткое описание или оставить пустым *@
-                                            @(product.Description?.Length > 50 ? product.Description.Substring(0, 50) + "..." : product.Description)
-                                        </p>
+                // ИСПРАВЛЕНО: Создаем и возвращаем CatalogViewModel.
+                // Это решит ошибки "CatalogViewModel" не содержит определения "GroupBy" и "Any" в представлении.
+                var viewModel = new CatalogViewModel
+                {
+                Products = products.ToList(),
+                Categories = categories.ToList(),
+                CurrentSearchName = searchString,
+                CurrentCategoryId = categories.FirstOrDefault(c => c.Slug == category)?.Id ?? 0 // Опционально: устанавливаем ID текущей категории
+                };
 
-                                        <div class="mt-auto">
-                                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                                <span class="text-white fs-5 fw-bold">@product.Price.ToString("N0") ₽</span>
-                                            </div>
+                return View(viewModel);
+                }
+                return RedirectToAction("Error");
+                }
 
-                                            <a asp-controller="Product" asp-action="GetProduct" asp-route-id="@product.Id" class="btn btn-warning w-100 fw-bold">
-                                                Подробнее
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        }
-                    </div>
-                </div>
-            }
-        }
-        else
-        {
-            <div class="text-center text-muted py-5">
-                <h4 class="fw-light">Товары не найдены :(</h4>
-                <p>Попробуйте изменить параметры поиска или загляните позже.</p>
-            </div>
-        }
-    </div>
-</div>
+                [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+                public IActionResult Error()
+                {
+                return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+                }
+                }
+                }
