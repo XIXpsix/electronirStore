@@ -1,19 +1,368 @@
-﻿@* Указываем, что моделью может быть пустой список Product, как это отправляет контроллер *@
-@model List<ElectronicsStore.Domain.Entity.Product>
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Top Tech - Лучшее железо</title>
+    <style>
+        /* --- ТЕХНО-СТИЛЬ (DARK MODE) --- */
+        :root {
+            --bg-body: #0f1115; /* Почти черный фон */
+            --bg-card: #181b21; /* Темно-серые карточки */
+            --text-main: #ffffff; /* Белый текст */
+            --text-muted: #94a3b8; /* Серый текст для описаний */
+            --accent: #00e5ff; /* Неоновый голубой (Cyber Cyan) */
+            --accent-hover: #00b8cc;
+        }
 
-@{
-    ViewData["Title"] = "Главная страница";
-}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-<div class="container py-5 text-center text-white">
-    <h1 class="display-3 fw-bold brand-orange">ElectronicsHub</h1>
-    <p class="lead text-white-50">Ваш надежный проводник в мир современных технологий.</p>
-    <hr class="text-secondary opacity-25" />
-    <a asp-controller="Home" asp-action="Catalog" class="btn btn-lg btn-warning fw-bold mt-4">Перейти в Каталог товаров</a>
-</div>
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.5;
+        }
 
-@* Оставляем этот блок пустым, так как главная страница не показывает товары *@
-@if (Model.Any())
-{
-    // Пусто
-}
+        /* --- ШАПКА --- */
+        header {
+            background-color: rgba(15, 17, 21, 0.95);
+            border-bottom: 1px solid #2d3748;
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .nav-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text-main);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+            .logo span {
+                color: var(--accent);
+            }
+
+        /* --- HERO БАННЕР --- */
+        .hero {
+            background: linear-gradient(to right, #1a202c, #0f1115);
+            padding: 80px 20px;
+            text-align: center;
+            border-bottom: 1px solid #2d3748;
+        }
+
+            .hero h1 {
+                font-size: 2.5rem;
+                margin-bottom: 15px;
+                font-weight: 800;
+            }
+
+            .hero p {
+                font-size: 1.1rem;
+                color: var(--text-muted);
+                max-width: 600px;
+                margin: 0 auto 30px auto;
+            }
+
+        .btn-tech {
+            background-color: var(--accent);
+            color: #000;
+            padding: 12px 35px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: 0.3s;
+            display: inline-block;
+        }
+
+            .btn-tech:hover {
+                background-color: var(--accent-hover);
+                box-shadow: 0 0 20px rgba(0, 229, 255, 0.4);
+            }
+
+        /* --- СЕТКА ТОВАРОВ --- */
+        .catalog-title {
+            margin: 40px 0 30px 0;
+            font-size: 1.8rem;
+            border-left: 4px solid var(--accent);
+            padding-left: 15px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            padding-bottom: 60px;
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid #2d3748;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.3s, border-color 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+
+            .card:hover {
+                transform: translateY(-5px);
+                border-color: var(--accent);
+            }
+
+        .img-wrap {
+            height: 220px; /* Чуть увеличил высоту */
+            width: 100%;
+            overflow: hidden;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+            .img-wrap img {
+                width: 100%;
+                height: 100%;
+                object-fit: contain; /* Картинка вписывается целиком */
+                padding: 10px;
+            }
+
+        .card-body {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .category {
+            font-size: 0.8rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: white;
+        }
+
+        .specs {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 15px;
+            flex-grow: 1;
+        }
+
+            .specs ul {
+                list-style: none;
+                padding-left: 0;
+            }
+
+            .specs li::before {
+                content: "• ";
+                color: var(--accent);
+            }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #2d3748;
+            padding-top: 15px;
+            margin-top: auto;
+        }
+
+        .price {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        .btn-buy {
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 0.9rem;
+            border: 1px solid var(--accent);
+            padding: 5px 15px;
+            border-radius: 4px;
+            transition: 0.3s;
+        }
+
+            .btn-buy:hover {
+                background: var(--accent);
+                color: black;
+            }
+
+        /* --- МОБИЛЬНАЯ ВЕРСИЯ --- */
+        @@media (max-width: 600px) {
+            .hero h1
+
+        {
+            font-size: 1.8rem;
+        }
+
+        .grid {
+            grid-template-columns: 1fr;
+            padding: 0 10px 40px 10px;
+        }
+
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="container nav-flex">
+            <div class="logo">PC<span>ZONE</span></div>
+            <div style="color: white; font-size: 1.5rem;">≡</div>
+        </div>
+    </header>
+
+    <div class="hero">
+        <div class="container">
+            <h1>Мощное железо для любых задач</h1>
+            <p>Топовые сборки, игровые ноутбуки и профессиональная периферия.</p>
+            <a href="#shop" class="btn-tech">Смотреть каталог</a>
+        </div>
+    </div>
+
+    <section id="shop" class="container">
+        <h2 class="catalog-title">Ассортимент</h2>
+
+        <div class="grid">
+
+            <div class="card">
+                <div class="img-wrap">
+                    <img src="https://images.unsplash.com/photo-1593640408182-31c70c8268f5?auto=format&fit=crop&w=800&q=80" alt="Ноутбук">
+                </div>
+                <div class="card-body">
+                    <div class="category">Ноутбуки</div>
+                    <div class="card-title">UltraBook Pro X15</div>
+                    <div class="specs">
+                        <ul>
+                            <li>CPU: Core i9 12900H</li>
+                            <li>GPU: RTX 4070 8GB</li>
+                            <li>RAM: 32GB DDR5</li>
+                        </ul>
+                    </div>
+                    <div class="card-footer">
+                        <span class="price">145 000 ₽</span>
+                        <a href="#" class="btn-buy">Купить</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="img-wrap">
+                    <img src="https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=800&q=80" alt="ПК">
+                </div>
+                <div class="card-body">
+                    <div class="category">Игровые ПК</div>
+                    <div class="card-title">CyberBattle Station</div>
+                    <div class="specs">
+                        <ul>
+                            <li>Корпус: Glass ARGB</li>
+                            <li>GPU: RTX 4090 OC</li>
+                            <li>Охлаждение: Водяное</li>
+                        </ul>
+                    </div>
+                    <div class="card-footer">
+                        <span class="price">320 000 ₽</span>
+                        <a href="#" class="btn-buy">Купить</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="img-wrap">
+                    <img src="https://images.unsplash.com/photo-1595225476474-87563907a212?auto=format&fit=crop&w=800&q=80" alt="Клавиатура">
+                </div>
+                <div class="card-body">
+                    <div class="category">Периферия</div>
+                    <div class="card-title">MechKey RGB 60%</div>
+                    <div class="specs">
+                        <ul>
+                            <li>Свичи: Red Linear</li>
+                            <li>Подсветка: Full RGB</li>
+                            <li>Корпус: Алюминий</li>
+                        </ul>
+                    </div>
+                    <div class="card-footer">
+                        <span class="price">8 500 ₽</span>
+                        <a href="#" class="btn-buy">Купить</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="img-wrap">
+                    <img src="https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=800&q=80" alt="Игровые Наушники">
+                </div>
+                <div class="card-body">
+                    <div class="category">Аудио / Гейминг</div>
+                    <div class="card-title">HyperSound Pro 7.1</div>
+                    <div class="specs">
+                        <ul>
+                            <li>Микрофон: Съемный</li>
+                            <li>Звук: Объемный 7.1</li>
+                            <li>Подсветка: RGB кольцо</li>
+                        </ul>
+                    </div>
+                    <div class="card-footer">
+                        <span class="price">6 500 ₽</span>
+                        <a href="#" class="btn-buy">Купить</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="img-wrap">
+                    <img src="https://images.unsplash.com/photo-1590658268037-6bf12165a8df?auto=format&fit=crop&w=800&q=80" alt="TWS Наушники">
+                </div>
+                <div class="card-body">
+                    <div class="category">Аудио / TWS</div>
+                    <div class="card-title">AirDots Ultra</div>
+                    <div class="specs">
+                        <ul>
+                            <li>Тип: Вакуумные</li>
+                            <li>Кейс: Беспроводная зарядка</li>
+                            <li>Работа: до 24 часов</li>
+                        </ul>
+                    </div>
+                    <div class="card-footer">
+                        <span class="price">3 990 ₽</span>
+                        <a href="#" class="btn-buy">Купить</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+</body>
+</html>

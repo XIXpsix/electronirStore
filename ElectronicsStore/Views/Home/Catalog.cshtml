@@ -4,19 +4,16 @@
 @{
     ViewData["Title"] = "Каталог";
 
-    // Получаем текущие параметры из URL
     var currentCategory = Context.Request.Query["category"].ToString();
     var currentSearch = Context.Request.Query["searchString"].ToString();
 
-    // Логика: Если есть категория или поиск -> показываем товары. Иначе -> меню категорий.
     bool showProducts = !string.IsNullOrEmpty(currentCategory) || !string.IsNullOrEmpty(currentSearch);
 
-    // Красивое название для заголовка
     string categoryName = currentCategory switch
     {
         "smartphones" => "Телефоны",
         "tvs" => "ТВ и Экраны",
-        "pc" => "Компьютеры",
+        "laptops" => "Компьютеры",
         "Аксессуары" => "Аксессуары",
         _ => "Результаты поиска"
     };
@@ -27,32 +24,24 @@
 
         @if (!showProducts)
         {
-            /* =======================================================
-            ЭКРАН 1: ВЫБОР КАТЕГОРИИ (Списка товаров НЕТ)
-            ======================================================= */
-
             <p class="text-muted mt-2">Выберите категорию или найдите нужный товар</p>
 
             <div class="d-flex justify-content-center mt-4">
                 <form asp-controller="Home" asp-action="Catalog" method="get" class="w-100" style="max-width: 700px;">
                     <div class="input-group input-group-lg">
-
                         <input type="text" name="searchString" class="form-control bg-dark text-white border-secondary"
                                placeholder="Например: Iphone 15..."
                                aria-label="Поиск товара"
                                style="border-radius: 10px 0 0 10px; padding: 15px;">
-
                         <button class="btn btn-warning px-5 fw-bold" type="submit"
                                 style="border-radius: 0 10px 10px 0; color: #000;">
                             НАЙТИ
                         </button>
-
                     </div>
                 </form>
             </div>
 
             <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 fade-in-up">
-
                 <div class="col">
                     <a asp-action="Catalog" asp-route-category="smartphones" class="text-decoration-none category-nav-link">
                         <div class="card h-100 category-big-card">
@@ -78,7 +67,7 @@
                 </div>
 
                 <div class="col">
-                    <a asp-action="Catalog" asp-route-category="pc" class="text-decoration-none category-nav-link">
+                    <a asp-action="Catalog" asp-route-category="laptops" class="text-decoration-none category-nav-link">
                         <div class="card h-100 category-big-card">
                             <div class="card-body d-flex flex-column align-items-center justify-content-center p-5">
                                 <div class="icon-big mb-3">💻</div>
@@ -111,14 +100,9 @@
                     </a>
                 </div>
             </div>
-
         }
         else
         {
-            /* =======================================================
-            ЭКРАН 2: СПИСОК ТОВАРОВ (Выбрана категория)
-            ======================================================= */
-
             <div class="d-flex align-items-center mb-4 fade-in">
                 <a asp-action="Catalog" asp-route-category="" class="btn btn-outline-secondary me-3 rounded-circle"
                    style="width: 40px; height: 40px; padding: 0; display: flex; align-items: center; justify-content: center;">
@@ -127,7 +111,6 @@
 
                 <div>
                     <h2 class="text-white fw-bold text-uppercase m-0">@categoryName</h2>
-                    @* ИСПРАВЛЕНО: Добавлены скобки Count(), так как это метод IEnumerable *@
                     <small class="text-main-orange">Найдено товаров: @(Model.Products?.Count() ?? 0)</small>
                 </div>
 
@@ -141,16 +124,15 @@
             </div>
 
             <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-4 fade-in-up">
-                @* ИСПРАВЛЕНО: Any() это метод, он корректен *@
                 @if (Model.Products != null && Model.Products.Any())
                 {
                     @foreach (var product in Model.Products)
                     {
                         <div class="col">
                             <div class="card h-100 border-0 product-card bg-dark-card">
-
                                 <a asp-controller="Product" asp-action="GetProduct" asp-route-id="@product.Id" class="img-wrapper">
-                                    <img src="@(product.Images != null && product.Images.Any() ? product.Images.First().ImagePath : "/img/iphone15.jpg")"
+                                    @* ИСПРАВЛЕНО: Убрана принудительная картинка iphone15.jpg для пустых товаров *@
+                                    <img src="@(product.Images != null && product.Images.Any() ? product.Images.First().ImagePath : product.ImagePath)"
                                          class="card-img-top" alt="@product.Name">
                                 </a>
 
@@ -186,7 +168,6 @@
 </div>
 
 <style>
-    /* ОБЩИЕ ЦВЕТА */
     :root {
         --c-orange: #ff6600;
         --c-dark-card: #1e1e1e;
@@ -204,7 +185,6 @@
         background-color: var(--c-dark-card);
     }
 
-    /* КАРТОЧКИ ГЛАВНОГО МЕНЮ */
     .category-big-card {
         background: #1a1a1a;
         border: 1px solid #333;
@@ -237,7 +217,6 @@
             box-shadow: 0 0 20px rgba(255, 102, 0, 0.5);
         }
 
-    /* ПОИСК */
     .search-input {
         background-color: #121212;
         border: 1px solid #444;
@@ -278,7 +257,6 @@
             color: #fff;
         }
 
-    /* ТОВАРЫ */
     .product-card {
         border: 1px solid #333 !important;
         border-radius: 12px;
@@ -325,7 +303,6 @@
             color: #fff;
         }
 
-    /* АНИМАЦИИ ПОЯВЛЕНИЯ */
     .fade-in {
         animation: fadeIn 0.5s ease-in;
     }

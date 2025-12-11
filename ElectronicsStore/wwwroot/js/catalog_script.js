@@ -4,7 +4,6 @@
     const maxPrice = document.getElementById("maxPrice");
     const sortType = document.getElementById("sortType");
 
-    // Функция задержки (debounce)
     function debounce(func, timeout = 500) {
         let timer;
         return (...args) => {
@@ -15,20 +14,14 @@
 
     const debouncedFilter = debounce(() => applyFilters());
 
-    // Привязка событий
     if (nameSearch) nameSearch.addEventListener("input", debouncedFilter);
     if (minPrice) minPrice.addEventListener("input", debouncedFilter);
     if (maxPrice) maxPrice.addEventListener("input", debouncedFilter);
     if (sortType) sortType.addEventListener("change", applyFilters);
 });
 
-// НОВАЯ ФУНКЦИЯ: Выбор категории при клике
 function selectCategory(id, element) {
-    // 1. Устанавливаем ID в скрытое поле
     document.getElementById("categoryId").value = id;
-
-    // 2. Визуально переключаем класс 'active'
-    // Снимаем выделение со всех кнопок
     const buttons = document.querySelectorAll("#categoryList button");
     buttons.forEach(btn => {
         btn.classList.remove("active");
@@ -36,18 +29,14 @@ function selectCategory(id, element) {
         btn.classList.add("bg-dark");
         btn.classList.add("text-white");
     });
-
-    // Выделяем нажатую кнопку
     element.classList.remove("bg-dark");
     element.classList.remove("text-white");
     element.classList.add("active");
-
-    // 3. Применяем фильтр
     applyFilters();
 }
 
 async function applyFilters() {
-    const categoryIdVal = document.getElementById("categoryId").value; // Берем из скрытого поля
+    const categoryIdVal = document.getElementById("categoryId").value;
     const minPriceEl = document.getElementById("minPrice");
     const maxPriceEl = document.getElementById("maxPrice");
     const nameSearchEl = document.getElementById("nameSearch");
@@ -79,11 +68,12 @@ async function applyFilters() {
 
         if (result.data && result.data.length > 0) {
             result.data.forEach(product => {
+                // ИСПРАВЛЕНО: Убрана заглушка /img/placeholder.jpg
                 const productHtml = `
                     <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4 fade-in">
                         <div class="card h-100 border-secondary" style="background-color: #1e1e1e;">
                             <div class="position-relative bg-white overflow-hidden rounded-top" style="height: 200px; display: flex; align-items: center; justify-content: center;">
-                                <img src="${product.imagePath || '/img/placeholder.jpg'}" alt="${product.name}" style="max-height: 90%; max-width: 90%; object-fit: contain;">
+                                <img src="${product.imagePath || ''}" alt="${product.name}" style="max-height: 90%; max-width: 90%; object-fit: contain;">
                             </div>
                             <div class="card-body d-flex flex-column p-3">
                                 <h6 class="card-title text-warning text-truncate mb-1" title="${product.name}">
