@@ -1,16 +1,16 @@
 ﻿@{
-    ViewData["Title"] = "Главная";
+    ViewData["Title"] = "Главная страница";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Добро пожаловать в ElectronicsHub!</h1>
-    <p>Лучшая электроника по доступным ценам.</p>
+<div class="text-center py-5">
+    <h1 class="display-4 text-white">Добро пожаловать в ElectronicsStore!</h1>
+    <p class="lead text-white-50">Начните покупки, перейдя в наш <a asp-controller="Home" asp-action="Catalog" class="text-warning fw-bold">Каталог</a>.</p>
 
-    <div class="mt-4">
-        <img src="/img/iphone15.jpg" class="img-fluid rounded shadow" alt="iPhone 15" style="max-height: 400px;">
-    </div>
-
-    <div class="mt-5">
-        <a asp-controller="Home" asp-action="Catalog" class="btn btn-primary btn-lg">Перейти в каталог</a>
-    </div>
+    @* Опционально: ссылка на админ-панель, если пользователь авторизован как администратор *@
+    @if (User.IsInRole("Admin"))
+    {
+        <p class="mt-4">
+            <a asp-controller="Admin" asp-action="Index" class="btn btn-warning fw-bold">Перейти в Панель Администратора</a>
+        </p>
+    }
 </div>

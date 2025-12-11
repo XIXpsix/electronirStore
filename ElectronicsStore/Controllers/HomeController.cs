@@ -14,7 +14,11 @@ namespace ElectronicsStore.Controllers
     {
         // Инжектированные сервисы (productService, categoryService) используются напрямую
 
-        public IActionResult Index() => View();
+        public IActionResult Index()
+        {
+            // Передаем пустой список продуктов, чтобы Model в представлении не был null
+            return View(new List<Product>());
+        }
         public IActionResult Privacy() => View();
         public IActionResult About() => View();
         public IActionResult Contacts() => View();
