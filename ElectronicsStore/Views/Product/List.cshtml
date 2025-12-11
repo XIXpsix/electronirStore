@@ -1,4 +1,4 @@
-﻿@model IEnumerable<ElectronicsStore.Domain.Entity.Product>
+﻿@model ElectronicsStore.Domain.Entity
 
 @{
     ViewData["Title"] = "Каталог товаров";
@@ -75,9 +75,7 @@
         }
     </div>
 </div>
-
 <style>
-    /* Легкий эффект при наведении на карточку */
     .card:hover {
         transform: translateY(-5px);
         box-shadow: 0 10px 20px rgba(255, 102, 0, 0.2) !important;

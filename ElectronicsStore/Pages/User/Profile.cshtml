@@ -7,11 +7,11 @@
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <div class="card shadow-sm border-0 bg-dark-card"> @* Использовал bg-dark-card для соответствия стилю *
+            <div class="card shadow-sm border-0 bg-dark-card"> 
                 <div class="card-header bg-main-orange text-white">
                     <h4 class="mb-0">@ViewData["Title"]</h4>
                 </div>
-                <div class="card-body p-4 text-light-custom"> @* Добавил text-light-custom * @
+                <div class="card-body p-4 text-light-custom"> 
                     
                     <form asp-action="EditProfile" method="post" enctype="multipart/form-data">
                         <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
@@ -23,12 +23,12 @@
                                 <img src="@(Model.CurrentAvatarPath ?? "/img/w.png")" 
                                      class="rounded-circle img-thumbnail" 
                                      style="width: 150px; height: 150px; object-fit: cover; border: 3px solid #ff6600;" 
-                                     alt="Аватар" /> @* Добавил окантовку * @
+                                     alt="Аватар" />
                             </div>
                             
                             <div class="mb-3">
                                 <label asp-for="Avatar" class="form-label fw-bold">Изменить фото</label>
-                                @* Добавил класс для стилизации формы * @
+                                
                                 <input asp-for="Avatar" type="file" class="form-control form-control-dark-custom w-75 mx-auto" accept="image/*" />
                             </div>
                         </div>
@@ -41,7 +41,7 @@
 
                         <div class="mb-3">
                             <label asp-for="Email" class="form-label fw-bold"></label>
-                            @* Поле Email сделаем только для чтения, так как его смена может потребовать отдельной верификации * @
+                           
                             <input asp-for="Email" class="form-control form-control-dark-custom" readonly="readonly" />
                             <small class="text-muted">Email используется как ваш логин и не может быть изменен напрямую.</small>
                             <span asp-validation-for="Email" class="text-danger"></span>

@@ -18,8 +18,7 @@ namespace ElectronicsStore.Controllers
         [HttpGet]
         public async Task<IActionResult> ListOfCategories()
         {
-            var response = await _categoryService.GetAllCategories();
-
+            var response = await _categoryService.GetCategories();
             if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK)
             {
                 return View(response.Data);

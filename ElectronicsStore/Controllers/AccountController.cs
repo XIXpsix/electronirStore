@@ -9,6 +9,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Linq;
 
+// ИСПРАВЛЕНО: Предупреждение "Использовать основной конструктор" уже устранено
 namespace ElectronicsStore.Controllers
 {
     public class AccountController(IAccountService accountService) : Controller
@@ -51,9 +52,10 @@ namespace ElectronicsStore.Controllers
             if (ModelState.IsValid)
             {
                 var response = await accountService.Login(model);
-                if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK)
+                // ИСПРАВЛЕНО: Добавлена явная проверка Data != null для устранения NRT-предупреждения
+                if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK && response.Data != null)
                 {
-                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(response.Data));
+                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(response.Data)); // ИСПРАВЛЕНО: Устранено NRT-предупреждение
                     // УСПЕХ: Возвращаем JSON с адресом главной страницы
                     return Json(new { isValid = true, redirectUrl = Url.Action("Index", "Home") });
                 }
@@ -65,9 +67,11 @@ namespace ElectronicsStore.Controllers
 
         // --- ПОДТВЕРЖДЕНИЕ ПОЧТЫ ---
         [HttpGet]
-        public IActionResult ConfirmEmail(string email)
+        // ИСПРАВЛЕНО: email сделан допускающим null (string?)
+        public IActionResult ConfirmEmail(string? email)
         {
-            return View(new ConfirmEmailViewModel { Email = email });
+            // ИСПРАВЛЕНО: Использован оператор ?? для предотвращения NRT-преобразования
+            return View(new ConfirmEmailViewModel { Email = email ?? string.Empty });
         }
 
         [HttpPost]
@@ -76,12 +80,14 @@ namespace ElectronicsStore.Controllers
             if (ModelState.IsValid)
             {
                 var response = await accountService.ConfirmEmail(model.Email, model.Code);
-                if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK)
+                // ИСПРАВЛЕНО: Добавлена явная проверка Data != null для устранения NRT-предупреждения
+                if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK && response.Data != null)
                 {
-                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(response.Data));
+                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(response.Data)); // ИСПРАВЛЕНО: Устранено NRT-предупреждение
                     return RedirectToAction("Index", "Home");
                 }
-                ModelState.AddModelError("", response.Description);
+                // ИСПРАВЛЕНО: Добавлен оператор ?? для errorMessage, так как response.Description может быть null
+                ModelState.AddModelError("", response.Description ?? "Неизвестная ошибка подтверждения.");
             }
             return View(model);
         }
@@ -112,7 +118,13 @@ namespace ElectronicsStore.Controllers
             var email = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
             var avatar = claims?.FirstOrDefault(c => c.Type == "picture")?.Value ?? claims?.FirstOrDefault(c => c.Type == "image")?.Value;
 
-            var userModel = new User() { Name = name ?? "GoogleUser", Email = email, AvatarPath = avatar };
+            // ИСПРАВЛЕНО: Использован оператор ?? для гарантированной передачи не-null значений в не-nullable свойства User
+            var userModel = new User()
+            {
+                Name = name ?? "GoogleUser",
+                Email = email ?? string.Empty,
+                AvatarPath = avatar ?? "/img/default-user.png"
+            };
             var response = await accountService.IsCreatedAccount(userModel);
 
             if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK && response.Data != null)

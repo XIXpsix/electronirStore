@@ -19,8 +19,8 @@ namespace ElectronicsStore.Domain.Entity
         public Category? Category { get; set; }
 
         // Инициализацию коллекции можно упростить.
-        public List<ProductImage> Images { get; set; } = new(); // Изменено
-        public List<Review> Reviews { get; set; } = new();      // Изменено
-        public string ImagePath { get; set; }
+        public List<ProductImage> Images { get; set; } = new();
+        public List<Review> Reviews { get; set; } = new();
+        public string ImagePath { get; set; } = string.Empty; // ИСПРАВЛЕНО: Инициализация для устранения NRT-предупреждения
     }
 }
