@@ -8,30 +8,77 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/Shared.css" />
     <link rel="stylesheet" href="~/css/login_and_registration.css" />
+
+    <style>
+        .search-results-box {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            background: #1e1e1e; /* Темный фон */
+            border: 1px solid #444;
+            border-radius: 0 0 10px 10px;
+            z-index: 9999;
+            display: none;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            margin-top: 5px;
+        }
+
+        .search-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #333;
+            color: #e0e0e0;
+            transition: background 0.2s;
+        }
+
+            .search-item:hover {
+                background: #ff9900;
+                color: #000;
+            }
+
+            .search-item:last-child {
+                border-bottom: none;
+            }
+    </style>
 </head>
 <body>
 
-    <div class="side-video left-side"></div>
-    <div class="side-video right-side"></div>
+    <div class="video-sidebar-container left-sidebar">
+        <div class="video-overlay"></div>
+        <video autoplay muted loop playsinline class="video-element">
+            <source src="~/img/pc.mp4" type="video/mp4">
+            Ваш браузер не поддерживает видео.
+        </video>
+    </div>
+
+    <div class="video-sidebar-container right-sidebar">
+        <div class="video-overlay"></div>
+        <video autoplay muted loop playsinline class="video-element">
+            <source src="~/img/pc1.mp4" type="video/mp4">
+            Ваш браузер не поддерживает видео.
+        </video>
+    </div>
 
     <div class="main-wrapper">
         <header>
-            <div class="search-wrapper">
-                <input type="text" id="searchInput" placeholder="Поиск товаров..." autocomplete="off">
-                <div id="searchResults" class="search-results-box"></div>
-            </div>
             <nav class="navbar navbar-expand-xl navbar-dark custom-navbar box-shadow mb-3">
                 <div class="container-fluid">
                     <a class="navbar-brand brand-orange" asp-area="" asp-controller="Home" asp-action="Index">
                         ElectronicsHub
                     </a>
 
-                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
-                            aria-expanded="false" aria-label="Toggle navigation">
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+                            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                         <span class="navbar-toggler-icon"></span>
                     </button>
 
                     <div class="navbar-collapse collapse" id="navbarSupportedContent">
+
                         <ul class="navbar-nav mx-auto mb-2 mb-xl-0 text-center flex-grow-1 justify-content-center">
                             <li class="nav-item">
                                 <a class="nav-link text-light-custom" asp-controller="Home" asp-action="Index">Главная</a>
@@ -47,6 +94,12 @@
                             </li>
                         </ul>
 
+                        <div class="search-wrapper d-none d-lg-block mx-3" style="position: relative; width: 300px;">
+                            <input type="text" id="searchInput" placeholder="Поиск..." autocomplete="off"
+                                   class="form-control bg-dark text-white border-secondary"
+                                   style="border-radius: 20px; padding-left: 15px;">
+                            <div id="searchResults" class="search-results-box"></div>
+                        </div>
                         <div class="ms-auto">
                             @await Html.PartialAsync("_LoginPartial")
                         </div>
@@ -69,134 +122,79 @@
             </div>
         </footer>
     </div>
-    <div class="modal-overlay">
-        <div class="login-modal">
-            <h2>Вход в систему</h2>
 
-            <form>
-                <div class="input-group">
-                    <label>Email адрес</label>
-                    <input type="email" placeholder="name@example.com" value="xixpsix2@gmail.com">
-                </div>
-
-                <div class="input-group">
-                    <label>Пароль</label>
-                    <input type="password" placeholder="••••••••">
-                </div>
-
-                <button type="submit" class="login-btn">ВОЙТИ</button>
-            </form>
-
-            <div style="margin: 15px 0; font-size: 12px; color: #777;">или</div>
-
-            <button class="google-btn">
-                <img src="path-to-google-icon.png" width="16" alt="G">
-                Войти через Google
-            </button>
-
-            <div style="margin-top: 20px; font-size: 12px;">
-                Нет аккаунта? <a href="#" style="color: #ff9900;">Зарегистрироваться</a>
-            </div>
-        </div>
-    </div>
-    <div id="loginModal" class="modal-overlay">
-        <div class="modal-window">
-            <span class="close-modal" onclick="closeModal()">×</span>
-
-            <h2 style="color: white; text-align: center; margin-bottom: 20px;">Вход в систему</h2>
-
-            <form action="login.php" method="POST">
-                <div style="margin-bottom: 15px;">
-                    <label style="color: #ff9900; display: block; margin-bottom: 5px;">Email адрес</label>
-                    <input type="email" name="email" style="width: 100%; padding: 10px; border-radius: 5px; border: none;" placeholder="email@example.com">
-                </div>
-
-                <div style="margin-bottom: 20px;">
-                    <label style="color: #ff9900; display: block; margin-bottom: 5px;">Пароль</label>
-                    <input type="password" name="password" style="width: 100%; padding: 10px; border-radius: 5px; border: none;" placeholder="********">
-                </div>
-
-                <button type="submit" class="login-btn">ВОЙТИ</button>
-
-                <p style="text-align: center; color: #777; margin: 10px 0;">или</p>
-
-                <button type="button" style="width: 100%; padding: 10px; background: transparent; border: 1px solid #555; color: white; border-radius: 5px; cursor: pointer;">
-                    Войти через Google
-                </button>
-
-                <div style="margin-top: 15px; text-align: center; font-size: 14px;">
-                    <span style="color: #888;">Нет аккаунта?</span>
-                    <a href="register.php" style="color: #ff9900;">Зарегистрироваться</a>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <script src="~/js/shared_script.js"></script>
-
-    <script>
-        // Имитация базы (потом заменишь на AJAX запрос к серверу)
-        const products = [
-            { name: "Ноутбук Asus", price: "85 000 ₽" },
-            { name: "Мышь Logitech", price: "12 000 ₽" },
-            { name: "Клавиатура", price: "5 500 ₽" }
-        ];
-
-        const input = document.getElementById('searchInput');
-        const resultsBox = document.getElementById('searchResults');
-
-        // Функция задержки (debounce)
-        function debounce(func, timeout = 300) {
-            let timer;
-            return (...args) => {
-                clearTimeout(timer);
-                timer = setTimeout(() => { func.apply(this, args); }, timeout);
-            };
-        }
-
-        input.addEventListener('input', debounce(() => {
-            const query = input.value.toLowerCase().trim();
-            resultsBox.innerHTML = '';
-
-            if (query.length === 0) {
-                resultsBox.style.display = 'none';
-                return;
-            }
-
-            const found = products.filter(p => p.name.toLowerCase().includes(query));
-
-            if (found.length > 0) {
-                found.forEach(p => {
-                    const div = document.createElement('div');
-                    div.className = 'search-item';
-                    div.innerHTML = `<span>${p.name}</span> <span class="item-price">${p.price}</span>`;
-                    div.onclick = () => alert('Переход к ' + p.name);
-                    resultsBox.appendChild(div);
-                });
-                resultsBox.style.display = 'block';
-            } else {
-                resultsBox.style.display = 'none';
-            }
-        }));
-
-        // Скрыть при клике мимо
-        document.addEventListener('click', (e) => {
-            if (!input.contains(e.target) && !resultsBox.contains(e.target)) {
-                resultsBox.style.display = 'none';
-            }
-        });
-    </script>
-
-    <partial name="_LoginRegistrationPartial" /> 
+    <partial name="_LoginRegistrationPartial" />
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-
     <script src="~/js/shared_script.js"></script>
     <script src="~/js/animation.js"></script>
     <script src="~/js/login_and_registration_script.js"></script>
 
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Имитация базы товаров
+            const products = [
+                { name: "Ноутбук Asus ROG", price: "125 000 ₽" },
+                { name: "Мышь Logitech G Pro", price: "12 000 ₽" },
+                { name: "Клавиатура HyperX", price: "8 500 ₽" },
+                { name: "Монитор Samsung 144Hz", price: "22 000 ₽" },
+                { name: "iPhone 15 Pro", price: "110 000 ₽" }
+            ];
+
+            const input = document.getElementById('searchInput');
+            const resultsBox = document.getElementById('searchResults');
+
+            if (input && resultsBox) {
+                // Функция задержки (чтобы не моргало)
+                function debounce(func, timeout = 300) {
+                    let timer;
+                    return (...args) => {
+                        clearTimeout(timer);
+                        timer = setTimeout(() => { func.apply(this, args); }, timeout);
+                    };
+                }
+
+                // Логика поиска
+                input.addEventListener('input', debounce(() => {
+                    const query = input.value.toLowerCase().trim();
+                    resultsBox.innerHTML = '';
+
+                    if (query.length === 0) {
+                        resultsBox.style.display = 'none';
+                        return;
+                    }
+
+                    const found = products.filter(p => p.name.toLowerCase().includes(query));
+
+                    if (found.length > 0) {
+                        found.forEach(p => {
+                            const div = document.createElement('div');
+                            div.className = 'search-item';
+                            div.innerHTML = `
+                                <span style="font-weight:500;">${p.name}</span>
+                                <span style="color:#ff9900; font-size:13px; font-weight:bold;">${p.price}</span>
+                            `;
+                            div.onclick = () => alert('Переход к товару: ' + p.name);
+                            resultsBox.appendChild(div);
+                        });
+                        resultsBox.style.display = 'block';
+                    } else {
+                        resultsBox.innerHTML = '<div style="padding:10px; text-align:center; color:#777;">Ничего не найдено</div>';
+                        resultsBox.style.display = 'block';
+                    }
+                }));
+
+                // Скрыть при клике мимо
+                document.addEventListener('click', (e) => {
+                    if (!input.contains(e.target) && !resultsBox.contains(e.target)) {
+                        resultsBox.style.display = 'none';
+                    }
+                });
+            }
+        });
+    </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
