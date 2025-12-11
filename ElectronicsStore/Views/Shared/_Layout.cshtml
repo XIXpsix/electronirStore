@@ -16,6 +16,10 @@
 
     <div class="main-wrapper">
         <header>
+            <div class="search-wrapper">
+                <input type="text" id="searchInput" placeholder="Поиск товаров..." autocomplete="off">
+                <div id="searchResults" class="search-results-box"></div>
+            </div>
             <nav class="navbar navbar-expand-xl navbar-dark custom-navbar box-shadow mb-3">
                 <div class="container-fluid">
                     <a class="navbar-brand brand-orange" asp-area="" asp-controller="Home" asp-action="Index">
@@ -95,6 +99,94 @@
             </div>
         </div>
     </div>
+    <div id="loginModal" class="modal-overlay">
+        <div class="modal-window">
+            <span class="close-modal" onclick="closeModal()">×</span>
+
+            <h2 style="color: white; text-align: center; margin-bottom: 20px;">Вход в систему</h2>
+
+            <form action="login.php" method="POST">
+                <div style="margin-bottom: 15px;">
+                    <label style="color: #ff9900; display: block; margin-bottom: 5px;">Email адрес</label>
+                    <input type="email" name="email" style="width: 100%; padding: 10px; border-radius: 5px; border: none;" placeholder="email@example.com">
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="color: #ff9900; display: block; margin-bottom: 5px;">Пароль</label>
+                    <input type="password" name="password" style="width: 100%; padding: 10px; border-radius: 5px; border: none;" placeholder="********">
+                </div>
+
+                <button type="submit" class="login-btn">ВОЙТИ</button>
+
+                <p style="text-align: center; color: #777; margin: 10px 0;">или</p>
+
+                <button type="button" style="width: 100%; padding: 10px; background: transparent; border: 1px solid #555; color: white; border-radius: 5px; cursor: pointer;">
+                    Войти через Google
+                </button>
+
+                <div style="margin-top: 15px; text-align: center; font-size: 14px;">
+                    <span style="color: #888;">Нет аккаунта?</span>
+                    <a href="register.php" style="color: #ff9900;">Зарегистрироваться</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="~/js/shared_script.js"></script>
+
+    <script>
+        // Имитация базы (потом заменишь на AJAX запрос к серверу)
+        const products = [
+            { name: "Ноутбук Asus", price: "85 000 ₽" },
+            { name: "Мышь Logitech", price: "12 000 ₽" },
+            { name: "Клавиатура", price: "5 500 ₽" }
+        ];
+
+        const input = document.getElementById('searchInput');
+        const resultsBox = document.getElementById('searchResults');
+
+        // Функция задержки (debounce)
+        function debounce(func, timeout = 300) {
+            let timer;
+            return (...args) => {
+                clearTimeout(timer);
+                timer = setTimeout(() => { func.apply(this, args); }, timeout);
+            };
+        }
+
+        input.addEventListener('input', debounce(() => {
+            const query = input.value.toLowerCase().trim();
+            resultsBox.innerHTML = '';
+
+            if (query.length === 0) {
+                resultsBox.style.display = 'none';
+                return;
+            }
+
+            const found = products.filter(p => p.name.toLowerCase().includes(query));
+
+            if (found.length > 0) {
+                found.forEach(p => {
+                    const div = document.createElement('div');
+                    div.className = 'search-item';
+                    div.innerHTML = `<span>${p.name}</span> <span class="item-price">${p.price}</span>`;
+                    div.onclick = () => alert('Переход к ' + p.name);
+                    resultsBox.appendChild(div);
+                });
+                resultsBox.style.display = 'block';
+            } else {
+                resultsBox.style.display = 'none';
+            }
+        }));
+
+        // Скрыть при клике мимо
+        document.addEventListener('click', (e) => {
+            if (!input.contains(e.target) && !resultsBox.contains(e.target)) {
+                resultsBox.style.display = 'none';
+            }
+        });
+    </script>
+
     <partial name="_LoginRegistrationPartial" /> 
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
