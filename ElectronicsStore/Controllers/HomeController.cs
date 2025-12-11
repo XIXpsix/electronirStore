@@ -24,25 +24,22 @@ namespace ElectronicsStore.Controllers
         public IActionResult Contacts() => View();
 
         [HttpGet]
-        // ИСПРАВЛЕНО NRT: category и searchString могут быть null (string?)
         public async Task<IActionResult> Catalog(string? category, string? searchString)
         {
             // 1. Получаем продукты
             var productsResponse = await productService.GetProducts();
-            // ИСПРАВЛЕНО NRT: Используем ?? [] для пустой коллекции (requires C# 12, or switch to new List<Product>())
             IEnumerable<Product> products = productsResponse.Data ?? [];
 
-            // 2. Получаем категории (для CatalogViewModel)
+            // 2. Получаем категории
             var categoriesResponse = await categoryService.GetCategories();
             IEnumerable<Category> categories = categoriesResponse.Data ?? [];
 
-            // Если возникла ошибка при получении продуктов (хотя категории могли быть получены)
+            // Если возникла ошибка при получении продуктов
             if (productsResponse.StatusCode == Domain.Enum.StatusCode.OK)
             {
-                // Применяем фильтр по категории
+                // ... (весь ваш код фильтрации, который был внутри if) ...
                 if (!string.IsNullOrEmpty(category))
                 {
-                    // ИСПРАВЛЕНИЕ: Проверяем p.Category?.Name != null
                     if (category == "tvs")
                         products = products.Where(p => p.Category?.Name != null &&
                             (p.Category.Name.Contains("Телевизор", StringComparison.OrdinalIgnoreCase) ||
@@ -52,31 +49,29 @@ namespace ElectronicsStore.Controllers
                             (p.Category.Name.Contains("ПК", StringComparison.OrdinalIgnoreCase) ||
                              p.Category.Name.Contains("Ноутбук", StringComparison.OrdinalIgnoreCase)));
                     else
-                        // ИСПРАВЛЕНИЕ: Фильтруем по Slug категории
                         products = products.Where(p => p.Category?.Slug == category);
                 }
 
-                // Применяем фильтр по поисковой строке
                 if (!string.IsNullOrEmpty(searchString))
                 {
-                    // ИСПРАВЛЕНО NRT: Проверяем p.Name != null
                     products = products.Where(p => p.Name != null &&
                         p.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase));
                 }
 
-                // ИСПРАВЛЕНО: Создаем и возвращаем CatalogViewModel. 
-                // Это решит ошибки "CatalogViewModel" не содержит определения "GroupBy" и "Any" в представлении.
                 var viewModel = new CatalogViewModel
                 {
                     Products = products.ToList(),
                     Categories = categories.ToList(),
                     CurrentSearchName = searchString,
-                    CurrentCategoryId = categories.FirstOrDefault(c => c.Slug == category)?.Id ?? 0 // Опционально: устанавливаем ID текущей категории
+                    CurrentCategoryId = categories.FirstOrDefault(c => c.Slug == category)?.Id ?? 0
                 };
 
                 return View(viewModel);
             }
-            return RedirectToAction("Error");
+
+            // --- ИЗМЕНЕНИЕ ЗДЕСЬ ---
+            // Вместо RedirectToAction("Error"), выводим текст ошибки, чтобы понять причину
+            return Content($"ОШИБКА: {productsResponse.Description}");
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

@@ -1,4 +1,5 @@
-﻿@model List<ElectronicsStore.Domain.Entity.Product>
+﻿@using System.Linq
+@model ElectronicsStore.Domain.ViewModels.CatalogViewModel
 
 @{
     ViewData["Title"] = "Каталог";
@@ -105,6 +106,7 @@
                     </a>
                 </div>
             </div>
+
         }
         else
         {
@@ -120,21 +122,24 @@
 
                 <div>
                     <h2 class="text-white fw-bold text-uppercase m-0">@categoryName</h2>
-                    <small class="text-main-orange">Найдено товаров: @Model.Count</small>
+                    @* ИСПРАВЛЕНО: Добавлены скобки Count(), так как это метод IEnumerable *@
+                    <small class="text-main-orange">Найдено товаров: @(Model.Products?.Count() ?? 0)</small>
                 </div>
 
                 <div class="ms-auto d-none d-md-block" style="width: 300px;">
                     <form asp-action="Catalog" method="get" class="search-form position-relative">
-                        <input type="hidden" name="category" value="@currentCategory" /> <input name="searchString" class="form-control search-input-small"
-                                                                                                type="search" placeholder="Поиск в этой категории..." value="@currentSearch">
+                        <input type="hidden" name="category" value="@currentCategory" />
+                        <input name="searchString" class="form-control search-input-small"
+                               type="search" placeholder="Поиск в этой категории..." value="@currentSearch">
                     </form>
                 </div>
             </div>
 
             <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-4 fade-in-up">
-                @if (Model != null && Model.Any())
+                @* ИСПРАВЛЕНО: Any() это метод, он корректен *@
+                @if (Model.Products != null && Model.Products.Any())
                 {
-                    @foreach (var product in Model)
+                    @foreach (var product in Model.Products)
                     {
                         <div class="col">
                             <div class="card h-100 border-0 product-card bg-dark-card">
