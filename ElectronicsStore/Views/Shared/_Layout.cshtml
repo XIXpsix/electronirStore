@@ -135,22 +135,29 @@
                         <span class="navbar-toggler-icon"></span>
                     </button>
 
-                    <div class="collapse navbar-collapse" id="navbarContent">
-                        <ul class="navbar-nav mx-auto mb-2 mb-lg-0 text-uppercase fw-bold">
-                            <li class="nav-item"><a class="nav-link text-white" asp-controller="Home" asp-action="Index">Главная</a></li>
-                            <li class="nav-item"><a class="nav-link text-white" asp-controller="Home" asp-action="About">О нас</a></li>
-                            <li class="nav-item"><a class="nav-link text-white" asp-controller="Home" asp-action="Catalog">Каталог</a></li>
-                            <li class="nav-item"><a class="nav-link text-white" asp-controller="Home" asp-action="Contacts">Контакты</a></li>
-                        </ul>
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link text-light-custom" asp-controller="Home" asp-action="Index">Главная</a>
+                        </li>
 
-                        <div class="search-container d-none d-lg-block mx-3">
-                            <input type="text" id="searchInput" class="form-control bg-dark text-white border-secondary rounded-pill" placeholder="Поиск товара..." autocomplete="off">
-                            <div id="searchResults" class="search-results"></div>
-                        </div>
+                        <li class="nav-item">
+                            <a class="nav-link text-warning fw-bold" asp-controller="Home" asp-action="Catalog">
+                                ☰ Каталог товаров
+                            </a>
+                        </li>
 
-                        <div class="d-flex align-items-center">
-                            @await Html.PartialAsync("_LoginPartial")
-                        </div>
+                        <li class="nav-item">
+                            <a class="nav-link text-light-custom" asp-controller="Home" asp-action="Contacts">Контакты</a>
+                        </li>
+                    </ul>
+
+                    <div class="search-container d-none d-lg-block mx-3">
+                        <form asp-controller="Home" asp-action="Catalog" method="get" class="d-flex">
+                            <input type="text" name="searchString" id="searchInput"
+                                   class="form-control bg-dark text-white border-secondary rounded-pill"
+                                   placeholder="🔍 Найти товар..." autocomplete="off">
+                        </form>
+                        <div id="searchResults" class="search-results"></div>
                     </div>
                 </div>
             </nav>
