@@ -37,7 +37,7 @@ namespace ElectronicsStore.Controllers
             IEnumerable<Category> categories = categoriesResponse.Data ?? [];
 
             // Если возникла ошибка при получении продуктов (хотя категории могли быть получены)
-            if (productsResponse.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK)
+            if (productsResponse.StatusCode == Domain.Enum.StatusCode.OK)
             {
                 // Применяем фильтр по категории
                 if (!string.IsNullOrEmpty(category))
