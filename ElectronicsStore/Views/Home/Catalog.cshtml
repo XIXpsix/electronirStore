@@ -31,19 +31,24 @@
             ЭКРАН 1: ВЫБОР КАТЕГОРИИ (Списка товаров НЕТ)
             ======================================================= */
 
-            <div class="text-center mb-5 fade-in">
-                <h1 class="fw-800 text-white text-uppercase" style="letter-spacing: 2px;">
-                    Каталог <span class="text-main-orange">Electronics</span>
-                </h1>
-                <p class="text-muted mt-2">Выберите категорию для просмотра товаров</p>
+            <p class="text-muted mt-2">Выберите категорию или найдите нужный товар</p>
 
-                <div class="d-flex justify-content-center mt-4">
-                    <form asp-action="Catalog" method="get" class="search-form position-relative w-100" style="max-width: 600px;">
-                        <input name="searchString" class="form-control search-input"
-                               type="search" placeholder="Поиск по всему магазину..." aria-label="Search">
-                        <button class="btn search-btn" type="submit">🔍</button>
-                    </form>
-                </div>
+            <div class="d-flex justify-content-center mt-4">
+                <form asp-controller="Home" asp-action="Catalog" method="get" class="w-100" style="max-width: 700px;">
+                    <div class="input-group input-group-lg">
+
+                        <input type="text" name="searchString" class="form-control bg-dark text-white border-secondary"
+                               placeholder="Например: Iphone 15..."
+                               aria-label="Поиск товара"
+                               style="border-radius: 10px 0 0 10px; padding: 15px;">
+
+                        <button class="btn btn-warning px-5 fw-bold" type="submit"
+                                style="border-radius: 0 10px 10px 0; color: #000;">
+                            НАЙТИ
+                        </button>
+
+                    </div>
+                </form>
             </div>
 
             <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 fade-in-up">

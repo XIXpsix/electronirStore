@@ -2,6 +2,7 @@
 using ElectronicsStore.DAL;
 using Microsoft.EntityFrameworkCore;
 using ElectronicsStore.Domain.Entity;
+using ElectronicsStore.DAL.Interfaces; // Добавлено для IBaseStorage
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 
@@ -12,9 +13,10 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<ElectronicsStoreContext>(options =>
     options.UseNpgsql(connectionString));
 
-// 2. Инициализация слоев (Твой класс Initializer)
+// 2. Инициализация слоев (Твой Initializer)
 builder.Services.InitializeRepositories();
 builder.Services.InitializeServices();
+builder.Services.InitializeValidators(); // Добавил валидаторы, они у тебя были в классе
 
 // 3. Контроллеры
 builder.Services.AddControllersWithViews();
@@ -23,7 +25,6 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-    // ChallengeScheme ставим Cookie по умолчанию, но для Google будем вызывать явно в контроллере
     options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
 })
 .AddCookie(options =>
@@ -33,16 +34,39 @@ builder.Services.AddAuthentication(options =>
 })
 .AddGoogle(googleOptions =>
 {
-    // Важно: убедись, что в secrets.json структура именно такая:
-    // "Authentication": { "Google": { "ClientId": "...", "ClientSecret": "..." } }
     googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"];
     googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
 });
 
+// ... твой код builder.Build(); ...
+
 var app = builder.Build();
+
+// === ВСТАВИТЬ ЭТОТ БЛОК (ЗАПУСК ИНИЦИАЛИЗАЦИИ) ===
+using (var scope = app.Services.CreateScope())
+{
+var services = scope.ServiceProvider;
+try
+{
+// Получаем доступ к хранилищам
+var userStorage = services.GetRequiredService<ElectronicsStore.DAL.Interfaces.IBaseStorage<ElectronicsStore.Domain.Entity.User>>();
+var productStorage = services.GetRequiredService<ElectronicsStore.DAL.Interfaces.IBaseStorage<ElectronicsStore.Domain.Entity.Product>>();
+var categoryStorage = services.GetRequiredService<ElectronicsStore.DAL.Interfaces.IBaseStorage<ElectronicsStore.Domain.Entity.Category>>();
+
+// ЗАПУСКАЕМ СОЗДАНИЕ ТОВАРОВ
+await ElectronicsStore.Initializer.InitializeData(userStorage, productStorage, categoryStorage);
+}
+catch (Exception ex)
+{
+var logger = services.GetRequiredService<ILogger<Program>>();
+logger.LogError(ex, "Ошибка при заполнении базы данных.");
+}
+}
+// ===================================================
 
 if (!app.Environment.IsDevelopment())
 {
+    // ... дальше старый код ...
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
