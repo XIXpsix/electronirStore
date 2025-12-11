@@ -10,30 +10,92 @@
     <link rel="stylesheet" href="~/css/login_and_registration.css" />
 
     <style>
-        .search-results-box {
+        /* === ИСПРАВЛЕНИЕ: СТИЛИ ДЛЯ БОКОВЫХ ВИДЕО === */
+        body {
+            background-color: #121212; /* Темный фон под сайтом */
+            overflow-x: hidden; /* Убираем горизонтальную прокрутку */
+        }
+
+        /* 1. Блоки с видео (фиксированные по бокам) */
+        .video-sidebar {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            width: 250px; /* Фиксированная ширина боковой панели */
+            z-index: 0; /* Самый нижний слой */
+            overflow: hidden;
+            background: #000;
+        }
+
+        .sidebar-left {
+            left: 0;
+        }
+
+        .sidebar-right {
+            right: 0;
+        }
+
+        /* Сами видео */
+        .video-sidebar video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.6; /* Легкая прозрачность, чтобы не отвлекало */
+        }
+
+        /* 2. Основной контент сайта (Центральная колонка) */
+        .main-site-wrapper {
+            position: relative;
+            z-index: 10; /* Поверх видео! */
+            margin-left: 250px; /* Отступ слева (равен ширине видео) */
+            margin-right: 250px; /* Отступ справа */
+            background-color: #1a1a1a; /* Фон основной части */
+            min-height: 100vh;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8); /* Тень по бокам */
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 3. Адаптивность (на телефонах убираем видео) */
+        @@media (max-width: 1200px) {
+            .video-sidebar
+
+        {
+            display: none;
+        }
+        /* Скрываем видео */
+        .main-site-wrapper {
+            margin: 0;
+        }
+        /* Убираем отступы */
+        }
+
+        /* === СТИЛИ ДЛЯ ПОИСКА === */
+        .search-container {
+            position: relative;
+            width: 300px;
+        }
+
+        .search-results {
             position: absolute;
             top: 100%;
             left: 0;
             width: 100%;
-            background: #1e1e1e; /* Темный фон */
+            background: #252525;
             border: 1px solid #444;
-            border-radius: 0 0 10px 10px;
-            z-index: 9999;
+            border-radius: 0 0 8px 8px;
+            z-index: 1000;
             display: none;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            margin-top: 5px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
         }
 
         .search-item {
+            padding: 10px;
+            color: #eee;
+            border-bottom: 1px solid #333;
+            cursor: pointer;
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            padding: 12px 15px;
-            cursor: pointer;
-            border-bottom: 1px solid #333;
-            color: #e0e0e0;
-            transition: background 0.2s;
         }
 
             .search-item:hover {
@@ -42,65 +104,51 @@
             }
 
             .search-item:last-child {
-                border-bottom: none;
+                border: none;
             }
     </style>
 </head>
 <body>
 
-    <div class="video-sidebar-container left-sidebar">
-        <div class="video-overlay"></div>
-        <video autoplay muted loop playsinline class="video-element">
+    <div class="video-sidebar sidebar-left">
+        <video autoplay muted loop playsinline>
             <source src="~/img/pc.mp4" type="video/mp4">
-            Ваш браузер не поддерживает видео.
         </video>
     </div>
 
-    <div class="video-sidebar-container right-sidebar">
-        <div class="video-overlay"></div>
-        <video autoplay muted loop playsinline class="video-element">
+    <div class="video-sidebar sidebar-right">
+        <video autoplay muted loop playsinline>
             <source src="~/img/pc1.mp4" type="video/mp4">
-            Ваш браузер не поддерживает видео.
         </video>
     </div>
 
-    <div class="main-wrapper">
+    <div class="main-site-wrapper">
+
         <header>
-            <nav class="navbar navbar-expand-xl navbar-dark custom-navbar box-shadow mb-3">
+            <nav class="navbar navbar-expand-xl navbar-dark bg-black border-bottom border-warning px-4 py-3">
                 <div class="container-fluid">
-                    <a class="navbar-brand brand-orange" asp-area="" asp-controller="Home" asp-action="Index">
+                    <a class="navbar-brand text-warning fw-bold fs-3" asp-controller="Home" asp-action="Index">
                         ElectronicsHub
                     </a>
 
-                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
-                            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
                         <span class="navbar-toggler-icon"></span>
                     </button>
 
-                    <div class="navbar-collapse collapse" id="navbarSupportedContent">
-
-                        <ul class="navbar-nav mx-auto mb-2 mb-xl-0 text-center flex-grow-1 justify-content-center">
-                            <li class="nav-item">
-                                <a class="nav-link text-light-custom" asp-controller="Home" asp-action="Index">Главная</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-light-custom" asp-controller="Home" asp-action="About">О нас</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-light-custom" asp-controller="Home" asp-action="Catalog">Каталог товаров</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-light-custom" asp-controller="Home" asp-action="Contacts">Контакты</a>
-                            </li>
+                    <div class="collapse navbar-collapse" id="navbarContent">
+                        <ul class="navbar-nav mx-auto mb-2 mb-lg-0 text-uppercase fw-bold">
+                            <li class="nav-item"><a class="nav-link text-white" asp-controller="Home" asp-action="Index">Главная</a></li>
+                            <li class="nav-item"><a class="nav-link text-white" asp-controller="Home" asp-action="About">О нас</a></li>
+                            <li class="nav-item"><a class="nav-link text-white" asp-controller="Home" asp-action="Catalog">Каталог</a></li>
+                            <li class="nav-item"><a class="nav-link text-white" asp-controller="Home" asp-action="Contacts">Контакты</a></li>
                         </ul>
 
-                        <div class="search-wrapper d-none d-lg-block mx-3" style="position: relative; width: 300px;">
-                            <input type="text" id="searchInput" placeholder="Поиск..." autocomplete="off"
-                                   class="form-control bg-dark text-white border-secondary"
-                                   style="border-radius: 20px; padding-left: 15px;">
-                            <div id="searchResults" class="search-results-box"></div>
+                        <div class="search-container d-none d-lg-block mx-3">
+                            <input type="text" id="searchInput" class="form-control bg-dark text-white border-secondary rounded-pill" placeholder="Поиск товара..." autocomplete="off">
+                            <div id="searchResults" class="search-results"></div>
                         </div>
-                        <div class="ms-auto">
+
+                        <div class="d-flex align-items-center">
                             @await Html.PartialAsync("_LoginPartial")
                         </div>
                     </div>
@@ -108,21 +156,21 @@
             </nav>
         </header>
 
-        <main role="main" class="content-container">
+        <main role="main" class="container py-4 flex-grow-1">
             @RenderBody()
         </main>
 
-        <footer class="footer-custom">
-            <div class="container text-center">
-                <ul class="list-unstyled">
-                    <li><a href="#" class="text-light-custom">Политика конфиденциальности</a></li>
-                    <li><a href="#" class="text-light-custom">Условия использования</a></li>
-                </ul>
-                <p class="text-muted small mb-0">&copy; 2025 - ElectronicsHub</p>
+        <footer class="bg-black text-white text-center py-3 border-top border-secondary mt-auto">
+            <div class="container">
+                <p class="mb-0">&copy; 2025 - ElectronicsHub</p>
+                <small class="text-muted">
+                    <a href="#" class="text-secondary text-decoration-none">Privacy</a> &middot;
+                    <a href="#" class="text-secondary text-decoration-none">Terms</a>
+                </small>
             </div>
         </footer>
-    </div>
 
+    </div>
     <partial name="_LoginRegistrationPartial" />
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
@@ -134,67 +182,55 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            // Имитация базы товаров
+            // Данные для примера (потом заменишь на AJAX)
             const products = [
                 { name: "Ноутбук Asus ROG", price: "125 000 ₽" },
+                { name: "Видеокарта RTX 4090", price: "180 000 ₽" },
                 { name: "Мышь Logitech G Pro", price: "12 000 ₽" },
                 { name: "Клавиатура HyperX", price: "8 500 ₽" },
-                { name: "Монитор Samsung 144Hz", price: "22 000 ₽" },
-                { name: "iPhone 15 Pro", price: "110 000 ₽" }
+                { name: "iPhone 15 Pro Max", price: "140 000 ₽" }
             ];
 
             const input = document.getElementById('searchInput');
-            const resultsBox = document.getElementById('searchResults');
+            const results = document.getElementById('searchResults');
 
-            if (input && resultsBox) {
-                // Функция задержки (чтобы не моргало)
-                function debounce(func, timeout = 300) {
-                    let timer;
-                    return (...args) => {
-                        clearTimeout(timer);
-                        timer = setTimeout(() => { func.apply(this, args); }, timeout);
-                    };
-                }
+            if(input) {
+                input.addEventListener('input', function() {
+                    const val = this.value.toLowerCase().trim();
+                    results.innerHTML = '';
 
-                // Логика поиска
-                input.addEventListener('input', debounce(() => {
-                    const query = input.value.toLowerCase().trim();
-                    resultsBox.innerHTML = '';
-
-                    if (query.length === 0) {
-                        resultsBox.style.display = 'none';
+                    if (val.length === 0) {
+                        results.style.display = 'none';
                         return;
                     }
 
-                    const found = products.filter(p => p.name.toLowerCase().includes(query));
+                    const filtered = products.filter(p => p.name.toLowerCase().includes(val));
 
-                    if (found.length > 0) {
-                        found.forEach(p => {
+                    if (filtered.length > 0) {
+                        filtered.forEach(p => {
                             const div = document.createElement('div');
                             div.className = 'search-item';
-                            div.innerHTML = `
-                                <span style="font-weight:500;">${p.name}</span>
-                                <span style="color:#ff9900; font-size:13px; font-weight:bold;">${p.price}</span>
-                            `;
-                            div.onclick = () => alert('Переход к товару: ' + p.name);
-                            resultsBox.appendChild(div);
+                            div.innerHTML = `<span>${p.name}</span> <span class="text-warning">${p.price}</span>`;
+                            div.onclick = () => alert('Переход к ' + p.name);
+                            results.appendChild(div);
                         });
-                        resultsBox.style.display = 'block';
+                        results.style.display = 'block';
                     } else {
-                        resultsBox.innerHTML = '<div style="padding:10px; text-align:center; color:#777;">Ничего не найдено</div>';
-                        resultsBox.style.display = 'block';
+                        results.innerHTML = '<div style="padding:10px; text-align:center; color:#777;">Ничего не найдено</div>';
+                        results.style.display = 'block';
                     }
-                }));
+                });
 
-                // Скрыть при клике мимо
+                // Закрыть при клике мимо
                 document.addEventListener('click', (e) => {
-                    if (!input.contains(e.target) && !resultsBox.contains(e.target)) {
-                        resultsBox.style.display = 'none';
+                    if (!input.contains(e.target) && !results.contains(e.target)) {
+                        results.style.display = 'none';
                     }
                 });
             }
         });
     </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
