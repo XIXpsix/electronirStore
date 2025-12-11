@@ -8,7 +8,7 @@
     <div class="auth-card slide-in-bottom">
         <h2 class="auth-title">Вход в систему</h2>
 
-        <form asp-action="Login" asp-controller="Account" asp-anti-forgery="true">
+        <form asp-action="Login" asp-controller="Account" asp-anti-forgery="true" novalidate>
             <div class="text-danger mb-3" asp-validation-summary="ModelOnly"></div>
 
             <div class="form-floating mb-3">

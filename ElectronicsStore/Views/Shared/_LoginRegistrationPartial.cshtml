@@ -24,7 +24,7 @@
 
                                 <div class="auth-view" id="loginView">
                                     <h2 class="fw-bold mb-4" style="color: #ff6600;">ВХОД</h2>
-                                    <form asp-controller="Account" asp-action="Login" method="post">
+                                    <form asp-controller="Account" asp-action="Login" method="post" novalidate>
                                         <div class="form-floating mb-3">
                                             <input name="Email" type="email" class="form-control dark-input" placeholder="Email" required>
                                             <label>Email адрес</label>
@@ -52,7 +52,7 @@
 
                                 <div class="auth-view" id="registerView">
                                     <h2 class="fw-bold mb-4" style="color: #ff6600;">РЕГИСТРАЦИЯ</h2>
-                                    <form asp-controller="Account" asp-action="Register" method="post">
+                                    <form asp-controller="Account" asp-action="Register" method="post" novalidate>
                                         <div class="form-floating mb-2">
                                             <input name="Name" type="text" class="form-control dark-input" placeholder="Имя" required>
                                             <label>Ваше Имя</label>

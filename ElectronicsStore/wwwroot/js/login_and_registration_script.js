@@ -21,16 +21,15 @@ window.switchMode = function (mode) {
     // Очищаем ошибки валидации при переключении
     const forms = document.querySelectorAll('#loginView form, #registerView form');
     forms.forEach(form => {
-        // Сброс всех сообщений об ошибках
+        // Сбрасываем все сообщения об ошибках
         const validationSpans = form.querySelectorAll('.text-danger');
         validationSpans.forEach(span => span.textContent = '');
 
         // Удаление ошибок, добавленных AJAX-обработчиком
         $(form).find('.ajax-error-message').remove();
 
-        // Сброс валидации (если используется jQuery Validation)
+        // ✅ Исправление предыдущей ошибки "Cannot read properties of undefined"
         if (typeof $ !== 'undefined' && $.fn.validate) {
-            // ✅ ИСПРАВЛЕНИЕ ОШИБКИ: Используем ?. для безопасного доступа
             $(form).data('validator')?.resetForm();
         }
     });
@@ -43,21 +42,19 @@ $(document).ready(function () {
 
     // Функция для обработки AJAX отправки формы
     function handleAjaxFormSubmission(e) {
-        e.preventDefault(); // Остановить стандартную отправку формы
+        e.preventDefault(); // 🚩 ГЛАВНАЯ СТРОКА: ОСТАНОВИТЬ стандартную отправку формы
 
         var form = $(this);
         var url = form.attr('action');
         var method = form.attr('method') || 'POST';
         var data = form.serialize();
 
-        // 1. Очистка предыдущих ошибок
+        // Поиск элементов для отображения ошибок
         var validationSummary = form.find('[data-valmsg-summary="ModelOnly"]');
         var isModalForm = form.closest('#authModal').length > 0;
 
-        // Очищаем пользовательские ошибки
+        // 1. Очистка предыдущих ошибок
         form.find('.ajax-error-message').remove();
-
-        // Очищаем стандартную сводку ошибок
         if (validationSummary.length > 0) {
             validationSummary.empty();
         }
@@ -77,22 +74,21 @@ $(document).ready(function () {
                     var errorMessage = response.description || 'Неизвестная ошибка сервера.';
 
                     if (isModalForm) {
-                        // Для модального окна: добавляем сообщение об ошибке вверху формы
+                        // Для модального окна
                         var errorDiv = $('<div class="text-danger mb-3 ajax-error-message"></div>');
                         errorDiv.text(errorMessage);
                         form.prepend(errorDiv);
                     } else if (validationSummary.length > 0) {
-                        // Для автономных страниц (Login.cshtml/Register.cshtml): добавляем ошибку в asp-validation-summary
+                        // Для автономных страниц
                         var errorList = $('<ul>').append($('<li>').text(errorMessage));
                         validationSummary.html(errorList);
                     } else {
-                        // Как запасной вариант
                         alert(errorMessage);
                     }
                 }
             },
             error: function (xhr, status, error) {
-                // Обработка общей AJAX-ошибки (например, 500 Internal Server Error)
+                // Обработка общей AJAX-ошибки
                 var errorMsg = 'Произошла критическая ошибка при обращении к серверу.';
 
                 var errorDiv = $('<div class="text-danger mb-3 ajax-error-message"></div>');
@@ -102,7 +98,6 @@ $(document).ready(function () {
         });
     }
 
-    // Привязываем функцию к отправке всех форм входа и регистрации
-    // Выбираем формы по asp-action (для автономных страниц) И формы внутри модального окна
+    // Привязываем функцию к отправке всех форм
     $('form[asp-action="Login"], form[asp-action="Register"], #authModal form').on('submit', handleAjaxFormSubmission);
 });
