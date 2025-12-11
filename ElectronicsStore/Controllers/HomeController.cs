@@ -3,22 +3,29 @@ using ElectronicsStore.Domain.Entity;
 using ElectronicsStore.Domain.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
-using System.Collections.Generic; // Добавлено для IEnumerable
-using System.Linq; // Добавлено для Where и ToList
-using System; // Добавлено для StringComparison
+using System.Collections.Generic;
+using System.Linq;
+using System;
+using System.Threading.Tasks; // Не забудьте добавить это для async/await
 
 namespace ElectronicsStore.Controllers
 {
-    // ИСПРАВЛЕНО: Использование основного конструктора для IProductService и ICategoryService
     public class HomeController(IProductService productService, ICategoryService categoryService) : Controller
     {
-        // Инжектированные сервисы (productService, categoryService) используются напрямую
-
-        public IActionResult Index()
+        // Изменили метод на async Task и загружаем товары
+        public async Task<IActionResult> Index()
         {
-            // Передаем пустой список продуктов, чтобы Model в представлении не был null
-            return View(new List<Product>());
+            // Получаем список всех товаров
+            var response = await productService.GetProducts();
+
+            // Если успех - передаем товары, иначе пустой список
+            var products = response.StatusCode == Domain.Enum.StatusCode.OK
+                ? response.Data
+                : new List<Product>();
+
+            return View(products);
         }
+
         public IActionResult Privacy() => View();
         public IActionResult About() => View();
         public IActionResult Contacts() => View();
@@ -26,18 +33,14 @@ namespace ElectronicsStore.Controllers
         [HttpGet]
         public async Task<IActionResult> Catalog(string? category, string? searchString)
         {
-            // 1. Получаем продукты
             var productsResponse = await productService.GetProducts();
             IEnumerable<Product> products = productsResponse.Data ?? [];
 
-            // 2. Получаем категории
             var categoriesResponse = await categoryService.GetCategories();
             IEnumerable<Category> categories = categoriesResponse.Data ?? [];
 
-            // Если возникла ошибка при получении продуктов
             if (productsResponse.StatusCode == Domain.Enum.StatusCode.OK)
             {
-                // ... (весь ваш код фильтрации, который был внутри if) ...
                 if (!string.IsNullOrEmpty(category))
                 {
                     if (category == "tvs")
@@ -69,8 +72,6 @@ namespace ElectronicsStore.Controllers
                 return View(viewModel);
             }
 
-            // --- ИЗМЕНЕНИЕ ЗДЕСЬ ---
-            // Вместо RedirectToAction("Error"), выводим текст ошибки, чтобы понять причину
             return Content($"ОШИБКА: {productsResponse.Description}");
         }
 
