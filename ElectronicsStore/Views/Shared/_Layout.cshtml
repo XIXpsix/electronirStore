@@ -10,19 +10,18 @@
     <link rel="stylesheet" href="~/css/login_and_registration.css" />
 
     <style>
-        /* === ИСПРАВЛЕНИЕ: СТИЛИ ДЛЯ БОКОВЫХ ВИДЕО === */
         body {
-            background-color: #121212; /* Темный фон под сайтом */
-            overflow-x: hidden; /* Убираем горизонтальную прокрутку */
+            background-color: #121212;
+            overflow-x: hidden;
         }
 
-        /* 1. Блоки с видео (фиксированные по бокам) */
+        /* Видео сайдбары */
         .video-sidebar {
             position: fixed;
             top: 0;
             bottom: 0;
-            width: 250px; /* Фиксированная ширина боковой панели */
-            z-index: 0; /* Самый нижний слой */
+            width: 250px;
+            z-index: 0;
             overflow: hidden;
             background: #000;
         }
@@ -35,45 +34,55 @@
             right: 0;
         }
 
-        /* Сами видео */
         .video-sidebar video {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            opacity: 0.6; /* Легкая прозрачность, чтобы не отвлекало */
+            opacity: 0.4; /* Чуть темнее, чтобы не отвлекало */
         }
 
-        /* 2. Основной контент сайта (Центральная колонка) */
+        /* Основной контент */
         .main-site-wrapper {
             position: relative;
-            z-index: 10; /* Поверх видео! */
-            margin-left: 250px; /* Отступ слева (равен ширине видео) */
-            margin-right: 250px; /* Отступ справа */
-            background-color: #1a1a1a; /* Фон основной части */
+            z-index: 10;
+            margin-left: 250px;
+            margin-right: 250px;
+            background-color: #1a1a1a;
             min-height: 100vh;
-            box-shadow: 0 0 50px rgba(0,0,0,0.8); /* Тень по бокам */
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
             display: flex;
             flex-direction: column;
         }
 
-        /* 3. Адаптивность (на телефонах убираем видео) */
+        /* Адаптивность */
         @@media (max-width: 1200px) {
             .video-sidebar
 
         {
             display: none;
         }
-        /* Скрываем видео */
+
         .main-site-wrapper {
             margin: 0;
         }
-        /* Убираем отступы */
+
         }
 
-        /* === СТИЛИ ДЛЯ ПОИСКА === */
+        /* Поиск */
         .search-container {
             position: relative;
+            /* Ширина на ПК фиксированная, на моб - 100% */
             width: 300px;
+        }
+        @@media (max-width: 991px) {
+            .search-container
+
+        {
+            width: 100%; /* На мобиле во всю ширину */
+            margin-top: 15px; /* Отступ сверху от ссылок */
+            margin-bottom: 15px;
+        }
+
         }
 
         .search-results {
@@ -123,7 +132,6 @@
     </div>
 
     <div class="main-site-wrapper">
-
         <header>
             <nav class="navbar navbar-expand-xl navbar-dark bg-black border-bottom border-warning px-4 py-3">
                 <div class="container-fluid">
@@ -135,29 +143,34 @@
                         <span class="navbar-toggler-icon"></span>
                     </button>
 
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                        <li class="nav-item">
-                            <a class="nav-link text-light-custom" asp-controller="Home" asp-action="Index">Главная</a>
-                        </li>
+                    <div class="collapse navbar-collapse" id="navbarContent">
 
-                        <li class="nav-item">
-                            <a class="nav-link text-warning fw-bold" asp-controller="Home" asp-action="Catalog">
-                                ☰ Каталог товаров
-                            </a>
-                        </li>
+                        <ul class="navbar-nav me-auto mb-2 mb-lg-0 text-uppercase fw-bold align-items-center">
+                            <li class="nav-item">
+                                <a class="nav-link text-light-custom" asp-controller="Home" asp-action="Index">Главная</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-warning" asp-controller="Home" asp-action="Catalog">
+                                    ☰ Каталог
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-light-custom" asp-controller="Home" asp-action="Contacts">Контакты</a>
+                            </li>
+                        </ul>
 
-                        <li class="nav-item">
-                            <a class="nav-link text-light-custom" asp-controller="Home" asp-action="Contacts">Контакты</a>
-                        </li>
-                    </ul>
+                        <div class="search-container mx-lg-3">
+                            <form asp-controller="Home" asp-action="Catalog" method="get" class="d-flex w-100">
+                                <input type="text" name="searchString" id="searchInput"
+                                       class="form-control bg-dark text-white border-secondary rounded-pill"
+                                       placeholder="🔍 Найти товар..." autocomplete="off">
+                            </form>
+                            <div id="searchResults" class="search-results"></div>
+                        </div>
 
-                    <div class="search-container d-none d-lg-block mx-3">
-                        <form asp-controller="Home" asp-action="Catalog" method="get" class="d-flex">
-                            <input type="text" name="searchString" id="searchInput"
-                                   class="form-control bg-dark text-white border-secondary rounded-pill"
-                                   placeholder="🔍 Найти товар..." autocomplete="off">
-                        </form>
-                        <div id="searchResults" class="search-results"></div>
+                        <div class="d-flex align-items-center justify-content-center">
+                            @await Html.PartialAsync("_LoginPartial")
+                        </div>
                     </div>
                 </div>
             </nav>
@@ -170,14 +183,10 @@
         <footer class="bg-black text-white text-center py-3 border-top border-secondary mt-auto">
             <div class="container">
                 <p class="mb-0">&copy; 2025 - ElectronicsHub</p>
-                <small class="text-muted">
-                    <a href="#" class="text-secondary text-decoration-none">Privacy</a> &middot;
-                    <a href="#" class="text-secondary text-decoration-none">Terms</a>
-                </small>
             </div>
         </footer>
-
     </div>
+
     <partial name="_LoginRegistrationPartial" />
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
@@ -189,7 +198,7 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            // Данные для примера (потом заменишь на AJAX)
+            // Имитация данных для живого поиска
             const products = [
                 { name: "Ноутбук Asus ROG", price: "125 000 ₽" },
                 { name: "Видеокарта RTX 4090", price: "180 000 ₽" },
@@ -201,7 +210,7 @@
             const input = document.getElementById('searchInput');
             const results = document.getElementById('searchResults');
 
-            if(input) {
+            if(input && results) {
                 input.addEventListener('input', function() {
                     const val = this.value.toLowerCase().trim();
                     results.innerHTML = '';
@@ -218,7 +227,11 @@
                             const div = document.createElement('div');
                             div.className = 'search-item';
                             div.innerHTML = `<span>${p.name}</span> <span class="text-warning">${p.price}</span>`;
-                            div.onclick = () => alert('Переход к ' + p.name);
+                            div.onclick = () => {
+                                // При клике подставляем в поле и отправляем форму
+                                input.value = p.name;
+                                input.closest('form').submit();
+                            };
                             results.appendChild(div);
                         });
                         results.style.display = 'block';
@@ -228,7 +241,6 @@
                     }
                 });
 
-                // Закрыть при клике мимо
                 document.addEventListener('click', (e) => {
                     if (!input.contains(e.target) && !results.contains(e.target)) {
                         results.style.display = 'none';

@@ -1,7 +1,9 @@
 ﻿using ElectronicsStore.BLL.Interfaces;
 using ElectronicsStore.Domain.Entity;
-using ElectronicsStore.Domain.ViewModels;
+using ElectronicsStore.Domain.ViewModels; // Обязательно для CatalogViewModel
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
@@ -19,35 +21,55 @@ namespace ElectronicsStore.Controllers
 
         public async Task<IActionResult> Index()
         {
-            // На главной тоже можно показать пару товаров (например, топ-3)
             var response = await _productService.GetProducts();
             if (response.StatusCode == Domain.Enum.StatusCode.OK)
             {
+                // На главной показываем топ-3 товара
                 return View(response.Data.Take(3).ToList());
             }
             return View(new List<Product>());
         }
 
-        // ЭТОТ МЕТОД ОТВЕЧАЕТ ЗА СТРАНИЦУ КАТАЛОГА
         [HttpGet]
-        public async Task<IActionResult> Catalog(string searchString)
+        public async Task<IActionResult> Catalog(string category, string searchString)
         {
+            // 1. Создаем модель, которую ждет View (CatalogViewModel)
+            // Это решит ошибку "InvalidOperationException... requires CatalogViewModel"
+            var model = new CatalogViewModel
+            {
+                Products = new List<Product>(),
+                CurrentSearchName = searchString,
+                // Если нужно, можно добавить свойство CurrentCategorySlug в ViewModel и заполнить его
+            };
+
             var response = await _productService.GetProducts();
 
             if (response.StatusCode == Domain.Enum.StatusCode.OK)
             {
                 var products = response.Data;
 
-                // Если в поиске что-то написали, фильтруем
+                // 2. Фильтрация по ПОИСКУ (если введен текст)
                 if (!string.IsNullOrEmpty(searchString))
                 {
                     products = products.Where(p => p.Name.ToLower().Contains(searchString.ToLower())).ToList();
                 }
 
-                return View(products);
+                // 3. Фильтрация по КАТЕГОРИИ (ИСПРАВЛЕНО)
+                // Если категория выбрана и это не "все товары"
+                if (!string.IsNullOrEmpty(category) && category != "all")
+                {
+                    // Мы проверяем, совпадает ли Slug категории товара с тем, что пришло в ссылке.
+                    // Например: category="smartphones" -> ищем товары, у которых Category.Slug == "smartphones"
+                    products = products.Where(p =>
+                        p.Category != null &&
+                        string.Equals(p.Category.Slug, category, StringComparison.OrdinalIgnoreCase)
+                    ).ToList();
+                }
+
+                model.Products = products;
             }
 
-            return View(new List<Product>());
+            return View(model);
         }
 
         public IActionResult About() => View();
