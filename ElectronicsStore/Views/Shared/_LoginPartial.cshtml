@@ -9,7 +9,7 @@
 
         <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                @* Здесь используем Claim AvatarPath, который мы обновили в контроллере! *@
+                @* Аватарка пользователя *@
                 <img src="@avatarPath" class="rounded-circle" style="width: 35px; height: 35px; object-fit: cover; border: 2px solid #ff6600;" alt="Avatar">
                 <span class="ms-2 text-light-custom d-none d-md-inline">@userName</span>
             </a>
@@ -54,8 +54,14 @@
     {
         <li class="nav-item">
             <div class="form-btn-container">
-                @* Кнопка, привязанная к скрипту через id="click-to-hide" *@
-                <button class="nav-link btn btn-link text-light-custom" id="click-to-hide">
+                @* ИСПРАВЛЕНИЕ:
+                   1. Добавлены атрибуты data-bs-toggle и data-bs-target для открытия модального окна.
+                   2. ID изменен на 'click-to-hide-login' для совместимости с shared_script.js (мобильное меню).
+                *@
+                <button class="nav-link btn btn-link text-light-custom"
+                        id="click-to-hide-login"
+                        data-bs-toggle="modal"
+                        data-bs-target="#authModal">
                     Войти / Регистрация
                 </button>
             </div>

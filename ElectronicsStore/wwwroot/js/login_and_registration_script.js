@@ -28,7 +28,7 @@ window.switchMode = function (mode) {
         // Удаление ошибок, добавленных AJAX-обработчиком
         $(form).find('.ajax-error-message').remove();
 
-        // ✅ Исправление предыдущей ошибки "Cannot read properties of undefined"
+        // Безопасный сброс валидации
         if (typeof $ !== 'undefined' && $.fn.validate) {
             $(form).data('validator')?.resetForm();
         }
@@ -42,7 +42,7 @@ $(document).ready(function () {
 
     // Функция для обработки AJAX отправки формы
     function handleAjaxFormSubmission(e) {
-        e.preventDefault(); // 🚩 ГЛАВНАЯ СТРОКА: ОСТАНОВИТЬ стандартную отправку формы
+        e.preventDefault(); // 🚩 ЭТА СТРОКА НАЧНЕТ РАБОТАТЬ ПОСЛЕ ИСПРАВЛЕНИЯ СИНТАКСИЧЕСКОЙ ОШИБКИ
 
         var form = $(this);
         var url = form.attr('action');
@@ -67,19 +67,17 @@ $(document).ready(function () {
             dataType: 'json',
             success: function (response) {
                 if (response.isValid) {
-                    // УСПЕХ: Перенаправление, используя URL из ответа C#
+                    // УСПЕХ: Перенаправление
                     window.location.href = response.redirectUrl;
                 } else {
                     // НЕУДАЧА: Отобразить ошибку
                     var errorMessage = response.description || 'Неизвестная ошибка сервера.';
 
                     if (isModalForm) {
-                        // Для модального окна
                         var errorDiv = $('<div class="text-danger mb-3 ajax-error-message"></div>');
                         errorDiv.text(errorMessage);
                         form.prepend(errorDiv);
                     } else if (validationSummary.length > 0) {
-                        // Для автономных страниц
                         var errorList = $('<ul>').append($('<li>').text(errorMessage));
                         validationSummary.html(errorList);
                     } else {
