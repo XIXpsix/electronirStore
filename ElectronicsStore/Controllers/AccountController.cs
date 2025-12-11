@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Linq;
- // Для явного указания StatusCode
+// Для явного указания StatusCode
 
 // ИСПРАВЛЕНО: Предупреждение "Использовать основной конструктор" уже устранено
 namespace ElectronicsStore.Controllers
@@ -117,9 +117,14 @@ namespace ElectronicsStore.Controllers
         public async Task<IActionResult> GoogleResponse()
         {
             var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            if (result?.Principal == null) return RedirectToAction("Login");
 
-            // ИСПРАВЛЕНО NRT: result.Principal гарантированно не null после проверки
+            if (result?.Principal == null)
+            {
+                return RedirectToAction("Login");
+            }
+
+            // --- БЕЗОПАСНЫЙ ДОСТУП К Principal ---
+            // Теперь мы уверены, что result.Principal не null, и можем работать с ним напрямую.
             var principal = result.Principal;
 
             var claims = principal.Identities.FirstOrDefault()?.Claims;
