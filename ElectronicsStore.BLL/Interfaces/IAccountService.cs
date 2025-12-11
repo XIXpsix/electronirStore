@@ -15,6 +15,7 @@ namespace ElectronicsStore.BLL.Interfaces
 
         // Новые методы для профиля
         Task<BaseResponse<User>> GetUser(string name);
-        Task<BaseResponse<User>> EditProfile(string name, UserProfileViewModel model, string newAvatarPath);
+        // ИСПРАВЛЕНО: newAvatarPath теперь string? для устранения NRT-предупреждения
+        Task<BaseResponse<User>> EditProfile(string name, UserProfileViewModel model, string? newAvatarPath);
     }
 }

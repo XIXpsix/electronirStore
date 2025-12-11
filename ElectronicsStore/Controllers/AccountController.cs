@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Linq;
+using ElectronicsStore.Domain.Enum; // Для явного указания StatusCode
 
 // ИСПРАВЛЕНО: Предупреждение "Использовать основной конструктор" уже устранено
 namespace ElectronicsStore.Controllers
@@ -24,7 +25,7 @@ namespace ElectronicsStore.Controllers
             if (ModelState.IsValid)
             {
                 var response = await accountService.Register(model);
-                if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK)
+                if (response.StatusCode == StatusCode.OK)
                 {
                     // УСПЕХ: Возвращаем JSON с адресом для перехода (на ввод кода)
                     return Json(new
@@ -34,11 +35,13 @@ namespace ElectronicsStore.Controllers
                     });
                 }
                 // ОШИБКА СЕРВИСА (например, почта занята)
-                return Json(new { isValid = false, description = response.Description });
+                // ИСПРАВЛЕНО NRT: Добавлен ?? для response.Description
+                return Json(new { isValid = false, description = response.Description ?? "Неизвестная ошибка регистрации" });
             }
 
             // ОШИБКА ВАЛИДАЦИИ (пустые поля и т.д.)
-            var errorMsg = string.Join("\n", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+            // ИСПРАВЛЕНО NRT: Убеждаемся, что ErrorMessage не null перед Join
+            var errorMsg = string.Join("\n", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).Where(e => e != null));
             return Json(new { isValid = false, description = errorMsg });
         }
 
@@ -53,15 +56,17 @@ namespace ElectronicsStore.Controllers
             {
                 var response = await accountService.Login(model);
                 // ИСПРАВЛЕНО: Добавлена явная проверка Data != null для устранения NRT-предупреждения
-                if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK && response.Data != null)
+                if (response.StatusCode == StatusCode.OK && response.Data != null)
                 {
-                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(response.Data)); // ИСПРАВЛЕНО: Устранено NRT-предупреждение
+                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(response.Data));
                     // УСПЕХ: Возвращаем JSON с адресом главной страницы
                     return Json(new { isValid = true, redirectUrl = Url.Action("Index", "Home") });
                 }
-                return Json(new { isValid = false, description = response.Description });
+                // ИСПРАВЛЕНО NRT: Добавлен ?? для response.Description
+                return Json(new { isValid = false, description = response.Description ?? "Неизвестная ошибка входа" });
             }
-            var errorMsg = string.Join("\n", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+            // ИСПРАВЛЕНО NRT: Убеждаемся, что ErrorMessage не null перед Join
+            var errorMsg = string.Join("\n", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).Where(e => e != null));
             return Json(new { isValid = false, description = errorMsg });
         }
 
@@ -81,12 +86,12 @@ namespace ElectronicsStore.Controllers
             {
                 var response = await accountService.ConfirmEmail(model.Email, model.Code);
                 // ИСПРАВЛЕНО: Добавлена явная проверка Data != null для устранения NRT-предупреждения
-                if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK && response.Data != null)
+                if (response.StatusCode == StatusCode.OK && response.Data != null)
                 {
-                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(response.Data)); // ИСПРАВЛЕНО: Устранено NRT-предупреждение
+                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(response.Data));
                     return RedirectToAction("Index", "Home");
                 }
-                // ИСПРАВЛЕНО: Добавлен оператор ?? для errorMessage, так как response.Description может быть null
+                // ИСПРАВЛЕНО: response.Description уже обрабатывается оператором ??, что решает NRT-предупреждение
                 ModelState.AddModelError("", response.Description ?? "Неизвестная ошибка подтверждения.");
             }
             return View(model);
@@ -113,12 +118,16 @@ namespace ElectronicsStore.Controllers
             var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             if (result?.Principal == null) return RedirectToAction("Login");
 
-            var claims = result.Principal.Identities.FirstOrDefault()?.Claims;
+            // ИСПРАВЛЕНО NRT: result.Principal гарантированно не null после проверки
+            var principal = result.Principal;
+
+            var claims = principal.Identities.FirstOrDefault()?.Claims;
+            // ИСПРАВЛЕНО NRT: Все переменные name/email/avatar могут быть null
             var name = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
             var email = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
             var avatar = claims?.FirstOrDefault(c => c.Type == "picture")?.Value ?? claims?.FirstOrDefault(c => c.Type == "image")?.Value;
 
-            // ИСПРАВЛЕНО: Использован оператор ?? для гарантированной передачи не-null значений в не-nullable свойства User
+            // ИСПРАВЛЕНО NRT: Использован оператор ?? для гарантированной передачи не-null значений
             var userModel = new User()
             {
                 Name = name ?? "GoogleUser",
@@ -127,7 +136,7 @@ namespace ElectronicsStore.Controllers
             };
             var response = await accountService.IsCreatedAccount(userModel);
 
-            if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK && response.Data != null)
+            if (response.StatusCode == StatusCode.OK && response.Data != null)
             {
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(response.Data));
                 return RedirectToAction("Index", "Home");

@@ -1,4 +1,9 @@
-﻿@model ElectronicsStore.Domain.Entity
+﻿@using ElectronicsStore
+@using ElectronicsStore.Models
+@using ElectronicsStore.Domain.ViewModels
+@using ElectronicsStore.Domain.Entity
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelper
+@model ElectronicsStore.Domain.ViewModels.CatalogViewModel
 
 @{
     ViewData["Title"] = "Каталог товаров";
@@ -75,10 +80,3 @@
         }
     </div>
 </div>
-<style>
-    .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(255, 102, 0, 0.2) !important;
-        border-color: #ff6600 !important;
-    }
-</style>

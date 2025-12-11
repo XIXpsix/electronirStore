@@ -1,4 +1,9 @@
 ﻿@model IEnumerable<ElectronicsStore.Domain.Entity.Category>
+@using ElectronicsStore
+@using ElectronicsStore.Models
+@using ElectronicsStore.Domain.ViewModels
+@using ElectronicsStore.Domain.Entity // <-- Это пространство имен
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 
 @{
     ViewData["Title"] = "Категории";

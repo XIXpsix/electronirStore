@@ -3,17 +3,16 @@ using ElectronicsStore.Domain.Entity;
 using ElectronicsStore.Domain.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using System.Collections.Generic; // Добавлено для IEnumerable
+using System.Linq; // Добавлено для Where и ToList
+using System; // Добавлено для StringComparison
 
 namespace ElectronicsStore.Controllers
 {
-    public class HomeController : Controller
+    // ИСПРАВЛЕНО: Использование основного конструктора для IProductService и ICategoryService
+    public class HomeController(IProductService productService, ICategoryService categoryService) : Controller
     {
-        private readonly IProductService _productService;
-
-        public HomeController(IProductService productService)
-        {
-            _productService = productService;
-        }
+        // Инжектированные сервисы (productService, categoryService) используются напрямую
 
         public IActionResult Index() => View();
         public IActionResult Privacy() => View();
@@ -21,13 +20,22 @@ namespace ElectronicsStore.Controllers
         public IActionResult Contacts() => View();
 
         [HttpGet]
-        public async Task<IActionResult> Catalog(string category, string searchString)
+        // ИСПРАВЛЕНО NRT: category и searchString могут быть null (string?)
+        public async Task<IActionResult> Catalog(string? category, string? searchString)
         {
-            var response = await _productService.GetProducts();
-            IEnumerable<Product> products = response.Data ?? [];
+            // 1. Получаем продукты
+            var productsResponse = await productService.GetProducts();
+            // ИСПРАВЛЕНО NRT: Используем ?? [] для пустой коллекции (requires C# 12, or switch to new List<Product>())
+            IEnumerable<Product> products = productsResponse.Data ?? [];
 
-            if (response.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK)
+            // 2. Получаем категории (для CatalogViewModel)
+            var categoriesResponse = await categoryService.GetCategories();
+            IEnumerable<Category> categories = categoriesResponse.Data ?? [];
+
+            // Если возникла ошибка при получении продуктов (хотя категории могли быть получены)
+            if (productsResponse.StatusCode == ElectronicsStore.Domain.Enum.StatusCode.OK)
             {
+                // Применяем фильтр по категории
                 if (!string.IsNullOrEmpty(category))
                 {
                     // ИСПРАВЛЕНИЕ: Проверяем p.Category?.Name != null
@@ -40,16 +48,29 @@ namespace ElectronicsStore.Controllers
                             (p.Category.Name.Contains("ПК", StringComparison.OrdinalIgnoreCase) ||
                              p.Category.Name.Contains("Ноутбук", StringComparison.OrdinalIgnoreCase)));
                     else
-                        products = products.Where(p => p.Category?.Name == category);
+                        // ИСПРАВЛЕНИЕ: Фильтруем по Slug категории
+                        products = products.Where(p => p.Category?.Slug == category);
                 }
 
+                // Применяем фильтр по поисковой строке
                 if (!string.IsNullOrEmpty(searchString))
                 {
+                    // ИСПРАВЛЕНО NRT: Проверяем p.Name != null
                     products = products.Where(p => p.Name != null &&
                         p.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase));
                 }
 
-                return View(products.ToList());
+                // ИСПРАВЛЕНО: Создаем и возвращаем CatalogViewModel. 
+                // Это решит ошибки "CatalogViewModel" не содержит определения "GroupBy" и "Any" в представлении.
+                var viewModel = new CatalogViewModel
+                {
+                    Products = products.ToList(),
+                    Categories = categories.ToList(),
+                    CurrentSearchName = searchString,
+                    CurrentCategoryId = categories.FirstOrDefault(c => c.Slug == category)?.Id ?? 0 // Опционально: устанавливаем ID текущей категории
+                };
+
+                return View(viewModel);
             }
             return RedirectToAction("Error");
         }

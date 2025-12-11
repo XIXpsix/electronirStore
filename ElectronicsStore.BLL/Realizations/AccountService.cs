@@ -29,7 +29,8 @@ namespace ElectronicsStore.BLL.Realizations
         {
             try
             {
-                var user = await userRepository.GetAll().FirstOrDefaultAsync(x => x.Email == model.Email);
+                // ИСПРАВЛЕНО: Устранена ошибка лямбда-выражения (используется Where)
+                var user = await userRepository.GetAll().Where(x => x.Email == model.Email).FirstOrDefaultAsync();
                 if (user == null)
                 {
                     user = new User()
@@ -59,7 +60,8 @@ namespace ElectronicsStore.BLL.Realizations
         {
             try
             {
-                var user = await userRepository.GetAll().FirstOrDefaultAsync(x => x.Email == model.Email);
+                // ИСПРАВЛЕНО: Устранена ошибка лямбда-выражения (используется Where)
+                var user = await userRepository.GetAll().Where(x => x.Email == model.Email).FirstOrDefaultAsync();
                 if (user != null) return new() { Description = "Пользователь с таким email уже есть" };
 
                 var random = new Random();
@@ -92,7 +94,8 @@ namespace ElectronicsStore.BLL.Realizations
         {
             try
             {
-                var user = await userRepository.GetAll().FirstOrDefaultAsync(x => x.Email == model.Email);
+                // ИСПРАВЛЕНО: Устранена ошибка лямбда-выражения (используется Where)
+                var user = await userRepository.GetAll().Where(x => x.Email == model.Email).FirstOrDefaultAsync();
                 if (user == null) return new() { Description = "Пользователь не найден", StatusCode = StatusCode.UserNotFound };
 
                 if (user.Password != HashPassword(model.Password)) return new() { Description = "Неверный пароль", StatusCode = StatusCode.InternalServerError };
@@ -112,7 +115,8 @@ namespace ElectronicsStore.BLL.Realizations
         {
             try
             {
-                var user = await userRepository.GetAll().FirstOrDefaultAsync(x => x.Email == email);
+                // ИСПРАВЛЕНО: Устранена ошибка лямбда-выражения (используется Where)
+                var user = await userRepository.GetAll().Where(x => x.Email == email).FirstOrDefaultAsync();
                 if (user == null) return new() { Description = "Пользователь не найден" };
 
                 if (user.ConfirmationCode != code) return new() { Description = "Неверный код" };
@@ -136,8 +140,9 @@ namespace ElectronicsStore.BLL.Realizations
         {
             try
             {
-                // Ищем пользователя по имени (которое в нашей системе является Email)
-                var user = await userRepository.GetAll().FirstOrDefaultAsync(x => x.Name == name);
+                // ИСПРАВЛЕНО: Устранена ошибка лямбда-выражения (используется Where)
+                // Ищем пользователя по имени (которое в нашей системе является Name из клеймов)
+                var user = await userRepository.GetAll().Where(x => x.Name == name).FirstOrDefaultAsync();
                 if (user == null) return new() { Description = "Пользователь не найден", StatusCode = StatusCode.UserNotFound };
 
                 return new() { Data = user, StatusCode = StatusCode.OK };
@@ -148,17 +153,20 @@ namespace ElectronicsStore.BLL.Realizations
             }
         }
 
-        public async Task<BaseResponse<User>> EditProfile(string name, UserProfileViewModel model, string newAvatarPath)
+        // ИСПРАВЛЕНО: newAvatarPath теперь string? (допускает null)
+        public async Task<BaseResponse<User>> EditProfile(string name, UserProfileViewModel model, string? newAvatarPath)
         {
             try
             {
-                var user = await userRepository.GetAll().FirstOrDefaultAsync(x => x.Name == name);
+                // ИСПРАВЛЕНО: Устранена ошибка лямбда-выражения (используется Where)
+                var user = await userRepository.GetAll().Where(x => x.Name == name).FirstOrDefaultAsync();
                 if (user == null) return new() { Description = "Пользователь не найден", StatusCode = StatusCode.UserNotFound };
 
                 // Обновляем данные
                 user.Name = model.Name;
-                user.Email = model.Email;
+                user.Email = model.Email; // Принимаем, что модель настроена так, что Email здесь не null или в классе User допускает null.
 
+                // ИСПРАВЛЕНО NRT: newAvatarPath обрабатывается правильно
                 if (!string.IsNullOrEmpty(newAvatarPath))
                 {
                     user.AvatarPath = newAvatarPath;
@@ -185,6 +193,9 @@ namespace ElectronicsStore.BLL.Realizations
                 new("Id", user.Id.ToString()),
                 new("AvatarPath", user.AvatarPath ?? "/img/w.png")
             };
+            // ПРЕДУПРЕЖДЕНИЕ: "Инициализацию коллекции можно упростить"
+            // Этот код уже использует современный синтаксис инициализации. 
+            // Это предупреждение часто можно игнорировать.
             return new ClaimsIdentity(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
         }
     }
