@@ -6,15 +6,18 @@ namespace ElectronicsStore.Domain.ViewModels
 {
     public class CatalogViewModel
     {
+        // Списки инициализируем пустыми, чтобы не было NullReference
         public IEnumerable<Product> Products { get; set; } = new List<Product>();
-
-        // Список категорий для отображения в фильтре
         public IEnumerable<Category> Categories { get; set; } = new List<Category>();
 
-        // Текущее состояние фильтра (чтобы при обновлении страницы значения не терялись)
         public ProductFilter Filter { get; set; } = new ProductFilter();
-        public string CurrentSearchName { get; set; }
-        public string CurrentCategoryName { get; set; }
+
+        // Задаем значения по умолчанию, чтобы избежать ошибок "Необходимо задать обязательный элемент"
+        public string CurrentCategoryName { get; set; } = "Каталог";
+
+        // Добавляем это свойство, так как компилятор на него ругался
+        public string CurrentSearchName { get; set; } = string.Empty;
+
         public bool IsMainCatalogPage { get; set; }
     }
 }

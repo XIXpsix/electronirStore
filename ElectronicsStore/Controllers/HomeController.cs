@@ -1,7 +1,9 @@
 ﻿using ElectronicsStore.BLL.Interfaces;
+using ElectronicsStore.Domain.Entity;
 using ElectronicsStore.Domain.Filters;
 using ElectronicsStore.Domain.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,89 +15,85 @@ namespace ElectronicsStore.Controllers
         private readonly IProductService _productService;
         private readonly ICategoryService _categoryService;
 
+        // ВАЖНО: Конструктор должен принимать ОБА сервиса
         public HomeController(IProductService productService, ICategoryService categoryService)
         {
             _productService = productService;
             _categoryService = categoryService;
         }
 
-        // Главная страница теперь перенаправляет на Каталог
         public async Task<IActionResult> Index()
         {
-            return RedirectToAction("Catalog");
+            var response = await _productService.GetProducts();
+
+            // Исправление warning: "Возможно, аргумент-ссылка... NULL"
+            // Если Data придет null, мы подставим пустой список, чтобы Take(3) не упал
+            var products = response.Data ?? new List<Product>();
+
+            if (response.StatusCode == Domain.Enum.StatusCode.OK)
+            {
+                return View(products.Take(3).ToList());
+            }
+            return View(new List<Product>());
         }
 
         [HttpGet]
         public async Task<IActionResult> Catalog(ProductFilter filter)
         {
-            var model = new CatalogViewModel();
+            // 1. Получаем категории (безопасно)
+            var categoriesResponse = await _categoryService.GetCategories();
+            var categories = categoriesResponse.Data ?? new List<Category>();
 
-            // Логика определения страницы:
-            // Если категория не выбрана (0) И нет поискового запроса -> Показываем "Главную страницу каталога" (выбор категорий)
-            if (filter.CategoryId == 0 && string.IsNullOrWhiteSpace(filter.Name))
+            // 2. Определяем, главная ли это страница (нет фильтров)
+            bool isMainPage = filter.CategoryId == 0 && string.IsNullOrWhiteSpace(filter.Name);
+
+            // 3. Подготавливаем переменные
+            IEnumerable<Product> products = new List<Product>();
+            string categoryName = "Каталог";
+
+            // 4. Если нужно искать товары
+            if (!isMainPage)
             {
-                model.IsMainCatalogPage = true;
-
-                // Получаем список всех категорий для отображения карточек
-                var categoriesResponse = await _categoryService.GetCategories();
-                model.Categories = categoriesResponse.Data;
-            }
-            else
-            {
-                // Иначе показываем "Список товаров" (внутри категории или результаты поиска)
-                model.IsMainCatalogPage = false;
-
-                // 1. Получаем товары по фильтру
                 var productsResponse = await _productService.GetProductsByFilter(filter);
+                products = productsResponse.Data ?? new List<Product>();
 
-                // 2. Получаем категории для выпадающего списка в фильтре
-                var categoriesResponse = await _categoryService.GetCategories();
-
-                model.Products = productsResponse.Data;
-                model.Categories = categoriesResponse.Data;
-                model.Filter = filter;
-
-                // 3. Формируем заголовок страницы
                 if (filter.CategoryId > 0)
                 {
-                    // Если выбрана категория, ищем её название
-                    var catName = model.Categories.FirstOrDefault(c => c.Id == filter.CategoryId)?.Name;
-                    model.CurrentCategoryName = catName ?? "Категория";
+                    var cat = categories.FirstOrDefault(c => c.Id == filter.CategoryId);
+                    categoryName = cat?.Name ?? "Категория";
                 }
                 else
                 {
-                    // Если это просто поиск по всем товарам
-                    model.CurrentCategoryName = $"Поиск: {filter.Name}";
+                    categoryName = $"Поиск: {filter.Name}";
                 }
             }
+
+            // 5. Создаем модель, инициализируя ВСЕ свойства
+            var model = new CatalogViewModel
+            {
+                IsMainCatalogPage = isMainPage,
+                Categories = categories,
+                Products = products,
+                Filter = filter,
+                CurrentCategoryName = categoryName,
+                // Заполняем обязательное поле, на которое ругался компилятор
+                CurrentSearchName = filter.Name ?? string.Empty
+            };
 
             return View(model);
         }
 
-        // Метод для AJAX-фильтрации (обновляет только сетку товаров без перезагрузки)
         [HttpPost]
         public async Task<IActionResult> Filter([FromBody] ProductFilter filter)
         {
             var response = await _productService.GetProductsByFilter(filter);
-
-            // Возвращаем частичное представление (Partial View)
-            return PartialView("_ProductListPartial", response.Data);
+            // Безопасная передача данных в PartialView
+            return PartialView("_ProductListPartial", response.Data ?? new List<Product>());
         }
 
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-
-        public IActionResult About()
-        {
-            return View();
-        }
-
-        public IActionResult Contacts()
-        {
-            return View();
-        }
+        public IActionResult Privacy() => View();
+        public IActionResult About() => View();
+        public IActionResult Contacts() => View();
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

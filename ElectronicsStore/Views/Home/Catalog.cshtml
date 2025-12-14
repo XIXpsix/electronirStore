@@ -9,27 +9,23 @@
 
         @if (Model.IsMainCatalogPage)
         {
-            /* === ГЛАВНАЯ КАТАЛОГА (Выбор категорий + Общий поиск) === */
+            /* === ГЛАВНАЯ КАТАЛОГА === */
 
             <div class="text-center mb-5 fade-in">
                 <h1 class="text-white fw-bold text-uppercase mb-4">Каталог товаров</h1>
 
                 <div class="row justify-content-center">
                     <div class="col-md-8 col-lg-6">
-                        <form asp-action="Catalog" method="get" class="d-flex position-relative">
-                            <input type="text" name="Name" class="form-control form-control-lg bg-dark text-white border-secondary rounded-pill ps-4 pe-5"
-                                   placeholder="Найти ноутбук, телефон..." style="height: 60px; font-size: 1.2rem;">
-                            <button type="submit" class="btn btn-warning rounded-circle position-absolute"
-                                    style="right: 5px; top: 5px; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;">
-                                🔍
-                            </button>
-                        </form>
+                        <div class="position-relative">
+                            <input type="text" id="globalSearchInput" class="form-control form-control-lg bg-dark text-white border-secondary rounded-pill ps-4 pe-5"
+                                   placeholder="Начните вводить название товара..." style="height: 60px; font-size: 1.2rem; box-shadow: 0 0 15px rgba(0,0,0,0.5);">
+                            <span class="position-absolute" style="right: 20px; top: 18px; font-size: 1.5rem; opacity: 0.5;">🔍</span>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 justify-content-center fade-in-up">
-
+            <div id="categoriesBlock" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 justify-content-center fade-in-up">
                 @foreach (var cat in Model.Categories)
                 {
                     <div class="col">
@@ -42,34 +38,35 @@
                                                                 cat.Name.ToLower().Contains("аксессуар") ? "🎧" : "📦")
                         </div>
                         <h3 class="text-white fw-bold">@cat.Name</h3>
-                        <p class="text-muted">Перейти в раздел</p>
+                        <p class="text-muted">Смотреть товары</p>
                     </div>
                 </a>
             </div>
                         }
-
                 <div class="col">
                     <a href="@Url.Action("Catalog", new { CategoryId = 0, Name = "" })" class="text-decoration-none category-card-link">
                         <div class="card h-100 category-big-card bg-main-orange-gradient text-center p-4 border-0">
                             <div class="icon-big mb-3 text-black">🚀</div>
                             <h3 class="text-black fw-bold">Все товары</h3>
-                            <p class="text-black-50">Смотреть весь ассортимент</p>
+                            <p class="text-black-50">Полный список</p>
                         </div>
                     </a>
                 </div>
+            </div>
 
+            <div id="globalSearchResults" class="row row-cols-1 row-cols-sm-2 row-cols-xl-3 g-4 fade-in-up" style="display: none;">
             </div>
         }
         else
         {
-            /* === СПИСОК ТОВАРОВ (Внутри категории или Результаты поиска) === */
+            /* === СТРАНИЦА КАТЕГОРИИ / СПИСОК ТОВАРОВ === */
 
             <div class="d-flex align-items-center mb-4 fade-in">
                 <a href="@Url.Action("Catalog")" class="btn btn-outline-secondary me-3 rounded-circle"
                    style="width: 40px; height: 40px; display:flex; align-items:center; justify-content:center; text-decoration:none;">🠔</a>
 
                 <div>
-                    <small class="text-muted d-block mb-1">Вы просматриваете:</small>
+                    <small class="text-muted d-block mb-1">Раздел:</small>
                     <h2 class="text-white fw-bold text-uppercase m-0">@Model.CurrentCategoryName</h2>
                 </div>
             </div>
@@ -77,10 +74,9 @@
             <div class="row">
                 <div class="col-lg-3 mb-4 fade-in-up">
                     <div class="filter-card p-4 rounded bg-dark-card border border-secondary sticky-top" style="top: 20px; z-index: 100;">
+                        <h5 class="text-white mb-3">Фильтры</h5>
 
-                        <h5 class="text-white mb-3">Параметры</h5>
-
-                        <form id="filterForm">
+                        <form id="filterForm" onsubmit="event.preventDefault();">
                             <div class="mb-3">
                                 <label class="text-muted mb-1 small">Категория</label>
                                 <select id="categorySelect" class="form-select bg-dark text-white border-secondary">
@@ -95,11 +91,8 @@
 
                             <div class="mb-3">
                                 <label class="text-muted mb-1 small">Поиск</label>
-                                <div class="input-group">
-                                    <input type="text" id="nameInput" class="form-control bg-dark text-white border-secondary"
-                                           placeholder="Название..." value="@Model.Filter.Name">
-                                    <button class="btn btn-warning" type="button" onclick="applyFilter()">🔍</button>
-                                </div>
+                                <input type="text" id="nameInput" class="form-control bg-dark text-white border-secondary"
+                                       placeholder="Название..." value="@Model.Filter.Name">
                             </div>
 
                             <hr class="border-secondary my-3">
@@ -112,7 +105,7 @@
                                 </div>
                             </div>
 
-                            <div class="mb-4">
+                            <div class="mb-3">
                                 <label class="text-muted mb-1 small">Сортировка</label>
                                 <select id="sortSelect" class="form-select bg-dark text-white border-secondary">
                                     <!option value="" @(Model.Filter.SortType == "" ? "selected" : "")>По новизне</!option>
@@ -122,8 +115,7 @@
                                 </select>
                             </div>
 
-                            <button type="button" onclick="applyFilter()" class="btn btn-warning w-100 fw-bold">Применить</button>
-                            <a href="@Url.Action("Catalog")" class="btn btn-outline-secondary w-100 mt-2">Сбросить</a>
+                            <a href="@Url.Action("Catalog")" class="btn btn-outline-secondary w-100 btn-sm">Сбросить всё</a>
                         </form>
                     </div>
                 </div>
@@ -150,13 +142,18 @@
     }
 
     .category-card-link:hover .category-big-card {
-        transform: translateY(-5px);
+        transform: translateY(-7px);
         border-color: #ff6600;
-        box-shadow: 0 10px 30px rgba(255, 102, 0, 0.15);
+        box-shadow: 0 10px 30px rgba(255, 102, 0, 0.2);
     }
 
     .icon-big {
         font-size: 3.5rem;
+        transition: transform 0.3s;
+    }
+
+    .category-card-link:hover .icon-big {
+        transform: scale(1.1);
     }
 
     .bg-main-orange-gradient {
@@ -164,11 +161,11 @@
     }
 
     .fade-in {
-        animation: fadeIn 0.8s ease-in-out;
+        animation: fadeIn 0.6s ease-out;
     }
 
     .fade-in-up {
-        animation: fadeInUp 0.8s ease-out;
+        animation: fadeInUp 0.6s ease-out;
     }
 
     @@keyframes fadeIn {
@@ -195,18 +192,51 @@
 </style>
 
 <script>
-    async function applyFilter() {
-        const data = {
-            // Берем категорию из выпадающего списка.
-            // Если мы зашли в "Телефоны", она там уже выбрана. Но пользователь может сменить её на "Все".
-            CategoryId: parseInt(document.getElementById('categorySelect').value),
-            Name: document.getElementById('nameInput').value,
-            MinPrice: document.getElementById('minPrice').value ? parseFloat(document.getElementById('minPrice').value) : null,
-            MaxPrice: document.getElementById('maxPrice').value ? parseFloat(document.getElementById('maxPrice').value) : null,
-            SortType: document.getElementById('sortSelect').value
-        };
+    // Главная функция фильтрации
+    async function applyFilter(source) {
+        let data = {};
+        let containerId = "";
+
+        // Определяем, откуда пришел запрос (Главная или Сайдбар)
+        if (source === 'global') {
+            const query = document.getElementById('globalSearchInput').value;
+
+            // Логика переключения видимости на главной
+            const categoriesBlock = document.getElementById('categoriesBlock');
+            const resultsBlock = document.getElementById('globalSearchResults');
+
+            if (!query || query.trim() === "") {
+                // Если пусто - показываем категории, скрываем результаты
+                categoriesBlock.style.display = 'flex';
+                resultsBlock.style.display = 'none';
+                return; // Не делаем запрос
+            } else {
+                // Если есть текст - скрываем категории, показываем результаты
+                categoriesBlock.style.display = 'none';
+                resultsBlock.style.display = 'flex';
+                containerId = 'globalSearchResults';
+
+                // Данные для фильтра
+                data = { CategoryId: 0, Name: query, MinPrice: null, MaxPrice: null, SortType: "" };
+            }
+        }
+        else {
+            // Логика для сайдбара
+            containerId = 'productsContainer';
+            data = {
+                CategoryId: parseInt(document.getElementById('categorySelect')?.value || 0),
+                Name: document.getElementById('nameInput')?.value || "",
+                MinPrice: document.getElementById('minPrice')?.value ? parseFloat(document.getElementById('minPrice').value) : null,
+                MaxPrice: document.getElementById('maxPrice')?.value ? parseFloat(document.getElementById('maxPrice').value) : null,
+                SortType: document.getElementById('sortSelect')?.value || ""
+            };
+        }
 
         try {
+            // Делаем загрузку полупрозрачной, чтобы было видно процесс
+            const container = document.getElementById(containerId);
+            container.style.opacity = '0.5';
+
             const response = await fetch('/Home/Filter', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -214,21 +244,41 @@
             });
 
             if (response.ok) {
-                document.getElementById('productsContainer').innerHTML = await response.text();
+                container.innerHTML = await response.text();
             }
+            container.style.opacity = '1';
         } catch (e) {
-            console.error("Ошибка при фильтрации", e);
+            console.error(e);
         }
     }
 
-    // Живой поиск (debounce)
-    let timeout = null;
-    document.getElementById('nameInput')?.addEventListener('input', () => {
-        clearTimeout(timeout);
-        timeout = setTimeout(applyFilter, 600);
-    });
+    // Универсальная функция задержки (debounce)
+    function debounce(func, timeout = 500) {
+        let timer;
+        return (...args) => {
+            clearTimeout(timer);
+            timer = setTimeout(() => { func.apply(this, args); }, timeout);
+        };
+    }
 
-    // Авто-обновление при смене сортировки или категории
-    document.getElementById('sortSelect')?.addEventListener('change', applyFilter);
-    document.getElementById('categorySelect')?.addEventListener('change', applyFilter);
+    // --- ПОДКЛЮЧЕНИЕ СОБЫТИЙ ---
+
+    // 1. Глобальный поиск на главной
+    const globalInput = document.getElementById('globalSearchInput');
+    if (globalInput) {
+        globalInput.addEventListener('input', debounce(() => applyFilter('global'), 500));
+    }
+
+    // 2. Поиск и фильтры в сайдбаре
+    const sidebarInput = document.getElementById('nameInput');
+    if (sidebarInput) {
+        // Текст
+        sidebarInput.addEventListener('input', debounce(() => applyFilter('sidebar'), 500));
+        // Цена
+        document.getElementById('minPrice')?.addEventListener('input', debounce(() => applyFilter('sidebar'), 800));
+        document.getElementById('maxPrice')?.addEventListener('input', debounce(() => applyFilter('sidebar'), 800));
+        // Выпадающие списки (срабатывают сразу)
+        document.getElementById('categorySelect')?.addEventListener('change', () => applyFilter('sidebar'));
+        document.getElementById('sortSelect')?.addEventListener('change', () => applyFilter('sidebar'));
+    }
 </script>
