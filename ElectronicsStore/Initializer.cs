@@ -12,32 +12,36 @@ namespace ElectronicsStore
 {
     public static class Initializer
     {
-        // Переименовали метод в InitializeData и принимаем IServiceProvider,
-        // так как внутри используется GetRequiredService для BLL сервисов.
+        // Метод заполнения данными
         public static async Task InitializeData(IServiceProvider serviceProvider)
         {
-            // Используем переданный провайдер. Создавать новый scope не обязательно, 
-            // если метод вызывается уже внутри scope в Program.cs, но допустимо.
-
             var productService = serviceProvider.GetRequiredService<IProductService>();
             var categoryRepository = serviceProvider.GetRequiredService<IBaseStorage<Category>>();
 
             // --- 1. Создание категорий ---
+            // Мы делим компьютеры на Ноутбуки и ПК, и переименовываем Телефоны в Смартфоны
             var categoriesToCreate = new List<Category>
             {
                 new Category
                 {
-                    Name = "Телефоны",
+                    Name = "Смартфоны", // Было "Телефоны"
                     Slug = "smartphones",
                     ImagePath = "/img/category_phones.jpg",
-                    Description = "Мобильные телефоны"
+                    Description = "Мобильные устройства"
                 },
                 new Category
                 {
-                    Name = "Компьютеры",
+                    Name = "Ноутбуки", // Новая категория
                     Slug = "laptops",
                     ImagePath = "/img/category_laptops.jpg",
-                    Description = "Ноутбуки и ПК"
+                    Description = "Компактные компьютеры"
+                },
+                new Category
+                {
+                    Name = "Настольные ПК", // Новая категория
+                    Slug = "desktops",
+                    ImagePath = "/img/category_pc.jpg",
+                    Description = "Мощные стационарные компьютеры"
                 },
                 new Category
                 {
@@ -51,7 +55,7 @@ namespace ElectronicsStore
                     Name = "Периферия",
                     Slug = "accessories",
                     ImagePath = "/img/category_accessories.jpg",
-                    Description = "Периферийные устройства"
+                    Description = "Клавиатуры, мыши и прочее"
                 },
                 new Category
                 {
@@ -66,68 +70,47 @@ namespace ElectronicsStore
 
             foreach (var cat in categoriesToCreate)
             {
-                if (!existingCategories.Any(x => x.Name == cat.Name))
+                // Проверяем по Slug (уникальному коду), чтобы не дублировать
+                if (!existingCategories.Any(x => x.Slug == cat.Slug))
                 {
                     await categoryRepository.Add(cat);
                 }
             }
 
+            // Обновляем список из БД
             var dbCategories = categoryRepository.GetAll().ToList();
 
             // --- 2. Создание товаров ---
             var currentProducts = await productService.GetProducts();
 
+            // Если товаров мало, добавляем новые
             if (currentProducts.Data == null || currentProducts.Data.Count() < 15)
             {
-                // -- ТЕЛЕФОНЫ --
-                var phoneCatId = dbCategories.FirstOrDefault(x => x.Name == "Телефоны")?.Id ?? 0;
+                // -- СМАРТФОНЫ --
+                var phoneCatId = dbCategories.FirstOrDefault(x => x.Slug == "smartphones")?.Id ?? 0;
                 if (phoneCatId != 0)
                 {
-                    await productService.CreateProduct(new ProductViewModel { Name = "iPhone 15 Pro", Description = "Флагман Apple, титановый корпус", Price = 120000, CategoryId = phoneCatId });
-                    await productService.CreateProduct(new ProductViewModel { Name = "Samsung Galaxy S24", Description = "Искусственный интеллект Galaxy AI", Price = 90000, CategoryId = phoneCatId });
-                    await productService.CreateProduct(new ProductViewModel { Name = "Xiaomi 14 Ultra", Description = "Профессиональная камера Leica", Price = 100000, CategoryId = phoneCatId });
-                    await productService.CreateProduct(new ProductViewModel { Name = "Google Pixel 8", Description = "Чистый Android и лучшие фото", Price = 75000, CategoryId = phoneCatId });
+                    await productService.CreateProduct(new ProductViewModel { Name = "iPhone 15 Pro", Description = "Флагман Apple", Price = 120000, CategoryId = phoneCatId });
+                    await productService.CreateProduct(new ProductViewModel { Name = "Samsung Galaxy S24", Description = "Galaxy AI", Price = 90000, CategoryId = phoneCatId });
                 }
 
-                // -- КОМПЬЮТЕРЫ --
-                var pcCatId = dbCategories.FirstOrDefault(x => x.Name == "Компьютеры")?.Id ?? 0;
+                // -- НОУТБУКИ --
+                var laptopCatId = dbCategories.FirstOrDefault(x => x.Slug == "laptops")?.Id ?? 0;
+                if (laptopCatId != 0)
+                {
+                    await productService.CreateProduct(new ProductViewModel { Name = "MacBook Air 15", Description = "Чип M3", Price = 160000, CategoryId = laptopCatId });
+                    await productService.CreateProduct(new ProductViewModel { Name = "MSI Katana", Description = "Игровой ноутбук", Price = 125000, CategoryId = laptopCatId });
+                }
+
+                // -- НАСТОЛЬНЫЕ ПК --
+                var pcCatId = dbCategories.FirstOrDefault(x => x.Slug == "desktops")?.Id ?? 0;
                 if (pcCatId != 0)
                 {
-                    await productService.CreateProduct(new ProductViewModel { Name = "MacBook Air 15", Description = "Чип M3, легкий и мощный", Price = 160000, CategoryId = pcCatId });
-                    await productService.CreateProduct(new ProductViewModel { Name = "ASUS TUF Gaming", Description = "RTX 4060, для игр и работы", Price = 110000, CategoryId = pcCatId });
-                    await productService.CreateProduct(new ProductViewModel { Name = "MSI Katana", Description = "Мощная игровая станция", Price = 125000, CategoryId = pcCatId });
-                    await productService.CreateProduct(new ProductViewModel { Name = "Lenovo Legion Pro", Description = "Киберспортивный ноутбук", Price = 180000, CategoryId = pcCatId });
+                    await productService.CreateProduct(new ProductViewModel { Name = "ASUS ROG Station", Description = "RTX 4080, i9-14900K", Price = 250000, CategoryId = pcCatId });
+                    await productService.CreateProduct(new ProductViewModel { Name = "Office PC Basic", Description = "Для офиса", Price = 40000, CategoryId = pcCatId });
                 }
 
-                // -- МОНИТОРЫ --
-                var monCatId = dbCategories.FirstOrDefault(x => x.Name == "Мониторы")?.Id ?? 0;
-                if (monCatId != 0)
-                {
-                    await productService.CreateProduct(new ProductViewModel { Name = "Samsung Odyssey G5", Description = "Изогнутый 34 дюйма, 165Гц", Price = 45000, CategoryId = monCatId });
-                    await productService.CreateProduct(new ProductViewModel { Name = "LG UltraGear 27", Description = "Nano IPS, 1мс отклик", Price = 38000, CategoryId = monCatId });
-                    await productService.CreateProduct(new ProductViewModel { Name = "Xiaomi Mi Monitor", Description = "34 дюйма, бюджетный ultrawide", Price = 30000, CategoryId = monCatId });
-                    await productService.CreateProduct(new ProductViewModel { Name = "Dell Alienware", Description = "OLED 360Гц, мечта геймера", Price = 110000, CategoryId = monCatId });
-                }
-
-                // -- ПЕРИФЕРИЯ --
-                var perCatId = dbCategories.FirstOrDefault(x => x.Name == "Периферия")?.Id ?? 0;
-                if (perCatId != 0)
-                {
-                    await productService.CreateProduct(new ProductViewModel { Name = "Logitech G Pro X", Description = "Беспроводная мышь, суперлегкая", Price = 14000, CategoryId = perCatId });
-                    await productService.CreateProduct(new ProductViewModel { Name = "Keychron K2", Description = "Механическая клавиатура", Price = 12000, CategoryId = perCatId });
-                    await productService.CreateProduct(new ProductViewModel { Name = "HyperX Cloud Alpha", Description = "Легендарная игровая гарнитура", Price = 9000, CategoryId = perCatId });
-                    await productService.CreateProduct(new ProductViewModel { Name = "Razer BlackWidow", Description = "Клавиатура с подсветкой Chroma", Price = 15000, CategoryId = perCatId });
-                }
-
-                // -- ПЛАНШЕТЫ --
-                var tabCatId = dbCategories.FirstOrDefault(x => x.Name == "Планшеты")?.Id ?? 0;
-                if (tabCatId != 0)
-                {
-                    await productService.CreateProduct(new ProductViewModel { Name = "iPad Air M1", Description = "Мощность ПК в тонком корпусе", Price = 65000, CategoryId = tabCatId });
-                    await productService.CreateProduct(new ProductViewModel { Name = "Samsung Tab S9", Description = "Экран AMOLED 120Гц", Price = 80000, CategoryId = tabCatId });
-                    await productService.CreateProduct(new ProductViewModel { Name = "Xiaomi Pad 6", Description = "Топ за свои деньги", Price = 35000, CategoryId = tabCatId });
-                    await productService.CreateProduct(new ProductViewModel { Name = "Huawei MatePad", Description = "Отличный экран и звук", Price = 30000, CategoryId = tabCatId });
-                }
+                // ... можно добавить товары для остальных категорий
             }
         }
     }

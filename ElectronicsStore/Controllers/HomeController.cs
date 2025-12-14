@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace ElectronicsStore.Controllers
 {
@@ -14,6 +15,9 @@ namespace ElectronicsStore.Controllers
     {
         private readonly IProductService _productService;
         private readonly ICategoryService _categoryService;
+        private int categoryId;
+        private string? name;
+        private bool showAll;
 
         // ВАЖНО: Конструктор должен принимать ОБА сервиса
         public HomeController(IProductService productService, ICategoryService categoryService)
@@ -45,8 +49,7 @@ namespace ElectronicsStore.Controllers
             var categories = categoriesResponse.Data ?? new List<Category>();
 
             // 2. Определяем, главная ли это страница (нет фильтров)
-            bool isMainPage = filter.CategoryId == 0 && string.IsNullOrWhiteSpace(filter.Name);
-
+            bool isMainPage = categoryId == 0 && string.IsNullOrEmpty(name) && !showAll;
             // 3. Подготавливаем переменные
             IEnumerable<Product> products = new List<Product>();
             string categoryName = "Каталог";

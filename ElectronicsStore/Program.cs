@@ -48,7 +48,7 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     try
     {
-        // Исправленный вызов: передаем serviceProvider
+        // Теперь передаем просто services
         await Initializer.InitializeData(services);
     }
     catch (Exception ex)
