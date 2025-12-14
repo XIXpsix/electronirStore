@@ -1,5 +1,4 @@
-﻿// ПОЛНЫЙ КОД
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using ElectronicsStore.BLL.Interfaces;
 using System.Threading.Tasks;
@@ -40,8 +39,6 @@ namespace ElectronicsStore.Controllers
             return View(new List<Product>());
         }
 
-        // --- СОЗДАНИЕ ТОВАРА ---
-
         [HttpGet]
         public async Task<IActionResult> Create()
         {
@@ -56,22 +53,22 @@ namespace ElectronicsStore.Controllers
             {
                 var response = await _productService.CreateProduct(model);
 
+                // Добавлена проверка response.Data != null
                 if (response.StatusCode == Domain.Enum.StatusCode.OK && response.Data != null)
                 {
-                    if (model.NewImages != null)
+                    if (model.NewImages != null && model.NewImages.Count > 0)
                     {
                         await SaveImages(response.Data.Id, model.NewImages);
                     }
 
                     return RedirectToAction("Index");
                 }
+                // Исправлена ошибка CS8604: null-coalescing для Description
                 ModelState.AddModelError("", response.Description ?? "Неизвестная ошибка при создании товара.");
             }
             await PopulateCategoriesDropdown();
             return View(model);
         }
-
-        // --- РЕДАКТИРОВАНИЕ ТОВАРА ---
 
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
@@ -95,7 +92,7 @@ namespace ElectronicsStore.Controllers
 
                 if (response.StatusCode == Domain.Enum.StatusCode.OK && response.Data != null)
                 {
-                    if (model.NewImages != null)
+                    if (model.NewImages != null && model.NewImages.Count > 0)
                     {
                         await SaveImages(model.Id, model.NewImages);
                     }
@@ -108,8 +105,6 @@ namespace ElectronicsStore.Controllers
             return View(model);
         }
 
-        // --- УДАЛЕНИЕ ТОВАРА ---
-
         [HttpPost]
         public async Task<IActionResult> Delete(int id)
         {
@@ -117,7 +112,6 @@ namespace ElectronicsStore.Controllers
 
             if (response.StatusCode == Domain.Enum.StatusCode.OK)
             {
-                // TODO: Добавить логику для удаления физических файлов изображений с диска
                 TempData["SuccessMessage"] = $"Товар ID {id} успешно удален.";
             }
             else
@@ -128,38 +122,37 @@ namespace ElectronicsStore.Controllers
             return RedirectToAction("Index");
         }
 
-        // --- УДАЛЕНИЕ ИЗОБРАЖЕНИЯ (AJAX) ---
-
         [HttpPost]
         public async Task<IActionResult> DeleteImage(int imageId)
         {
             var response = await _productService.DeleteImage(imageId);
             if (response.StatusCode == Domain.Enum.StatusCode.OK)
             {
-                // TODO: Добавить логику для удаления физического файла с диска
                 return Json(new { success = true, message = "Изображение удалено." });
             }
             return Json(new { success = false, message = response.Description ?? "Неизвестная ошибка." });
         }
 
-        // --- ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ ---
-
         private async Task PopulateCategoriesDropdown()
         {
-            // ИСПРАВЛЕНИЕ: Используем GetCategories()
             var categoriesResponse = await _categoryService.GetCategories();
-            var categories = categoriesResponse.Data?
+
+            // ИСПРАВЛЕНИЕ: Безопасное обращение к Data через оператор ?. и null-coalescing ??
+            var categoriesData = categoriesResponse.Data ?? Enumerable.Empty<Category>();
+
+            var categories = categoriesData
                 .Select(c => new SelectListItem
                 {
                     Value = c.Id.ToString(),
                     Text = c.Name
-                }).ToList() ?? new List<SelectListItem>();
+                }).ToList();
 
             ViewBag.Categories = categories;
         }
 
         private async Task SaveImages(int productId, List<IFormFile> images)
         {
+            // Проверка на null и количество
             if (images == null || images.Count == 0) return;
 
             var productsPath = Path.Combine(_appEnvironment.WebRootPath, "images", "products");

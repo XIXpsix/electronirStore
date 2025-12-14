@@ -48,12 +48,8 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     try
     {
-        var userStorage = services.GetRequiredService<IBaseStorage<User>>();
-        var productStorage = services.GetRequiredService<IBaseStorage<Product>>();
-        var categoryStorage = services.GetRequiredService<IBaseStorage<Category>>();
-
-        // Запуск инициализатора (теперь метод доступен)
-        await Initializer.InitializeData(userStorage, productStorage, categoryStorage);
+        // Исправленный вызов: передаем serviceProvider
+        await Initializer.InitializeData(services);
     }
     catch (Exception ex)
     {

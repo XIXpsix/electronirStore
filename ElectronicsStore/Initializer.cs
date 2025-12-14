@@ -10,73 +10,73 @@ using System.Collections.Generic;
 
 namespace ElectronicsStore
 {
-    public class Initializer
+    public static class Initializer
     {
-        public static async Task InitializeRepositories(IServiceProvider serviceProvider)
+        // Переименовали метод в InitializeData и принимаем IServiceProvider,
+        // так как внутри используется GetRequiredService для BLL сервисов.
+        public static async Task InitializeData(IServiceProvider serviceProvider)
         {
-            var scope = serviceProvider.CreateScope();
-            var productService = scope.ServiceProvider.GetRequiredService<IProductService>();
-            var categoryRepository = scope.ServiceProvider.GetRequiredService<IBaseStorage<Category>>();
+            // Используем переданный провайдер. Создавать новый scope не обязательно, 
+            // если метод вызывается уже внутри scope в Program.cs, но допустимо.
+
+            var productService = serviceProvider.GetRequiredService<IProductService>();
+            var categoryRepository = serviceProvider.GetRequiredService<IBaseStorage<Category>>();
 
             // --- 1. Создание категорий ---
             var categoriesToCreate = new List<Category>
             {
-                new Category 
-                { 
-                    Name = "Телефоны", 
+                new Category
+                {
+                    Name = "Телефоны",
                     Slug = "smartphones",
                     ImagePath = "/img/category_phones.jpg",
                     Description = "Мобильные телефоны"
                 },
-                new Category 
-                { 
-                    Name = "Компьютеры", 
+                new Category
+                {
+                    Name = "Компьютеры",
                     Slug = "laptops",
                     ImagePath = "/img/category_laptops.jpg",
                     Description = "Ноутбуки и ПК"
                 },
-                new Category 
-                { 
-                    Name = "Мониторы", 
+                new Category
+                {
+                    Name = "Мониторы",
                     Slug = "monitors",
                     ImagePath = "/img/category_monitors.jpg",
                     Description = "Мониторы и дисплеи"
                 },
-                new Category 
-                { 
-                    Name = "Периферия", 
+                new Category
+                {
+                    Name = "Периферия",
                     Slug = "accessories",
                     ImagePath = "/img/category_accessories.jpg",
                     Description = "Периферийные устройства"
                 },
-                new Category 
-                { 
-                    Name = "Планшеты", 
+                new Category
+                {
+                    Name = "Планшеты",
                     Slug = "tablets",
                     ImagePath = "/img/category_tablets.jpg",
                     Description = "Планшетные компьютеры"
-                    }
+                }
             };
 
-            // Получаем уже существующие категории из БД
             var existingCategories = categoryRepository.GetAll().ToList();
 
             foreach (var cat in categoriesToCreate)
             {
-                // Если категории с таким именем нет в БД — добавляем
                 if (!existingCategories.Any(x => x.Name == cat.Name))
                 {
                     await categoryRepository.Add(cat);
                 }
             }
 
-            // Обновляем список категорий из БД (чтобы получить их ID)
             var dbCategories = categoryRepository.GetAll().ToList();
 
-            // --- 2. Создание товаров (если их мало) ---
+            // --- 2. Создание товаров ---
             var currentProducts = await productService.GetProducts();
-            
-            // ✅ ИСПРАВЛЕНИЕ: Проверка на null перед Count()
+
             if (currentProducts.Data == null || currentProducts.Data.Count() < 15)
             {
                 // -- ТЕЛЕФОНЫ --
@@ -129,11 +129,6 @@ namespace ElectronicsStore
                     await productService.CreateProduct(new ProductViewModel { Name = "Huawei MatePad", Description = "Отличный экран и звук", Price = 30000, CategoryId = tabCatId });
                 }
             }
-        }
-
-        internal static async Task InitializeData(IBaseStorage<User> userStorage, IBaseStorage<Product> productStorage, IBaseStorage<Category> categoryStorage)
-        {
-            throw new NotImplementedException();
         }
     }
 }
