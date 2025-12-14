@@ -1,10 +1,12 @@
 ﻿using ElectronicsStore; // Проверьте, что Initializer в этом namespace
+using ElectronicsStore.BLL.Interfaces;
+using ElectronicsStore.BLL.Realizations;
 using ElectronicsStore.DAL;
-using Microsoft.EntityFrameworkCore;
-using ElectronicsStore.Domain.Entity;
 using ElectronicsStore.DAL.Interfaces;
+using ElectronicsStore.Domain.Entity;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +21,13 @@ builder.Services.InitializeRepositories();
 builder.Services.InitializeServices();
 builder.Services.InitializeValidators();
 
+builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<IAccountService, AccountService>();
+
+
+
+builder.Services.AddScoped<IOrderService, OrderService>();
+// ---------------------------
 // 3. Контроллеры
 builder.Services.AddControllersWithViews();
 
