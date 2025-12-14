@@ -15,24 +15,21 @@ using System.Collections.Generic;
 namespace ElectronicsStore.Controllers
 {
     [Authorize]
-    public class UserController : Controller
+    public class UserController(IAccountService accountService, IWebHostEnvironment appEnvironment) : Controller
     {
-        private readonly IAccountService _accountService;
-        private readonly IWebHostEnvironment _appEnvironment;
-
-        public UserController(IAccountService accountService, IWebHostEnvironment appEnvironment)
-        {
-            _accountService = accountService;
-            _appEnvironment = appEnvironment;
-        }
-
         [HttpGet]
         public async Task<IActionResult> Profile()
         {
-            var userName = User.Identity.Name;
-            var response = await _accountService.GetUser(userName);
+            // ✅ ИСПРАВЛЕНИЕ: Проверка на null
+            var userName = User.Identity?.Name;
+            if (string.IsNullOrEmpty(userName))
+            {
+                return RedirectToAction("Login", "Account");
+            }
 
-            if (response.StatusCode == Domain.Enum.StatusCode.OK)
+            var response = await accountService.GetUser(userName);
+
+            if (response.StatusCode == Domain.Enum.StatusCode.OK && response.Data != null)
             {
                 var user = response.Data;
                 var model = new UserProfileViewModel
@@ -40,7 +37,7 @@ namespace ElectronicsStore.Controllers
                     Id = user.Id,
                     Name = user.Name,
                     Email = user.Email,
-                    CurrentAvatarPath = user.AvatarPath
+                    CurrentAvatarPath = user.AvatarPath ?? "/img/default-user.png"
                 };
                 return View(model);
             }
@@ -50,8 +47,16 @@ namespace ElectronicsStore.Controllers
         [HttpPost]
         public async Task<IActionResult> EditProfile(UserProfileViewModel model)
         {
+            // ✅ ИСПРАВЛЕНИЕ: Проверка на null
+            var userName = User.Identity?.Name;
+            if (string.IsNullOrEmpty(userName))
+            {
+                ModelState.AddModelError("", "Пользователь не найден");
+                return View("Profile", model);
+            }
+
             // Убедимся, что папка для аватаров существует
-            var avatarsPath = Path.Combine(_appEnvironment.WebRootPath, "images", "avatars");
+            var avatarsPath = Path.Combine(appEnvironment.WebRootPath, "images", "avatars");
             if (!Directory.Exists(avatarsPath))
             {
                 Directory.CreateDirectory(avatarsPath);
@@ -59,7 +64,7 @@ namespace ElectronicsStore.Controllers
 
             if (ModelState.IsValid)
             {
-                string avatarPath = null;
+                string? avatarPath = null;
 
                 // Обработка загрузки файла
                 if (model.Avatar != null)
@@ -78,20 +83,19 @@ namespace ElectronicsStore.Controllers
                     }
                 }
 
-                // ВАЖНО: Мы используем старое имя пользователя (из текущих куки) для поиска пользователя, 
-                // так как новое имя может быть еще не сохранено
-                var response = await _accountService.EditProfile(User.Identity.Name, model, avatarPath);
+                // ВАЖНО: Мы используем старое имя пользователя (из текущих куки) для поиска пользователя
+                var response = await accountService.EditProfile(userName, model, avatarPath);
 
-                if (response.StatusCode == Domain.Enum.StatusCode.OK)
+                if (response.StatusCode == Domain.Enum.StatusCode.OK && response.Data != null)
                 {
                     // Обновляем Claims (куки), чтобы имя и аватарка обновились в шапке
                     var user = response.Data;
                     var claims = new List<Claim>
                     {
-                        new(ClaimsIdentity.DefaultNameClaimType, user.Name),
+                        new(ClaimsIdentity.DefaultNameClaimType, user.Name ?? ""),
                         new(ClaimsIdentity.DefaultRoleClaimType, user.Role.ToString()),
                         new("Id", user.Id.ToString()),
-                        new("AvatarPath", user.AvatarPath)
+                        new("AvatarPath", user.AvatarPath ?? "/img/default-user.png")
                     };
                     ClaimsIdentity id = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme,
                                                            ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
@@ -102,7 +106,8 @@ namespace ElectronicsStore.Controllers
                     return RedirectToAction("Profile");
                 }
 
-                ModelState.AddModelError("", response.Description);
+                // ✅ ИСПРАВЛЕНИЕ: Проверка на null
+                ModelState.AddModelError("", response.Description ?? "Неизвестная ошибка");
             }
             // Если ModelState невалиден, возвращаем модель обратно в представление
             return View("Profile", model);

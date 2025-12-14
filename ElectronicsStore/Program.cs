@@ -6,17 +6,16 @@ using ElectronicsStore.DAL.Interfaces; // Добавлено для IBaseStorage
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Подключение к БД
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ElectronicsStoreContext>(options =>
     options.UseNpgsql(connectionString));
 
-// 2. Инициализация слоев (Твой Initializer)
 builder.Services.InitializeRepositories();
 builder.Services.InitializeServices();
-builder.Services.InitializeValidators(); // Добавил валидаторы, они у тебя были в классе
+builder.Services.InitializeValidators();
 
 // 3. Контроллеры
 builder.Services.AddControllersWithViews();
@@ -34,15 +33,13 @@ builder.Services.AddAuthentication(options =>
 })
 .AddGoogle(googleOptions =>
 {
-    googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"];
-    googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+    googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"] ?? string.Empty;
+    googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"] ?? string.Empty        ;
 });
 
-// ... твой код builder.Build(); ...
 
 var app = builder.Build();
 
-// === ВСТАВИТЬ ЭТОТ БЛОК (ЗАПУСК ИНИЦИАЛИЗАЦИИ) ===
 using (var scope = app.Services.CreateScope())
 {
 var services = scope.ServiceProvider;
@@ -62,7 +59,6 @@ var logger = services.GetRequiredService<ILogger<Program>>();
 logger.LogError(ex, "Ошибка при заполнении базы данных.");
 }
 }
-// ===================================================
 
 if (!app.Environment.IsDevelopment())
 {

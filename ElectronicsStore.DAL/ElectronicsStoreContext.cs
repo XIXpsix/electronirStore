@@ -1,19 +1,16 @@
-﻿using System; // Добавлено для DateTime
-using ElectronicsStore.Domain.Entity;
+﻿using ElectronicsStore.Domain.Entity;
 using Microsoft.EntityFrameworkCore;
 
 namespace ElectronicsStore.DAL
 {
-    public class ElectronicsStoreContext : DbContext
+    public class ElectronicsStoreContext(DbContextOptions<ElectronicsStoreContext> options) : DbContext(options)
     {
-        public ElectronicsStoreContext(DbContextOptions<ElectronicsStoreContext> options) : base(options)
-        { }
-
         public DbSet<User> Users { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Review> Reviews { get; set; }
         public DbSet<ProductImage> ProductImages { get; set; }
+        public DbSet<Cart> Carts { get; set; }
         public DbSet<CartItem> CartItems { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -61,9 +58,8 @@ namespace ElectronicsStore.DAL
                 }
             );
 
-            // Начальные данные для товаров (по 3 в каждой категории)
+            // Начальные данные для товаров
             modelBuilder.Entity<Product>().HasData(
-                // === СМАРТФОНЫ (CategoryId = 1) ===
                 new Product
                 {
                     Id = 1,
@@ -94,8 +90,6 @@ namespace ElectronicsStore.DAL
                     ImagePath = "/img/pixel8.jpg",
                     CreatedAt = DateTime.UtcNow
                 },
-
-                // === НОУТБУКИ (CategoryId = 2) ===
                 new Product
                 {
                     Id = 4,
@@ -104,26 +98,6 @@ namespace ElectronicsStore.DAL
                     Price = 120000,
                     CategoryId = 2,
                     ImagePath = "/img/macbook_air.jpg",
-                    CreatedAt = DateTime.UtcNow
-                },
-                new Product
-                {
-                    Id = 5,
-                    Name = "ASUS ROG Strix",
-                    Description = "Мощный игровой ноутбук для современных игр",
-                    Price = 150000,
-                    CategoryId = 2,
-                    ImagePath = "/img/asus_rog.jpg",
-                    CreatedAt = DateTime.UtcNow
-                },
-                new Product
-                {
-                    Id = 6,
-                    Name = "Lenovo ThinkPad X1",
-                    Description = "Надежный ноутбук для бизнеса и работы",
-                    Price = 180000,
-                    CategoryId = 2,
-                    ImagePath = "/img/lenovo_thinkpad.jpg",
                     CreatedAt = DateTime.UtcNow
                 }
             );

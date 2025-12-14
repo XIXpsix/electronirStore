@@ -161,7 +161,7 @@ namespace ElectronicsStore.BLL.Realizations
         }
 
         // ИСПРАВЛЕНО: name теперь string?
-        public async Task<BaseResponse<User>> EditProfile(string? name, UserProfileViewModel model, string? newAvatarPath)
+        public async Task<BaseResponse<User>> EditProfile(string name, UserProfileViewModel model, string? newAvatarPath)
         {
             try
             {
@@ -173,11 +173,12 @@ namespace ElectronicsStore.BLL.Realizations
 
                 // ИСПРАВЛЕНО: Устранена ошибка лямбда-выражения (используется Where)
                 var user = await userRepository.GetAll().Where(x => x.Name == name).FirstOrDefaultAsync();
-                if (user == null) return new() { Description = "Пользователь не найден", StatusCode = StatusCode.UserNotFound };
+                if (user == null) 
+                    return new() { Description = "Пользователь не найден", StatusCode = StatusCode.UserNotFound };
 
                 // Обновляем данные
-                user.Name = model.Name;
-                user.Email = model.Email; // Принимаем, что модель настроена так, что Email здесь не null или в классе User допускает null.
+                user.Name = model.Name ?? user.Name;
+                user.Email = model.Email ?? user.Email;
 
                 // ИСПРАВЛЕНО NRT: newAvatarPath обрабатывается правильно
                 if (!string.IsNullOrEmpty(newAvatarPath))
