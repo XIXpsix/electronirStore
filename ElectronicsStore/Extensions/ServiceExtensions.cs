@@ -1,9 +1,11 @@
-using ElectronicsStore.BLL.Interfaces;
+п»їusing ElectronicsStore.BLL.Interfaces;
 using ElectronicsStore.BLL.Realizations;
 using ElectronicsStore.DAL.Interfaces;
 using ElectronicsStore.DAL.Realizations;
+using ElectronicsStore.DAL.Repositories;
 using ElectronicsStore.Domain.Entity;
 using ElectronicsStore.Domain.Validators;
+using ElectronicsStore.Domain.ViewModels;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -11,13 +13,13 @@ namespace ElectronicsStore
 {
     public static class ServiceExtensions
     {
-        // ? ИСПРАВЛЕНИЕ: Метод для инициализации repositories
+        // вњ… РРЎРџР РђР’Р›Р•РќРР•: РњРµС‚РѕРґ РґР»СЏ РёРЅРёС†РёР°Р»РёР·Р°С†РёРё repositories
         public static void InitializeRepositories(this IServiceCollection services)
         {
             services.AddScoped(typeof(IBaseStorage<>), typeof(BaseStorage<>));
         }
 
-        // ? ИСПРАВЛЕНИЕ: Метод для инициализации сервисов
+        // вњ… РРЎРџР РђР’Р›Р•РќРР•: РњРµС‚РѕРґ РґР»СЏ РёРЅРёС†РёР°Р»РёР·Р°С†РёРё СЃРµСЂРІРёСЃРѕРІ
         public static void InitializeServices(this IServiceCollection services)
         {
             services.AddScoped<IAccountService, AccountService>();
@@ -26,7 +28,7 @@ namespace ElectronicsStore
             services.AddScoped<IEmailService, EmailService>();
         }
 
-        // ? ИСПРАВЛЕНИЕ: Метод для инициализации валидаторов
+        // вњ… РРЎРџР РђР’Р›Р•РќРР•: РњРµС‚РѕРґ РґР»СЏ РёРЅРёС†РёР°Р»РёР·Р°С†РёРё РІР°Р»РёРґР°С‚РѕСЂРѕРІ
         public static void InitializeValidators(this IServiceCollection services)
         {
             services.AddScoped<IValidator<RegisterViewModel>, RegisterValidator>();
