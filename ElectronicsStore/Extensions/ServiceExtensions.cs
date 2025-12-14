@@ -1,7 +1,7 @@
 ﻿using ElectronicsStore.BLL.Interfaces;
 using ElectronicsStore.BLL.Realizations;
 using ElectronicsStore.DAL.Interfaces;
-using ElectronicsStore.DAL.Repositories; // Убрали DAL.Realizations, если его нет, или оставили один раз
+using ElectronicsStore.DAL.Repositories;
 using ElectronicsStore.Domain.Entity;
 using ElectronicsStore.Domain.Validators;
 using ElectronicsStore.Domain.ViewModels;
@@ -23,6 +23,9 @@ namespace ElectronicsStore
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<IEmailService, EmailService>();
+
+            // ✅ ОБЯЗАТЕЛЬНО ДОБАВЬТЕ ЭТУ СТРОКУ:
+            services.AddScoped<ICartService, CartService>();
         }
 
         public static void InitializeValidators(this IServiceCollection services)

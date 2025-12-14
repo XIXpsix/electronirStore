@@ -3,11 +3,13 @@
 @{
     ViewData["Title"] = Model.IsMainCatalogPage ? "Каталог" : Model.CurrentCategoryName;
 
-    // Список всех моделей для фильтра
     var allProductNames = Model.Products.Select(p => p.Name).Distinct().OrderBy(n => n).ToList();
 
-    // Проверяем режим: если CategoryId == 0, значит мы на странице "Все товары"
-    bool isAllProductsMode = Model.Filter.CategoryId == 0;
+    // Приводим к нижнему регистру для надежной проверки
+    string catName = Model.CurrentCategoryName.ToLower();
+    bool isComputerCategory = catName.Contains("комп") || catName.Contains("ноут") || catName.Contains("пк");
+
+    bool showCategorySelector = Model.Filter.CategoryId == 0;
 }
 
 <div class="catalog-wrapper">
@@ -39,26 +41,26 @@
                         <a href="@Url.Action("Catalog", new { CategoryId = cat.Id })" class="text-decoration-none category-card-link">
                             <div class="card h-100 category-big-card bg-dark-card text-center p-4">
                                 <div class="icon-big mb-3">
-                                    @if (cat.Name.Contains("Смартфон"))
+                                    @* === ИСПРАВЛЕННАЯ ЛОГИКА ИКОНОК (ToLower) === *@
+                                    @if (cat.Name.ToLower().Contains("смартфон") || cat.Name.ToLower().Contains("телефон"))
                                     {
                                         <span>📱</span>
                                     }
-                                    else if (cat.Name.Contains("Компьютер"))
+                                    else if (cat.Name.ToLower().Contains("комп") || cat.Name.ToLower().Contains("ноут") || cat.Name.ToLower().Contains("пк"))
                                     {
-
                                         <span>💻</span>
                                     }
-                                    else if (cat.Name.Contains("Монитор"))
+                                    else if (cat.Name.ToLower().Contains("монитор"))
                                     {
 
                                         <span>📺</span>
                                     }
-                                    else if (cat.Name.Contains("Периферия"))
+                                    else if (cat.Name.ToLower().Contains("периферия") || cat.Name.ToLower().Contains("аксессуар"))
                                     {
 
                                         <span>🎧</span>
                                     }
-                                    else if (cat.Name.Contains("Планшет"))
+                                    else if (cat.Name.ToLower().Contains("планшет"))
                                     {
 
                                         <span>📲</span>
@@ -105,7 +107,7 @@
 
                         <form id="filterForm" onsubmit="event.preventDefault();">
 
-                            @if (isAllProductsMode)
+                            @if (showCategorySelector)
                             {
                                 <div class="mb-4">
                                     <label class="filter-label">Категория</label>
@@ -122,6 +124,18 @@
                             else
                             {
                                 <input type="hidden" id="categorySelect" value="@Model.Filter.CategoryId" />
+                            }
+
+                            @if (isComputerCategory)
+                            {
+                                <div class="mb-4 fade-in">
+                                    <label class="filter-label">Тип устройства</label>
+                                    <select id="typeSelect" class="form-select custom-input" onchange="applyTypeFilter(this.value)">
+                                        <option value="">Все типы</option>
+                                        <option value="Ноутбук">Только Ноутбуки</option>
+                                        <option value="ПК">Только ПК</option>
+                                    </select>
+                                </div>
                             }
 
                             <div class="mb-4">
@@ -168,7 +182,6 @@
 </div>
 
 <style>
-    /* STYLES (Black & Orange) */
     :root {
         --main-bg: #050505;
         --card-bg: #141414;
@@ -322,18 +335,23 @@
         document.getElementById('minPrice').value = "";
         document.getElementById('maxPrice').value = "";
 
-        // Сбрасываем категорию, только если она видна (режим "Все товары")
         const catSelect = document.getElementById('categorySelect');
-        if(catSelect && catSelect.tagName === 'SELECT') {
-            catSelect.value = "0";
-        }
+        if(catSelect && catSelect.tagName === 'SELECT') { catSelect.value = "0"; }
 
+        if(document.getElementById('typeSelect')) document.getElementById('typeSelect').value = "";
+        if(document.getElementById('modelSelect')) document.getElementById('modelSelect').value = "";
+        applyFilter('sidebar');
+    }
+
+    function applyTypeFilter(val) {
+        document.getElementById('nameInput').value = val;
         if(document.getElementById('modelSelect')) document.getElementById('modelSelect').value = "";
         applyFilter('sidebar');
     }
 
     function applyModelFilter(val) {
         document.getElementById('nameInput').value = val;
+        if(document.getElementById('typeSelect')) document.getElementById('typeSelect').value = "";
         applyFilter('sidebar');
     }
 
