@@ -87,27 +87,42 @@ namespace ElectronicsStore.BLL.Realizations
                     .Include(x => x.Images)
                     .AsQueryable();
 
+                // 1. Фильтр по категории
                 if (filter.CategoryId > 0)
-                    query = query.Where(x => x.CategoryId == filter.CategoryId);
-
-                var filterName = filter.Name;
-                if (!string.IsNullOrWhiteSpace(filterName))
                 {
-                    query = query.Where(x => x.Name.Contains(filterName, StringComparison.OrdinalIgnoreCase));
+                    query = query.Where(x => x.CategoryId == filter.CategoryId);
                 }
 
-                if (filter.MinPrice > 0) query = query.Where(x => x.Price >= filter.MinPrice);
-                if (filter.MaxPrice > 0) query = query.Where(x => x.Price <= filter.MaxPrice);
+                // 2. Поиск по имени (регистронезависимый)
+                if (!string.IsNullOrWhiteSpace(filter.Name))
+                {
+                    // Используем ToLower для надежности, хотя некоторые БД и так игнорируют регистр
+                    query = query.Where(x => x.Name.ToLower().Contains(filter.Name.ToLower()));
+                }
 
+                // 3. Фильтр по цене
+                if (filter.MinPrice.HasValue && filter.MinPrice.Value > 0)
+                {
+                    query = query.Where(x => x.Price >= filter.MinPrice.Value);
+                }
+
+                if (filter.MaxPrice.HasValue && filter.MaxPrice.Value > 0)
+                {
+                    query = query.Where(x => x.Price <= filter.MaxPrice.Value);
+                }
+
+                // 4. Сортировка
                 query = filter.SortType switch
                 {
                     "price_asc" => query.OrderBy(x => x.Price),
                     "price_desc" => query.OrderByDescending(x => x.Price),
                     "name_asc" => query.OrderBy(x => x.Name),
-                    _ => query.OrderBy(x => x.Id)
+                    "name_desc" => query.OrderByDescending(x => x.Name),
+                    _ => query.OrderByDescending(x => x.Id) // По умолчанию новые сверху
                 };
 
                 var products = await query.ToListAsync();
+
                 return new BaseResponse<List<Product>> { Data = products, StatusCode = StatusCode.OK };
             }
             catch (Exception ex)
