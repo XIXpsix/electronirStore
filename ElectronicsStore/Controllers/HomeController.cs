@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace ElectronicsStore.Controllers
 {
@@ -15,11 +14,10 @@ namespace ElectronicsStore.Controllers
     {
         private readonly IProductService _productService;
         private readonly ICategoryService _categoryService;
-        private int categoryId;
-        private string? name;
-        private bool showAll;
 
-        // ВАЖНО: Конструктор должен принимать ОБА сервиса
+        // ✅ ИСПРАВЛЕНИЕ: Удалены неиспользуемые поля (categoryId, name, showAll),
+        // которые вызывали ошибки и требовали перезапуска при удалении.
+
         public HomeController(IProductService productService, ICategoryService categoryService)
         {
             _productService = productService;
@@ -30,11 +28,10 @@ namespace ElectronicsStore.Controllers
         {
             var response = await _productService.GetProducts();
 
-            // Исправление warning: "Возможно, аргумент-ссылка... NULL"
-            // Если Data придет null, мы подставим пустой список, чтобы Take(3) не упал
-            var products = response.Data ?? new List<Product>();
+            // ✅ ИСПРАВЛЕНИЕ: Безопасное получение списка
+            var products = response?.Data ?? new List<Product>();
 
-            if (response.StatusCode == Domain.Enum.StatusCode.OK)
+            if (response != null && response.StatusCode == Domain.Enum.StatusCode.OK)
             {
                 return View(products.Take(3).ToList());
             }
@@ -42,36 +39,44 @@ namespace ElectronicsStore.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Catalog(ProductFilter filter)
+        // ✅ ИСПРАВЛЕНИЕ: Добавлен параметр showAll
+        public async Task<IActionResult> Catalog(ProductFilter filter, bool showAll = false)
         {
             // 1. Получаем категории (безопасно)
             var categoriesResponse = await _categoryService.GetCategories();
-            var categories = categoriesResponse.Data ?? new List<Category>();
+            var categories = categoriesResponse?.Data ?? new List<Category>();
 
-            // 2. Определяем, главная ли это страница (нет фильтров)
-            bool isMainPage = categoryId == 0 && string.IsNullOrEmpty(name) && !showAll;
+            // 2. ✅ ИСПРАВЛЕНИЕ ЛОГИКИ:
+            // Проверяем данные из параметров (filter и showAll), а не пустые поля класса.
+            // Главная страница показывается, только если нет фильтров и не нажато "Все товары".
+            bool isMainPage = filter.CategoryId == 0 && string.IsNullOrEmpty(filter.Name) && !showAll;
+
             // 3. Подготавливаем переменные
             IEnumerable<Product> products = new List<Product>();
             string categoryName = "Каталог";
 
-            // 4. Если нужно искать товары
+            // 4. Если это НЕ главная страница (т.е. мы ищем товары)
             if (!isMainPage)
             {
                 var productsResponse = await _productService.GetProductsByFilter(filter);
-                products = productsResponse.Data ?? new List<Product>();
+                products = productsResponse?.Data ?? new List<Product>();
 
                 if (filter.CategoryId > 0)
                 {
                     var cat = categories.FirstOrDefault(c => c.Id == filter.CategoryId);
                     categoryName = cat?.Name ?? "Категория";
                 }
-                else
+                else if (!string.IsNullOrEmpty(filter.Name))
                 {
                     categoryName = $"Поиск: {filter.Name}";
                 }
+                else
+                {
+                    categoryName = "Все товары";
+                }
             }
 
-            // 5. Создаем модель, инициализируя ВСЕ свойства
+            // 5. Создаем модель
             var model = new CatalogViewModel
             {
                 IsMainCatalogPage = isMainPage,
@@ -79,7 +84,6 @@ namespace ElectronicsStore.Controllers
                 Products = products,
                 Filter = filter,
                 CurrentCategoryName = categoryName,
-                // Заполняем обязательное поле, на которое ругался компилятор
                 CurrentSearchName = filter.Name ?? string.Empty
             };
 
@@ -90,8 +94,8 @@ namespace ElectronicsStore.Controllers
         public async Task<IActionResult> Filter([FromBody] ProductFilter filter)
         {
             var response = await _productService.GetProductsByFilter(filter);
-            // Безопасная передача данных в PartialView
-            return PartialView("_ProductListPartial", response.Data ?? new List<Product>());
+            // ✅ ИСПРАВЛЕНИЕ: Безопасная передача данных
+            return PartialView("_ProductListPartial", response?.Data ?? new List<Product>());
         }
 
         public IActionResult Privacy() => View();

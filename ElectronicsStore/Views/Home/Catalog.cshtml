@@ -2,24 +2,31 @@
 
 @{
     ViewData["Title"] = Model.IsMainCatalogPage ? "Каталог" : Model.CurrentCategoryName;
+
+    // Получаем список моделей для фильтра (уникальные названия)
+    var allProductNames = Model.Products.Select(p => p.Name).Distinct().OrderBy(n => n).ToList();
+
+    // Проверяем, находимся ли мы в категории "Компьютеры"
+    bool isComputerCategory = Model.CurrentCategoryName.Contains("Компьютеры");
 }
 
-<div class="container-fluid" style="background-color: #050505; min-height: 100vh;">
+<div class="catalog-wrapper">
     <div class="container py-5">
 
         @if (Model.IsMainCatalogPage)
         {
-            /* === ГЛАВНАЯ КАТАЛОГА === */
-
+            /* === ГЛАВНАЯ СТРАНИЦА (ПЛИТКИ) === */
             <div class="text-center mb-5 fade-in">
-                <h1 class="text-white fw-bold text-uppercase mb-4">Каталог товаров</h1>
-
+                <h1 class="display-4 fw-bold text-white text-uppercase mb-4 title-glow">
+                    Каталог <span class="text-orange">Electronics</span>
+                </h1>
                 <div class="row justify-content-center">
                     <div class="col-md-8 col-lg-6">
-                        <div class="position-relative">
-                            <input type="text" id="globalSearchInput" class="form-control form-control-lg bg-dark text-white border-secondary rounded-pill ps-4 pe-5"
-                                   placeholder="Начните вводить название товара..." style="height: 60px; font-size: 1.2rem; box-shadow: 0 0 15px rgba(0,0,0,0.5);">
-                            <span class="position-absolute" style="right: 20px; top: 18px; font-size: 1.5rem; opacity: 0.5;">🔍</span>
+                        <div class="search-container position-relative">
+                            <input type="text" id="globalSearchInput"
+                                   class="form-control form-control-lg custom-search-input ps-5 pe-5"
+                                   placeholder="Найти гаджет..." autocomplete="off">
+                            <span class="search-icon-left">🔍</span>
                         </div>
                     </div>
                 </div>
@@ -32,90 +39,115 @@
                         <a href="@Url.Action("Catalog", new { CategoryId = cat.Id })" class="text-decoration-none category-card-link">
                             <div class="card h-100 category-big-card bg-dark-card text-center p-4">
                                 <div class="icon-big mb-3">
-                                    @(cat.Name.ToLower().Contains("телефон") ? "📱" :
-                                                                cat.Name.ToLower().Contains("комп") ? "💻" :
-                                                                cat.Name.ToLower().Contains("монитор") ? "🖥️" :
-                                                                cat.Name.ToLower().Contains("аксессуар") ? "🎧" : "📦")
-                        </div>
-                        <h3 class="text-white fw-bold">@cat.Name</h3>
-                        <p class="text-muted">Смотреть товары</p>
+                                    @if (cat.Name.Contains("Смартфон"))
+                                    {
+                                        <span>📱</span>
+                                    }
+                                    else if (cat.Name.Contains("Компьютер"))
+                                    {
+
+                                        <span>💻</span>
+                                    }
+                                    else if (cat.Name.Contains("Монитор"))
+                                    {
+
+                                        <span>📺</span>
+                                    }
+                                    else if (cat.Name.Contains("Периферия"))
+                                    {
+
+                                        <span>🎧</span>
+                                    }
+                                    else if (cat.Name.Contains("Планшет"))
+                                    {
+
+                                        <span>📲</span>
+                                    }
+                                    else
+                                    {
+
+                                        <span>📦</span>
+                                    }
+                                </div>
+                                <h3 class="text-white fw-bold">@cat.Name</h3>
+                            </div>
+                        </a>
                     </div>
-                </a>
-            </div>
-                        }
+                }
                 <div class="col">
-                    <a href="@Url.Action("Catalog", new { CategoryId = 0, Name = "" })" class="text-decoration-none category-card-link">
-                        <div class="card h-100 category-big-card bg-main-orange-gradient text-center p-4 border-0">
+                    <a href="@Url.Action("Catalog", new { CategoryId = 0, showAll = true })" class="text-decoration-none category-card-link">
+                        <div class="card h-100 category-big-card bg-gradient-orange text-center p-4 border-0">
                             <div class="icon-big mb-3 text-black">🚀</div>
                             <h3 class="text-black fw-bold">Все товары</h3>
-                            <p class="text-black-50">Полный список</p>
                         </div>
                     </a>
                 </div>
             </div>
 
-            <div id="globalSearchResults" class="row row-cols-1 row-cols-sm-2 row-cols-xl-3 g-4 fade-in-up" style="display: none;">
-            </div>
+            <div id="globalSearchResults" class="row row-cols-1 row-cols-sm-2 row-cols-xl-3 g-4 fade-in-up" style="display: none;"></div>
         }
         else
         {
-            /* === СТРАНИЦА КАТЕГОРИИ / СПИСОК ТОВАРОВ === */
-
+            /* === СТРАНИЦА ТОВАРОВ + ФИЛЬТРЫ === */
             <div class="d-flex align-items-center mb-4 fade-in">
-                <a href="@Url.Action("Catalog")" class="btn btn-outline-secondary me-3 rounded-circle"
-                   style="width: 40px; height: 40px; display:flex; align-items:center; justify-content:center; text-decoration:none;">🠔</a>
-
+                <a href="@Url.Action("Catalog")" class="btn-back me-3">🠔</a>
                 <div>
-                    <small class="text-muted d-block mb-1">Раздел:</small>
-                    <h2 class="text-white fw-bold text-uppercase m-0">@Model.CurrentCategoryName</h2>
+                    <small class="text-orange d-block mb-1 fw-bold text-uppercase">Раздел</small>
+                    <h2 class="text-white fw-bold text-uppercase m-0 text-shadow">@Model.CurrentCategoryName</h2>
                 </div>
             </div>
 
             <div class="row">
                 <div class="col-lg-3 mb-4 fade-in-up">
-                    <div class="filter-card p-4 rounded bg-dark-card border border-secondary sticky-top" style="top: 20px; z-index: 100;">
-                        <h5 class="text-white mb-3">Фильтры</h5>
+                    <div class="filter-panel sticky-top">
+                        <div class="filter-header mb-4">
+                            <h5 class="text-white m-0 fw-bold">⚡ Фильтры</h5>
+                        </div>
 
                         <form id="filterForm" onsubmit="event.preventDefault();">
-                            <div class="mb-3">
-                                <label class="text-muted mb-1 small">Категория</label>
-                                <select id="categorySelect" class="form-select bg-dark text-white border-secondary">
-                                    <option value="0">Все категории</option>
-                                    @foreach (var cat in Model.Categories)
+                            <input type="hidden" id="categorySelect" value="@Model.Filter.CategoryId" />
+
+                            @if (isComputerCategory || Model.Filter.CategoryId == 0)
+                            {
+                                <div class="mb-4">
+                                    <label class="filter-label">Тип устройства</label>
+                                    <select id="typeSelect" class="form-select custom-input" onchange="applyTypeFilter(this.value)">
+                                        <option value="">Все типы</option>
+                                        <option value="Ноутбук">Только Ноутбуки</option>
+                                        <option value="ПК">Только ПК</option>
+                                    </select>
+                                </div>
+                            }
+
+                            <div class="mb-4">
+                                <label class="filter-label">Модель</label>
+                                <select id="modelSelect" class="form-select custom-input" onchange="applyModelFilter(this.value)">
+                                    <option value="">Все модели</option>
+                                    @foreach (var name in allProductNames)
                                     {
-                                        var isSelected = cat.Id == Model.Filter.CategoryId;
-                                        <!option value="@cat.Id" @(isSelected ? "selected" : "")>@cat.Name</!option>
+                                        <option value="@name">@name</option>
                                     }
                                 </select>
                             </div>
 
-                            <div class="mb-3">
-                                <label class="text-muted mb-1 small">Поиск</label>
-                                <input type="text" id="nameInput" class="form-control bg-dark text-white border-secondary"
+                            <div class="mb-4">
+                                <label class="filter-label">Поиск</label>
+                                <input type="text" id="nameInput" class="form-control custom-input"
                                        placeholder="Название..." value="@Model.Filter.Name">
                             </div>
 
-                            <hr class="border-secondary my-3">
-
-                            <div class="mb-3">
-                                <label class="text-muted mb-1 small">Цена (₽)</label>
-                                <div class="d-flex gap-2">
-                                    <input type="number" id="minPrice" class="form-control bg-dark text-white border-secondary" placeholder="От" value="@Model.Filter.MinPrice">
-                                    <input type="number" id="maxPrice" class="form-control bg-dark text-white border-secondary" placeholder="До" value="@Model.Filter.MaxPrice">
+                            <div class="mb-4">
+                                <label class="filter-label">Цена (₽)</label>
+                                <div class="d-flex gap-2 align-items-center">
+                                    <input type="number" id="minPrice" class="form-control custom-input text-center" placeholder="0" value="@Model.Filter.MinPrice">
+                                    <span class="text-muted">-</span>
+                                    <input type="number" id="maxPrice" class="form-control custom-input text-center" placeholder="MAX" value="@Model.Filter.MaxPrice">
                                 </div>
                             </div>
 
-                            <div class="mb-3">
-                                <label class="text-muted mb-1 small">Сортировка</label>
-                                <select id="sortSelect" class="form-select bg-dark text-white border-secondary">
-                                    <!option value="" @(Model.Filter.SortType == "" ? "selected" : "")>По новизне</!option>
-                                    <!option value="price_asc" @(Model.Filter.SortType == "price_asc" ? "selected" : "")>Сначала дешевые</!option>
-                                    <!option value="price_desc" @(Model.Filter.SortType == "price_desc" ? "selected" : "")>Сначала дорогие</!option>
-                                    <!option value="name_asc" @(Model.Filter.SortType == "name_asc" ? "selected" : "")>А-Я</!option>
-                                </select>
-                            </div>
-
-                            <a href="@Url.Action("Catalog")" class="btn btn-outline-secondary w-100 btn-sm">Сбросить всё</a>
+                            <button type="button" onclick="resetFilters()" class="btn btn-outline-orange w-100 btn-sm fw-bold">
+                                🗑️ Сбросить
+                            </button>
                         </form>
                     </div>
                 </div>
@@ -131,51 +163,128 @@
 </div>
 
 <style>
+    /* Стили как в предыдущем ответе (черно-оранжевые) */
+    :root {
+        --main-bg: #050505;
+        --card-bg: #141414;
+        --input-bg: #1f1f1f;
+        --orange: #ff6600;
+        --border-color: #333;
+    }
+
+    .catalog-wrapper {
+        background-color: var(--main-bg);
+        min-height: 100vh;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .text-orange {
+        color: var(--orange) !important;
+    }
+
+    .title-glow {
+        text-shadow: 0 0 20px rgba(255, 102, 0, 0.3);
+    }
+
+    .custom-search-input {
+        background: #1a1a1a;
+        border: 2px solid #333;
+        border-radius: 50px;
+        color: white;
+        height: 60px;
+    }
+
+        .custom-search-input:focus {
+            border-color: var(--orange);
+            box-shadow: 0 0 15px rgba(255, 102, 0, 0.3);
+            color: white;
+            background: #222;
+        }
+
+    .search-icon-left {
+        position: absolute;
+        left: 20px;
+        top: 18px;
+        font-size: 1.2rem;
+        opacity: 0.5;
+    }
+
     .bg-dark-card {
-        background-color: #1e1e1e;
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        transition: 0.3s;
     }
 
-    .category-big-card {
-        border: 1px solid #333;
-        border-radius: 15px;
-        transition: all 0.3s ease;
+    .bg-gradient-orange {
+        background: linear-gradient(135deg, #ff6600, #ff9900);
+        border-radius: 20px;
     }
 
-    .category-card-link:hover .category-big-card {
+    .category-card-link:hover .bg-dark-card {
         transform: translateY(-7px);
-        border-color: #ff6600;
-        box-shadow: 0 10px 30px rgba(255, 102, 0, 0.2);
+        border-color: var(--orange);
     }
 
     .icon-big {
         font-size: 3.5rem;
-        transition: transform 0.3s;
+        transition: 0.3s;
     }
 
-    .category-card-link:hover .icon-big {
-        transform: scale(1.1);
+    .filter-panel {
+        background: var(--card-bg);
+        border-radius: 16px;
+        padding: 25px;
+        border: 1px solid var(--border-color);
     }
 
-    .bg-main-orange-gradient {
-        background: linear-gradient(45deg, #ff6600, #ff8533);
+    .filter-label {
+        color: #888;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        margin-bottom: 5px;
+        font-weight: bold;
     }
 
-    .fade-in {
-        animation: fadeIn 0.6s ease-out;
+    .custom-input {
+        background: var(--input-bg);
+        border: 1px solid var(--border-color);
+        color: white;
+        border-radius: 8px;
+    }
+
+        .custom-input:focus {
+            border-color: var(--orange);
+            background: #252525;
+            color: white;
+        }
+
+    .btn-outline-orange {
+        color: var(--orange);
+        border: 1px solid var(--orange);
+        transition: 0.3s;
+    }
+
+        .btn-outline-orange:hover {
+            background: var(--orange);
+            color: white;
+        }
+
+    .btn-back {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
     }
 
     .fade-in-up {
         animation: fadeInUp 0.6s ease-out;
-    }
-
-    @@keyframes fadeIn {
-        from {
-            opacity: 0;
-        }
-
-        to {
-            opacity: 1;
-        }
     }
 
     @@keyframes fadeInUp {
@@ -192,67 +301,78 @@
 </style>
 
 <script>
-    // Главная функция фильтрации
+    function resetFilters() {
+        document.getElementById('nameInput').value = "";
+        document.getElementById('minPrice').value = "";
+        document.getElementById('maxPrice').value = "";
+        if(document.getElementById('typeSelect')) document.getElementById('typeSelect').value = "";
+        if(document.getElementById('modelSelect')) document.getElementById('modelSelect').value = "";
+        applyFilter('sidebar');
+    }
+
+    // Фильтр ТИПА (пишет в поиск "Ноутбук" или "ПК")
+    function applyTypeFilter(val) {
+        document.getElementById('nameInput').value = val;
+        // Сбрасываем фильтр конкретной модели, чтобы не было конфликта
+        if(document.getElementById('modelSelect')) document.getElementById('modelSelect').value = "";
+        applyFilter('sidebar');
+    }
+
+    // Фильтр МОДЕЛИ (пишет полное имя в поиск)
+    function applyModelFilter(val) {
+        document.getElementById('nameInput').value = val;
+        // Сбрасываем фильтр типа
+        if(document.getElementById('typeSelect')) document.getElementById('typeSelect').value = "";
+        applyFilter('sidebar');
+    }
+
     async function applyFilter(source) {
         let data = {};
         let containerId = "";
 
-        // Определяем, откуда пришел запрос (Главная или Сайдбар)
         if (source === 'global') {
             const query = document.getElementById('globalSearchInput').value;
-
-            // Логика переключения видимости на главной
             const categoriesBlock = document.getElementById('categoriesBlock');
             const resultsBlock = document.getElementById('globalSearchResults');
 
             if (!query || query.trim() === "") {
-                // Если пусто - показываем категории, скрываем результаты
                 categoriesBlock.style.display = 'flex';
                 resultsBlock.style.display = 'none';
-                return; // Не делаем запрос
+                return;
             } else {
-                // Если есть текст - скрываем категории, показываем результаты
                 categoriesBlock.style.display = 'none';
                 resultsBlock.style.display = 'flex';
                 containerId = 'globalSearchResults';
-
-                // Данные для фильтра
-                data = { CategoryId: 0, Name: query, MinPrice: null, MaxPrice: null, SortType: "" };
+                data = { CategoryId: 0, Name: query };
             }
-        }
-        else {
-            // Логика для сайдбара
+        } else {
             containerId = 'productsContainer';
             data = {
                 CategoryId: parseInt(document.getElementById('categorySelect')?.value || 0),
                 Name: document.getElementById('nameInput')?.value || "",
                 MinPrice: document.getElementById('minPrice')?.value ? parseFloat(document.getElementById('minPrice').value) : null,
                 MaxPrice: document.getElementById('maxPrice')?.value ? parseFloat(document.getElementById('maxPrice').value) : null,
-                SortType: document.getElementById('sortSelect')?.value || ""
+                SortType: ""
             };
         }
 
         try {
-            // Делаем загрузку полупрозрачной, чтобы было видно процесс
             const container = document.getElementById(containerId);
-            container.style.opacity = '0.5';
-
-            const response = await fetch('/Home/Filter', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
-
-            if (response.ok) {
-                container.innerHTML = await response.text();
+            if(container) {
+                container.style.opacity = '0.5';
+                const response = await fetch('/Home/Filter', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (response.ok) {
+                    container.innerHTML = await response.text();
+                }
+                container.style.opacity = '1';
             }
-            container.style.opacity = '1';
-        } catch (e) {
-            console.error(e);
-        }
+        } catch (e) { console.error(e); }
     }
 
-    // Универсальная функция задержки (debounce)
     function debounce(func, timeout = 500) {
         let timer;
         return (...args) => {
@@ -261,24 +381,15 @@
         };
     }
 
-    // --- ПОДКЛЮЧЕНИЕ СОБЫТИЙ ---
+    document.addEventListener("DOMContentLoaded", function () {
+        const globalInput = document.getElementById('globalSearchInput');
+        if (globalInput) globalInput.addEventListener('input', debounce(() => applyFilter('global'), 500));
 
-    // 1. Глобальный поиск на главной
-    const globalInput = document.getElementById('globalSearchInput');
-    if (globalInput) {
-        globalInput.addEventListener('input', debounce(() => applyFilter('global'), 500));
-    }
-
-    // 2. Поиск и фильтры в сайдбаре
-    const sidebarInput = document.getElementById('nameInput');
-    if (sidebarInput) {
-        // Текст
-        sidebarInput.addEventListener('input', debounce(() => applyFilter('sidebar'), 500));
-        // Цена
-        document.getElementById('minPrice')?.addEventListener('input', debounce(() => applyFilter('sidebar'), 800));
-        document.getElementById('maxPrice')?.addEventListener('input', debounce(() => applyFilter('sidebar'), 800));
-        // Выпадающие списки (срабатывают сразу)
-        document.getElementById('categorySelect')?.addEventListener('change', () => applyFilter('sidebar'));
-        document.getElementById('sortSelect')?.addEventListener('change', () => applyFilter('sidebar'));
-    }
+        const sidebarInput = document.getElementById('nameInput');
+        if (sidebarInput) {
+            sidebarInput.addEventListener('input', debounce(() => applyFilter('sidebar'), 500));
+            document.getElementById('minPrice')?.addEventListener('input', debounce(() => applyFilter('sidebar'), 800));
+            document.getElementById('maxPrice')?.addEventListener('input', debounce(() => applyFilter('sidebar'), 800));
+        }
+    });
 </script>
