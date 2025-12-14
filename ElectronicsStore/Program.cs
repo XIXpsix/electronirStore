@@ -42,13 +42,12 @@ builder.Services.AddAuthentication(options =>
 
 var app = builder.Build();
 
-// === ЗАПУСК ИНИЦИАЛИЗАЦИИ ДАННЫХ ===
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     try
     {
-        // Теперь передаем просто services
+        // Исправленный вызов: передаем serviceProvider
         await Initializer.InitializeData(services);
     }
     catch (Exception ex)
@@ -57,7 +56,6 @@ using (var scope = app.Services.CreateScope())
         logger.LogError(ex, "Ошибка при заполнении базы данных.");
     }
 }
-// ===================================
 
 if (!app.Environment.IsDevelopment())
 {

@@ -1,7 +1,7 @@
 ﻿using ElectronicsStore.BLL.Interfaces;
 using ElectronicsStore.BLL.Realizations;
 using ElectronicsStore.DAL.Interfaces;
-using ElectronicsStore.DAL.Repositories;
+using ElectronicsStore.DAL.Repositories; // Убрали DAL.Realizations, если его нет, или оставили один раз
 using ElectronicsStore.Domain.Entity;
 using ElectronicsStore.Domain.Validators;
 using ElectronicsStore.Domain.ViewModels;

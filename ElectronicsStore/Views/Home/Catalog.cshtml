@@ -3,11 +3,11 @@
 @{
     ViewData["Title"] = Model.IsMainCatalogPage ? "Каталог" : Model.CurrentCategoryName;
 
-    // Получаем список моделей для фильтра (уникальные названия)
+    // Список всех моделей для фильтра
     var allProductNames = Model.Products.Select(p => p.Name).Distinct().OrderBy(n => n).ToList();
 
-    // Проверяем, находимся ли мы в категории "Компьютеры"
-    bool isComputerCategory = Model.CurrentCategoryName.Contains("Компьютеры");
+    // Проверяем режим: если CategoryId == 0, значит мы на странице "Все товары"
+    bool isAllProductsMode = Model.Filter.CategoryId == 0;
 }
 
 <div class="catalog-wrapper">
@@ -15,7 +15,7 @@
 
         @if (Model.IsMainCatalogPage)
         {
-            /* === ГЛАВНАЯ СТРАНИЦА (ПЛИТКИ) === */
+            /* === ГЛАВНАЯ СТРАНИЦА КАТАЛОГА (Плитки) === */
             <div class="text-center mb-5 fade-in">
                 <h1 class="display-4 fw-bold text-white text-uppercase mb-4 title-glow">
                     Каталог <span class="text-orange">Electronics</span>
@@ -25,7 +25,7 @@
                         <div class="search-container position-relative">
                             <input type="text" id="globalSearchInput"
                                    class="form-control form-control-lg custom-search-input ps-5 pe-5"
-                                   placeholder="Найти гаджет..." autocomplete="off">
+                                   placeholder="Поиск товара..." autocomplete="off">
                             <span class="search-icon-left">🔍</span>
                         </div>
                     </div>
@@ -83,12 +83,11 @@
                     </a>
                 </div>
             </div>
-
             <div id="globalSearchResults" class="row row-cols-1 row-cols-sm-2 row-cols-xl-3 g-4 fade-in-up" style="display: none;"></div>
         }
         else
         {
-            /* === СТРАНИЦА ТОВАРОВ + ФИЛЬТРЫ === */
+            /* === СПИСОК ТОВАРОВ + ФИЛЬТРЫ === */
             <div class="d-flex align-items-center mb-4 fade-in">
                 <a href="@Url.Action("Catalog")" class="btn-back me-3">🠔</a>
                 <div>
@@ -105,24 +104,30 @@
                         </div>
 
                         <form id="filterForm" onsubmit="event.preventDefault();">
-                            <input type="hidden" id="categorySelect" value="@Model.Filter.CategoryId" />
 
-                            @if (isComputerCategory || Model.Filter.CategoryId == 0)
+                            @if (isAllProductsMode)
                             {
                                 <div class="mb-4">
-                                    <label class="filter-label">Тип устройства</label>
-                                    <select id="typeSelect" class="form-select custom-input" onchange="applyTypeFilter(this.value)">
-                                        <option value="">Все типы</option>
-                                        <option value="Ноутбук">Только Ноутбуки</option>
-                                        <option value="ПК">Только ПК</option>
+                                    <label class="filter-label">Категория</label>
+                                    <select id="categorySelect" class="form-select custom-input" onchange="applyFilter('sidebar')">
+                                        <option value="0">Все категории</option>
+                                        @foreach (var cat in Model.Categories)
+                                        {
+                                            var isSelected = cat.Id == Model.Filter.CategoryId;
+                                            <!option value="@cat.Id" @(isSelected ? "selected" : "")>@cat.Name</!option>
+                                        }
                                     </select>
                                 </div>
+                            }
+                            else
+                            {
+                                <input type="hidden" id="categorySelect" value="@Model.Filter.CategoryId" />
                             }
 
                             <div class="mb-4">
                                 <label class="filter-label">Модель</label>
                                 <select id="modelSelect" class="form-select custom-input" onchange="applyModelFilter(this.value)">
-                                    <option value="">Все модели</option>
+                                    <option value="">Любая модель</option>
                                     @foreach (var name in allProductNames)
                                     {
                                         <option value="@name">@name</option>
@@ -163,7 +168,7 @@
 </div>
 
 <style>
-    /* Стили как в предыдущем ответе (черно-оранжевые) */
+    /* STYLES (Black & Orange) */
     :root {
         --main-bg: #050505;
         --card-bg: #141414;
@@ -259,6 +264,13 @@
             color: white;
         }
 
+    select.custom-input {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ff6600' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        background-size: 12px 10px;
+    }
+
     .btn-outline-orange {
         color: var(--orange);
         border: 1px solid var(--orange);
@@ -283,6 +295,10 @@
         text-decoration: none;
     }
 
+    .fade-in {
+        animation: fadeIn 0.6s ease-out;
+    }
+
     .fade-in-up {
         animation: fadeInUp 0.6s ease-out;
     }
@@ -305,24 +321,19 @@
         document.getElementById('nameInput').value = "";
         document.getElementById('minPrice').value = "";
         document.getElementById('maxPrice').value = "";
-        if(document.getElementById('typeSelect')) document.getElementById('typeSelect').value = "";
+
+        // Сбрасываем категорию, только если она видна (режим "Все товары")
+        const catSelect = document.getElementById('categorySelect');
+        if(catSelect && catSelect.tagName === 'SELECT') {
+            catSelect.value = "0";
+        }
+
         if(document.getElementById('modelSelect')) document.getElementById('modelSelect').value = "";
         applyFilter('sidebar');
     }
 
-    // Фильтр ТИПА (пишет в поиск "Ноутбук" или "ПК")
-    function applyTypeFilter(val) {
-        document.getElementById('nameInput').value = val;
-        // Сбрасываем фильтр конкретной модели, чтобы не было конфликта
-        if(document.getElementById('modelSelect')) document.getElementById('modelSelect').value = "";
-        applyFilter('sidebar');
-    }
-
-    // Фильтр МОДЕЛИ (пишет полное имя в поиск)
     function applyModelFilter(val) {
         document.getElementById('nameInput').value = val;
-        // Сбрасываем фильтр типа
-        if(document.getElementById('typeSelect')) document.getElementById('typeSelect').value = "";
         applyFilter('sidebar');
     }
 
@@ -375,10 +386,7 @@
 
     function debounce(func, timeout = 500) {
         let timer;
-        return (...args) => {
-            clearTimeout(timer);
-            timer = setTimeout(() => { func.apply(this, args); }, timeout);
-        };
+        return (...args) => { clearTimeout(timer); timer = setTimeout(() => { func.apply(this, args); }, timeout); };
     }
 
     document.addEventListener("DOMContentLoaded", function () {
@@ -386,10 +394,9 @@
         if (globalInput) globalInput.addEventListener('input', debounce(() => applyFilter('global'), 500));
 
         const sidebarInput = document.getElementById('nameInput');
-        if (sidebarInput) {
-            sidebarInput.addEventListener('input', debounce(() => applyFilter('sidebar'), 500));
-            document.getElementById('minPrice')?.addEventListener('input', debounce(() => applyFilter('sidebar'), 800));
-            document.getElementById('maxPrice')?.addEventListener('input', debounce(() => applyFilter('sidebar'), 800));
-        }
+        if (sidebarInput) sidebarInput.addEventListener('input', debounce(() => applyFilter('sidebar'), 500));
+
+        document.getElementById('minPrice')?.addEventListener('input', debounce(() => applyFilter('sidebar'), 800));
+        document.getElementById('maxPrice')?.addEventListener('input', debounce(() => applyFilter('sidebar'), 800));
     });
 </script>
