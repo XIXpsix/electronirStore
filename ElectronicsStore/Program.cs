@@ -1,18 +1,20 @@
-﻿using ElectronicsStore;
+﻿using ElectronicsStore; // Проверьте, что Initializer в этом namespace
 using ElectronicsStore.DAL;
 using Microsoft.EntityFrameworkCore;
 using ElectronicsStore.Domain.Entity;
-using ElectronicsStore.DAL.Interfaces; // Добавлено для IBaseStorage
+using ElectronicsStore.DAL.Interfaces;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 
-
 var builder = WebApplication.CreateBuilder(args);
 
+// 1. Подключение к БД
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ElectronicsStoreContext>(options =>
     options.UseNpgsql(connectionString));
 
+// 2. Инициализация слоев
+// Теперь эти методы будут доступны, т.к. Initializer.cs исправлен
 builder.Services.InitializeRepositories();
 builder.Services.InitializeServices();
 builder.Services.InitializeValidators();
@@ -33,36 +35,36 @@ builder.Services.AddAuthentication(options =>
 })
 .AddGoogle(googleOptions =>
 {
-    googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"] ?? string.Empty;
-    googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"] ?? string.Empty        ;
+    // Безопасное получение настроек с проверкой на null (опционально, но полезно)
+    googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"] ?? "";
+    googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"] ?? "";
 });
-
 
 var app = builder.Build();
 
+// === ЗАПУСК ИНИЦИАЛИЗАЦИИ ДАННЫХ ===
 using (var scope = app.Services.CreateScope())
 {
-var services = scope.ServiceProvider;
-try
-{
-// Получаем доступ к хранилищам
-var userStorage = services.GetRequiredService<ElectronicsStore.DAL.Interfaces.IBaseStorage<ElectronicsStore.Domain.Entity.User>>();
-var productStorage = services.GetRequiredService<ElectronicsStore.DAL.Interfaces.IBaseStorage<ElectronicsStore.Domain.Entity.Product>>();
-var categoryStorage = services.GetRequiredService<ElectronicsStore.DAL.Interfaces.IBaseStorage<ElectronicsStore.Domain.Entity.Category>>();
+    var services = scope.ServiceProvider;
+    try
+    {
+        var userStorage = services.GetRequiredService<IBaseStorage<User>>();
+        var productStorage = services.GetRequiredService<IBaseStorage<Product>>();
+        var categoryStorage = services.GetRequiredService<IBaseStorage<Category>>();
 
-// ЗАПУСКАЕМ СОЗДАНИЕ ТОВАРОВ
-await ElectronicsStore.Initializer.InitializeData(userStorage, productStorage, categoryStorage);
+        // Запуск инициализатора (теперь метод доступен)
+        await Initializer.InitializeData(userStorage, productStorage, categoryStorage);
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Ошибка при заполнении базы данных.");
+    }
 }
-catch (Exception ex)
-{
-var logger = services.GetRequiredService<ILogger<Program>>();
-logger.LogError(ex, "Ошибка при заполнении базы данных.");
-}
-}
+// ===================================
 
 if (!app.Environment.IsDevelopment())
 {
-    // ... дальше старый код ...
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
