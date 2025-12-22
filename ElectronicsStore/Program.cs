@@ -44,7 +44,6 @@ builder.Services.AddAuthentication(options =>
 })
 .AddGoogle(googleOptions =>
 {
-    // Безопасное получение настроек с проверкой на null (опционально, но полезно)
     googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"] ?? "";
     googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"] ?? "";
 });

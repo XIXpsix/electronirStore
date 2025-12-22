@@ -46,8 +46,6 @@ namespace ElectronicsStore.Controllers
             var categoriesResponse = await _categoryService.GetCategories();
             var categories = categoriesResponse?.Data ?? new List<Category>();
 
-            // 2. ✅ ИСПРАВЛЕНИЕ ЛОГИКИ:
-            // Проверяем данные из параметров (filter и showAll), а не пустые поля класса.
             // Главная страница показывается, только если нет фильтров и не нажато "Все товары".
             bool isMainPage = filter.CategoryId == 0 && string.IsNullOrEmpty(filter.Name) && !showAll;
 
@@ -55,7 +53,6 @@ namespace ElectronicsStore.Controllers
             IEnumerable<Product> products = new List<Product>();
             string categoryName = "Каталог";
 
-            // 4. Если это НЕ главная страница (т.е. мы ищем товары)
             if (!isMainPage)
             {
                 var productsResponse = await _productService.GetProductsByFilter(filter);

@@ -73,10 +73,8 @@ namespace ElectronicsStore.Controllers
 
         // --- ПОДТВЕРЖДЕНИЕ ПОЧТЫ ---
         [HttpGet]
-        // ИСПРАВЛЕНО: email сделан допускающим null (string?)
         public IActionResult ConfirmEmail(string? email)
         {
-            // ИСПРАВЛЕНО: Использован оператор ?? для предотвращения NRT-преобразования
             return View(new ConfirmEmailViewModel { Email = email ?? string.Empty });
         }
 

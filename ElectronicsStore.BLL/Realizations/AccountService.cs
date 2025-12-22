@@ -200,8 +200,7 @@ namespace ElectronicsStore.BLL.Realizations
         {
             var claims = new List<Claim>
             {
-                // Имя пользователя (DefaultNameClaimType) должно быть уникальным, 
-                // в вашей системе это, по-видимому, Email или Name, используем Name
+                // Имя пользователя (DefaultNameClaimType) должно быть уникальным
                 new(ClaimsIdentity.DefaultNameClaimType, user.Name ?? ""),
                 new(ClaimsIdentity.DefaultRoleClaimType, user.Role.ToString()),
                 new("Id", user.Id.ToString()),
