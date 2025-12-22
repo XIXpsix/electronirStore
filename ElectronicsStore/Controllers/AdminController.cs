@@ -43,7 +43,7 @@ namespace ElectronicsStore.Controllers
         public async Task<IActionResult> Create()
         {
             await PopulateCategoriesDropdown();
-            return View();
+            return View(new ProductViewModel());
         }
 
         [HttpPost]
