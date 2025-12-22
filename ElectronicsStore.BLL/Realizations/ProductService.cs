@@ -212,7 +212,9 @@ namespace ElectronicsStore.BLL.Realizations
                     Description = model.Description,
                     Price = model.Price,
                     CategoryId = model.CategoryId,
-                    CreatedAt = DateTime.Now
+                    CreatedAt = DateTime.Now,
+                    // явно задаем путь к картинке, чтобы избежать null
+                    ImagePath = "/img/w.png"
                 };
 
                 await _productRepository.Add(product);
@@ -221,7 +223,14 @@ namespace ElectronicsStore.BLL.Realizations
             }
             catch (Exception ex)
             {
-                return new BaseResponse<Product>() { Description = $"[CreateProduct] : {ex.Message}", StatusCode = StatusCode.InternalServerError };
+                // ! ¬ј∆Ќќ: Ётот код покажет нам насто€щую причину ошибки !
+                var message = $"[CreateProduct] : {ex.Message}";
+                if (ex.InnerException != null)
+                {
+                    message += $" | Inner: {ex.InnerException.Message}";
+                }
+
+                return new BaseResponse<Product>() { Description = message, StatusCode = StatusCode.InternalServerError };
             }
         }
 
