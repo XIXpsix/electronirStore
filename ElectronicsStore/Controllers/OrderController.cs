@@ -20,6 +20,18 @@ namespace ElectronicsStore.Controllers
         {
             return View();
         }
+        [HttpGet]
+        public async Task<IActionResult> Index()
+        {
+            var userName = User.Identity?.Name;
+            var response = await _orderService.GetOrders(userName);
+
+            if (response.StatusCode == Domain.Enum.StatusCode.OK)
+            {
+                return View(response.Data);
+            }
+            return RedirectToAction("Index", "Home");
+        }
 
         [HttpPost]
         public async Task<IActionResult> Create(string address)

@@ -1,0 +1,43 @@
+﻿@model IEnumerable<ElectronicsStore.Domain.Entity.Order>
+
+@{
+    ViewData["Title"] = "Мои заказы";
+}
+
+<div class="container py-5">
+    <h2 class="text-white mb-4">📦 История заказов</h2>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="card bg-dark-card border-secondary">
+            <div class="card-body p-0">
+                <table class="table table-dark table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Номер заказа</th>
+                            <th>Дата</th>
+                            <th>Адрес</th>
+                            <th>Сумма</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var order in Model)
+                        {
+                            <tr>
+                                <td>#@order.Id.ToString().Substring(0, 8)</td>
+                                <td>@order.DateCreated.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
+                                <td>@order.Address</td>
+                                <td class="text-warning fw-bold">@order.TotalPrice.ToString("N0") ₽</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">Вы еще ничего не заказывали.</div>
+        <a asp-controller="Home" asp-action="Catalog" class="btn btn-warning mt-3">Перейти в каталог</a>
+    }
+</div>

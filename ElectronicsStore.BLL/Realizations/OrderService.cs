@@ -74,5 +74,28 @@ namespace ElectronicsStore.BLL.Realizations
                 return new BaseResponse<Order>() { Description = ex.Message, StatusCode = StatusCode.InternalServerError };
             }
         }
+        // Добавьте этот метод внутрь класса OrderService
+        public async Task<IBaseResponse<List<Order>>> GetOrders(string userName)
+        {
+            try
+            {
+                var user = await _userRepository.GetAll().FirstOrDefaultAsync(x => x.Name == userName);
+                if (user == null)
+                {
+                    return new BaseResponse<List<Order>>() { Description = "Пользователь не найден", StatusCode = StatusCode.UserNotFound };
+                }
+
+                var orders = await _orderRepository.GetAll()
+                    .Where(x => x.UserId == user.Id)
+                    .OrderByDescending(x => x.DateCreated) // Сначала новые
+                    .ToListAsync();
+
+                return new BaseResponse<List<Order>>() { Data = orders, StatusCode = StatusCode.OK };
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponse<List<Order>>() { Description = ex.Message, StatusCode = StatusCode.InternalServerError };
+            }
+        }
     }
 }
