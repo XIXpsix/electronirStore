@@ -189,7 +189,7 @@ namespace ElectronicsStore.BLL.Realizations
                     ProductId = product.Id,
                     Content = content,
                     Rating = rating,
-                    CreatedAt = DateTime.Now
+                    CreatedAt = DateTime.UtcNow
                 };
 
                 await _reviewRepository.Add(review);
@@ -212,7 +212,7 @@ namespace ElectronicsStore.BLL.Realizations
                     Description = model.Description,
                     Price = model.Price,
                     CategoryId = model.CategoryId,
-                    CreatedAt = DateTime.Now,
+                    CreatedAt = DateTime.UtcNow,
                     // явно задаем путь к картинке, чтобы избежать null
                     ImagePath = "/img/w.png"
                 };
@@ -276,7 +276,7 @@ namespace ElectronicsStore.BLL.Realizations
                 product.Description = model.Description;
                 product.Price = model.Price;
                 product.CategoryId = model.CategoryId;
-                product.UpdatedAt = DateTime.Now;
+                product.UpdatedAt = DateTime.UtcNow;
 
                 await _productRepository.Update(product);
 
@@ -301,7 +301,7 @@ namespace ElectronicsStore.BLL.Realizations
 
                 if (product.Images != null)
                 {
-                    foreach (var image in product.Images)
+                    foreach (var image in product.Images.ToList())
                     {
                         await _productImageRepository.Delete(image);
                     }
