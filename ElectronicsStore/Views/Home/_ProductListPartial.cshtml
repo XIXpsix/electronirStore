@@ -9,7 +9,7 @@
 
                 <a asp-controller="Product" asp-action="GetProduct" asp-route-id="@product.Id"
                    class="img-wrapper stretched-link">
-                    <img src="@(product.Images?.FirstOrDefault()?.ImagePath ?? "/img/no-image.png")"
+                    <img src="@(product.Images?.FirstOrDefault()?.ImagePath ?? product.ImagePath ?? "/img/no-image.png")"
                          class="card-img-top" alt="@product.Name">
                 </a>
 

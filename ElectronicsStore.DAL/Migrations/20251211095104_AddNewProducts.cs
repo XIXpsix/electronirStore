@@ -25,11 +25,12 @@ namespace ElectronicsStore.DAL.Migrations
                 columns: new[] { "Id", "CategoryId", "CreatedAt", "Description", "ImagePath", "Name", "Price", "UpdatedAt" },
                 values: new object[,]
                 {
-                    { 2, 1, new DateTime(2025, 12, 11, 9, 51, 4, 200, DateTimeKind.Utc).AddTicks(2499), "Флагман на Android с отличным экраном", "", "Samsung Galaxy S24", 95000m, null },
-                    { 3, 1, new DateTime(2025, 12, 11, 9, 51, 4, 200, DateTimeKind.Utc).AddTicks(2501), "Смартфон с лучшей камерой и чистым Android", "", "Google Pixel 8", 75000m, null },
-                    { 4, 2, new DateTime(2025, 12, 11, 9, 51, 4, 200, DateTimeKind.Utc).AddTicks(2502), "Легкий, тонкий и производительный ультрабук", "", "MacBook Air M2", 120000m, null },
-                    { 5, 2, new DateTime(2025, 12, 11, 9, 51, 4, 200, DateTimeKind.Utc).AddTicks(2504), "Мощный игровой ноутбук для современных игр", "", "ASUS ROG Strix", 150000m, null },
-                    { 6, 2, new DateTime(2025, 12, 11, 9, 51, 4, 200, DateTimeKind.Utc).AddTicks(2505), "Надежный ноутбук для бизнеса и работы", "", "Lenovo ThinkPad X1", 180000m, null }
+            // Добавлены пути к картинкам в формате /img/НазваниеТовара.jpg
+            { 2, 1, new DateTime(2025, 12, 11, 9, 51, 4, 200, DateTimeKind.Utc).AddTicks(2499), "Флагман на Android с отличным экраном", "/img/Samsung Galaxy S24.jpg", "Samsung Galaxy S24", 95000m, null },
+            { 3, 1, new DateTime(2025, 12, 11, 9, 51, 4, 200, DateTimeKind.Utc).AddTicks(2501), "Смартфон с лучшей камерой и чистым Android", "/img/google pixel 8.jpg", "Google Pixel 8", 75000m, null },
+            { 4, 2, new DateTime(2025, 12, 11, 9, 51, 4, 200, DateTimeKind.Utc).AddTicks(2502), "Легкий, тонкий и производительный ультрабук", "/img/MacBook Air M2.jpg", "MacBook Air M2", 120000m, null },
+            { 5, 2, new DateTime(2025, 12, 11, 9, 51, 4, 200, DateTimeKind.Utc).AddTicks(2504), "Мощный игровой ноутбук для современных игр", "/img/ASUSROGStrix.jpg", "ASUS ROG Strix", 150000m, null },
+            { 6, 2, new DateTime(2025, 12, 11, 9, 51, 4, 200, DateTimeKind.Utc).AddTicks(2505), "Надежный ноутбук для бизнеса и работы", "/img/LenovoThinkPadX1.jpg", "Lenovo ThinkPad X1", 180000m, null }
                 });
         }
 

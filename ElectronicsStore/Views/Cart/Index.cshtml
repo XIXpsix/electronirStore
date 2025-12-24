@@ -5,13 +5,14 @@
 }
 
 <div class="container py-5">
-    <h2 class="mb-4">Ваша корзина</h2>
+    <h2 class="mb-4 text-white">Ваша корзина</h2>
 
     @if (Model != null && Model.Any())
     {
-        <table class="table table-hover">
+        <table class="table table-hover text-white">
             <thead>
                 <tr>
+                    <th>Фото</th>
                     <th>Товар</th>
                     <th>Цена</th>
                     <th>Действия</th>
@@ -21,9 +22,14 @@
                 @foreach (var item in Model)
                 {
                     <tr>
-                        <td>@item.Product.Name</td>
-                        <td>@item.Product.Price.ToString("C")</td>
-                        <td>
+                        <td class="align-middle">
+                            <img src="@(item.Product.Images?.FirstOrDefault()?.ImagePath ?? "/img/no-image.png")"
+                                 alt="@item.Product.Name"
+                                 style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;" />
+                        </td>
+                        <td class="align-middle">@item.Product.Name</td>
+                        <td class="align-middle">@item.Product.Price.ToString("C")</td>
+                        <td class="align-middle">
                             <a asp-action="Remove" asp-route-id="@item.Id" class="btn btn-danger btn-sm">Удалить</a>
                         </td>
                     </tr>
@@ -32,7 +38,7 @@
         </table>
 
         <div class="mt-3">
-            <h4 class="text-end">Итого: @Model.Sum(x => x.Product.Price).ToString("C")</h4>
+            <h4 class="text-end text-white">Итого: @Model.Sum(x => x.Product.Price).ToString("C")</h4>
             <a asp-action="Clear" class="btn btn-outline-danger">Очистить корзину</a>
             <a asp-controller="Order" asp-action="Create" class="btn btn-success ms-2">Оформить заказ</a>
         </div>
@@ -40,7 +46,8 @@
     else
     {
         <div class="alert alert-info">
-            Ваша корзина пуста. <a asp-controller="Home" asp-action="Catalog">Перейти в каталог</a>
+            Ваша корзина пуста.
+            <a asp-controller="Home" asp-action="Catalog">Перейти в каталог</a>
         </div>
     }
 </div>
