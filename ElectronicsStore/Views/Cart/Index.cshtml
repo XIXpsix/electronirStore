@@ -23,13 +23,14 @@
                 {
                     // Логика обработки пути к картинке
                     string imagePath;
-                    var dbImage = item.Product.Images?.FirstOrDefault()?.ImagePath;
+
+                    // ИСПРАВЛЕНИЕ: Сначала ищем в коллекции картинок, если нет — берем из свойства ImagePath товара
+                    var dbImage = item.Product.Images?.FirstOrDefault()?.ImagePath ?? item.Product.ImagePath;
 
                     if (!string.IsNullOrEmpty(dbImage))
                     {
                         // 1. Меняем обратные слеши на прямые
                         imagePath = dbImage.Replace("\\", "/");
-
                         // 2. Если путь не начинается со слеша, добавляем его (делаем абсолютным)
                         if (!imagePath.StartsWith("/"))
                         {
