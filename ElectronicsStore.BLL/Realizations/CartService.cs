@@ -42,9 +42,11 @@ namespace ElectronicsStore.BLL.Realizations
                     return new BaseResponse<IEnumerable<CartItem>> { Description = "Пользователь не найден", StatusCode = StatusCode.UserNotFound };
                 }
 
+                // === ГЛАВНОЕ ИСПРАВЛЕНИЕ ЗДЕСЬ ===
                 var cart = await _cartRepository.GetAll()
                     .Include(x => x.Items)
                     .ThenInclude(x => x.Product)
+                    .ThenInclude(x => x.Images) // <--- ЭТА СТРОКА ЗАГРУЖАЕТ КАРТИНКИ ИЗ БАЗЫ
                     .FirstOrDefaultAsync(x => x.UserId == user.Id);
 
                 if (cart == null)
@@ -107,7 +109,6 @@ namespace ElectronicsStore.BLL.Realizations
                     .Include(x => x.Cart).ThenInclude(x => x.User)
                     .FirstOrDefaultAsync(x => x.Id == itemId);
 
-                // Проверяем, что товар существует и принадлежит пользователю
                 if (item == null || item.Cart.User.Name != userName)
                 {
                     return new BaseResponse<bool> { Description = "Ошибка доступа", StatusCode = StatusCode.InternalServerError };

@@ -21,9 +21,31 @@
             <tbody>
                 @foreach (var item in Model)
                 {
+                    // Логика обработки пути к картинке
+                    string imagePath;
+                    var dbImage = item.Product.Images?.FirstOrDefault()?.ImagePath;
+
+                    if (!string.IsNullOrEmpty(dbImage))
+                    {
+                        // 1. Меняем обратные слеши на прямые
+                        imagePath = dbImage.Replace("\\", "/");
+
+                        // 2. Если путь не начинается со слеша, добавляем его (делаем абсолютным)
+                        if (!imagePath.StartsWith("/"))
+                        {
+                            imagePath = "/" + imagePath;
+                        }
+                    }
+                    else
+                    {
+                        // Если в БД нет картинки, ставим заглушку
+                        imagePath = "/img/G.png";
+                    }
+
                     <tr>
                         <td class="align-middle">
-                            <img src="@(item.Product.Images?.FirstOrDefault()?.ImagePath ?? "/img/no-image.png")"
+                            <img src="@imagePath"
+                                 onerror="this.onerror=null;this.src='/img/G.png';"
                                  alt="@item.Product.Name"
                                  style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;" />
                         </td>
